@@ -13,7 +13,7 @@ function fetchData($url) : mixed {
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
         
-        $response = curl_exec($curl);
+        $response = Async::await(fn() => curl_exec($curl));
 
         if (!$response) {
             $error = curl_error($curl);
