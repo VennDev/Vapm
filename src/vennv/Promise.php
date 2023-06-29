@@ -184,7 +184,7 @@ final class Promise {
             }
             else 
             {
-                $result[] = self::await($value);
+                $result[] = $value;
             }
         }
         return new PromiseResult(self::$isReject, $result);
