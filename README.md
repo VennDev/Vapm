@@ -43,7 +43,7 @@ test()->then(function($result) {
     var_dump($error);
 });
 ```
-# Promise 2
+# Chaining Promises
 ```php
 function function1() : mixed {
     return new Promise(function() {
