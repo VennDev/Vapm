@@ -27,7 +27,7 @@ function fetchData($url) : mixed {
     return $response;
 }
 
-function test() : Async { 
+function test() : mixed { 
     return Async::create(function() {
 
         try {
