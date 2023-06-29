@@ -61,9 +61,9 @@ function function2() : mixed {
 
 function test() : mixed { 
     return function1()->then(function($result) {
-        var_dump($result->getResult());
+        var_dump($result);
         return function2()->then(function($result) {
-            var_dump($result->getResult());
+            var_dump($result);
         });
     });
 }
