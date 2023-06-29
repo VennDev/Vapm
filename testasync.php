@@ -5,6 +5,8 @@ require 'vendor/autoload.php';
 use vennv\Async;
 
 function fetchData($url) : mixed {
+	
+	usleep(1000);
     
     $curl = curl_init();
     

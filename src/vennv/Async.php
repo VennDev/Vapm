@@ -4,6 +4,7 @@ namespace vennv;
 
 final class Async {
 
+    private static mixed $result = null;
     private static array $awaiting = [];
     private static array $listTerminated = [];
 
@@ -14,7 +15,14 @@ final class Async {
 
         self::run();
 
+        self::$result = $fiber->getReturn();
+
         return new self();
+    }
+
+    public function getResult() : mixed 
+    {
+        return self::$result;
     }
 
     private static function addWait(ChildAwait $await) : bool 
