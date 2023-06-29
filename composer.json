@@ -1,0 +1,15 @@
+{
+    "name": "nam/vapm",
+    "autoload": {
+        "psr-4": {
+            "vennv\\": "src/vennv/"
+        }
+    },
+    "authors": [
+        {
+            "name": "VennDev",
+            "email": "1050080275@sv.hcmunre.edu.vn"
+        }
+    ],
+    "require": {}
+}
