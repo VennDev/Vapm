@@ -4,42 +4,27 @@ require 'vendor/autoload.php';
 
 use vennv\Promise;
 
-function fetchData($url) : mixed {
-    
-    $curl = curl_init();
-    
-    curl_setopt($curl, CURLOPT_URL, $url);
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-    
-    $response = curl_exec($curl);
+function function1() : mixed {
+    return new Promise(function() {
+        sleep(2);
+        return Promise::resolve(6);
+    });
+}
 
-    if (!$response) {
-        $error = curl_error($curl);
-        curl_close($curl);
-        return "Error: " . $error;
-    }
-
-    curl_close($curl);
-
-    return $response;
+function function2() : mixed {
+    return new Promise(function() {
+        sleep(2);
+        return Promise::resolve(6);
+    });
 }
 
 function test() : mixed { 
-    
-    $pro1 = new Promise(function() {
-        return Promise::resolve(fetchData("https://www.youtube.com"));
+    return function1()->then(function($result) {
+        var_dump($result);
+        return function2()->then(function($result) {
+            var_dump($result);
+        });
     });
-
-    $pro2 = new Promise(function() {
-        return Promise::resolve(fetchData("https://www.google.com"));
-    });
-
-    return Promise::all([$pro1, $pro2]);
 }
 
-test()->then(function($result) {
-    var_dump($result);
-})->catch(function($error) {
-    var_dump($error);
-});
+test();

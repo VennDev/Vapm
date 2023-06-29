@@ -39,18 +39,18 @@ final class Promise {
         return self::$isReject;
     }
 
-    public static function reject(mixed $result) : PromiseResult 
+    public static function reject(mixed $result)  : mixed  
     {
         self::$isReject = true;
         self::$result = $result;
-        return new PromiseResult(self::$isReject, self::$result);
+        return self::$result;
     }
 
-    public static function resolve(mixed $result) : PromiseResult 
+    public static function resolve(mixed $result) : mixed 
     {
         self::$isReject = false;
         self::$result = $result;
-        return new PromiseResult(self::$isReject, self::$result);
+        return self::$result;
     }
 
     private static function addWait(ChildAwait $await) : bool 
@@ -197,7 +197,7 @@ final class Promise {
             $callable(self::$result);
         } 
 
-        return new PromiseResult(self::$isReject, self::$result);
+        return (new PromiseResult(self::$isReject, self::$result));
     }
 
     public function catch(callable $callable) : PromiseResult
