@@ -105,7 +105,7 @@ function test() : mixed {
 
 test();
 ```
-# Basic Promise
+# Promise + Async
 ```php
 function fetchData($url) : mixed {
     return Async::create(function() use ($url) {
