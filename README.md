@@ -43,6 +43,33 @@ test()->then(function($result) {
     var_dump($error);
 });
 ```
+# Promise 2
+```php
+function function1() : mixed {
+    return new Promise(function() {
+        sleep(2);
+        return Promise::resolve(6);
+    });
+}
+
+function function2() : mixed {
+    return new Promise(function() {
+        sleep(2);
+        return Promise::resolve(6);
+    });
+}
+
+function test() : mixed { 
+    return function1()->then(function($result) {
+        var_dump($result->getResult());
+        return function2()->then(function($result) {
+            var_dump($result->getResult());
+        });
+    });
+}
+
+test();
+```
 # MultiAsync Await
 ```php
 function fetchData($url) : mixed {
