@@ -12,6 +12,21 @@ final class Async {
         $fiber = new \Fiber($callable);
         $fiber->start();
 
+        while (!$fiber->isTerminated()) 
+        {
+
+            $fiber->resume();
+
+            if (!$fiber->isTerminated()) 
+            {
+                \Fiber::suspend();
+            } 
+            else 
+            {
+                break;
+            }
+        }
+
         self::run();
 
         return $fiber->getReturn();
@@ -107,7 +122,7 @@ final class Async {
         return $fiber->getReturn();
     }
 
-    private static function run() : void 
+    public static function run() : void 
     {
         while (count(self::$awaiting) > 0) 
         {

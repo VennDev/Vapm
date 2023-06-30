@@ -5,34 +5,40 @@ require 'vendor/autoload.php';
 use vennv\Async;
 
 function fetchData($url) : mixed {
-    $async = Async::create(function() use ($url) {
-        $curl = curl_init();
+    $async = Async::await(function() use ($url) {
+		$curl = curl_init();
         
-        curl_setopt($curl, CURLOPT_URL, $url);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-        
-        $response = curl_exec($curl);
+		curl_setopt($curl, CURLOPT_URL, $url);
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+		
+		$response = curl_exec($curl);
 
-        if (!$response) {
-            $error = curl_error($curl);
-            curl_close($curl);
-            return "Error: " . $error;
+		if (!$response) {
+			$error = curl_error($curl);
+			curl_close($curl);
+			return "Error: " . $error;
+		}
+
+		curl_close($curl);
+
+		return $response;
+	});
+	return $async;
+}
+
+function test() : void { 
+    Async::create(function() {
+        $url = [
+            "https://www.google.com",
+            "https://www.youtube.com"
+        ];
+        
+        foreach ($url as $value) {
+            $response = Async::await(fn() => fetchData($value));
+            echo $response . PHP_EOL;
         }
-
-        curl_close($curl);
-
-        return $response;
     });
-    return Async::await(fn() => $async);
 }
 
-function test() : mixed { 
-    $async = Async::create(function() {
-        $response = fetchData("https://www.google.com");
-        return $response;
-    });
-    return Async::await(fn() => $async);
-}
-
-var_dump(test());
+test();

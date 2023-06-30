@@ -19,6 +19,21 @@ final class Promise {
             });
             $fiber->start();
 
+            while (!$fiber->isTerminated()) 
+            {
+
+                $fiber->resume();
+
+                if (!$fiber->isTerminated()) 
+                {
+                    \Fiber::suspend();
+                } 
+                else 
+                {
+                    break;
+                }
+            }
+
             self::$result = $fiber->getReturn();
         } 
         catch (\Throwable | \Exception $error) 
