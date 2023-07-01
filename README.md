@@ -6,9 +6,9 @@
 ```php
 System::start();
 function fetchData($url) : mixed {
-    return Async::create(function() use ($url) {
+    return new Async(function() use ($url) {
         $curl = curl_init();
-    
+
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
@@ -28,18 +28,17 @@ function fetchData($url) : mixed {
 }
 
 function test() {
-    Async::create(function() {
-        $url = [
-            "https://www.google.com",
-            "https://www.youtube.com"
-        ];
-        
-        foreach ($url as $value) {
+    $url = [
+        "https://www.google.com",
+        "https://www.youtube.com"
+    ];
+    
+    foreach ($url as $value) {
+        new Async(function() use ($value) {
             $res = Async::await(fetchData($value));
             var_dump($res);
-        }
-    });
-    var_dump("Hello World");
+        });
+    }
 }
 
 test();
@@ -96,7 +95,7 @@ System::end();
 ```php
 System::start();
 function testAsync() {
-    Async::create(function() {
+    new Async(function() {
         Async::await(fn() => System::setTimeOut(function() {
             var_dump("Hello World 2");
         }, 1000));
