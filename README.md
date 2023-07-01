@@ -44,7 +44,6 @@ function test() {
 
 test();
 System::end();
-}
 ```
 # Time Out function
 ```php
