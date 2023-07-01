@@ -30,4 +30,12 @@ class Timer {
         EventQueue::run(EventQueue::IS_TIMEOUT);
     }
 
+    /**
+     * @throws Throwable
+     */
+    protected static function runNonBlocking() : void
+    {
+        EventQueue::runNonBlocking();
+    }
+
 }

@@ -27,6 +27,20 @@ final class System extends Timer {
     }
 
     /**
+     * @throws Throwable
+     *
+     * This method is usually used at the end of the whole chunk of your program,
+     * it is used to run the event loop.
+     *
+     * This method is used when you want to run the event loop in a non-blocking way.
+     * You should run this method in a separate thread and make it repeat every second.
+     */
+    public static function endNonBlocking() : void
+    {
+        parent::runNonBlocking();
+    }
+
+    /**
      * This method is used to add a callable to the loop. The callable will
      * be executed after the timeOut.
      */
