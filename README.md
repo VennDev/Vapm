@@ -4,155 +4,11 @@
 
 # Async Await
 ```php
-function test() : Async { 
-    return Async::create(function() {
-
-        try {
-            $url = [
-                "https://www.google.com",
-                "https://www.youtube.com"
-            ];
-            
-            foreach ($url as $value) {
-                var_dump(Async::await(fn() => fetchData($value)));
-            }
-        } catch (Exception $e) {
-            echo $e->getMessage();
-        }
-
-    });
-}
-```
-# MultiAsync Await
-```php
-function fetchData($url) : mixed {
-    $async = Async::create(function() use ($url) {
-        $curl = curl_init();
-        
-        curl_setopt($curl, CURLOPT_URL, $url);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-        
-        $response = curl_exec($curl);
-
-        if (!$response) {
-            $error = curl_error($curl);
-            curl_close($curl);
-            return "Error: " . $error;
-        }
-
-        curl_close($curl);
-
-        return $response;
-    });
-    return Async::await(fn() => $async);
-}
-
-function test() : mixed { 
-    $async = Async::create(function() {
-        $response = fetchData("https://www.google.com");
-        return $response;
-    });
-    return Async::await(fn() => $async);
-}
-
-var_dump(test());
-```
-# MultiAsync Await 2
-```php
-function fetchData($url) : mixed {
-    $async = Async::await(function() use ($url) {
-		$curl = curl_init();
-        
-		curl_setopt($curl, CURLOPT_URL, $url);
-		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-		
-		$response = curl_exec($curl);
-
-		if (!$response) {
-			$error = curl_error($curl);
-			curl_close($curl);
-			return "Error: " . $error;
-		}
-
-		curl_close($curl);
-
-		return $response;
-	});
-	return $async;
-}
-
-function test() : void { 
-    Async::create(function() {
-        $url = [
-            "https://www.google.com",
-            "https://www.youtube.com"
-        ];
-        
-        foreach ($url as $value) {
-            $response = Async::await(fn() => fetchData($value));
-            echo $response . PHP_EOL;
-        }
-    });
-}
-
-test();
-```
-# Promise All
-```php
-function test() : mixed { 
-    
-    $pro1 = new Promise(function() {
-        return Promise::resolve(fetchData("https://www.youtube.com"));
-    });
-
-    $pro2 = new Promise(function() {
-        return Promise::resolve(fetchData("https://www.google.com"));
-    });
-
-    return Promise::all([$pro1, $pro2]);
-}
-
-test()->then(function($result) {
-    var_dump($result);
-})->catch(function($error) {
-    var_dump($error);
-});
-```
-# Chaining Promises
-```php
-function function1() : mixed {
-    return new Promise(function() {
-        sleep(2);
-        return Promise::resolve(6);
-    });
-}
-
-function function2() : mixed {
-    return new Promise(function() {
-        sleep(2);
-        return Promise::resolve(6);
-    });
-}
-
-function test() : mixed { 
-    return function1()->then(function($result) {
-        var_dump($result);
-        return function2()->then(function($result) {
-            var_dump($result);
-        });
-    });
-}
-
-test();
-```
-# Promise + Async
-```php
+System::start();
 function fetchData($url) : mixed {
     return Async::create(function() use ($url) {
         $curl = curl_init();
-        
+    
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
@@ -171,15 +27,41 @@ function fetchData($url) : mixed {
     });
 }
 
-function test() : mixed { 
-    return new Promise(function() {
-        return Promise::resolve(fetchData("https://www.google.com")->getResult());
+function test() {
+    Async::create(function() {
+        $url = [
+            "https://www.google.com",
+            "https://www.youtube.com"
+        ];
+        
+        foreach ($url as $value) {
+            $res = Async::await(fetchData($value));
+            var_dump($res);
+        }
+    });
+    var_dump("Hello World");
+}
+
+test();
+System::end();
+}
+```
+# Time Out function
+```php
+System::start();
+function testAsync() {
+    Async::create(function() {
+        Async::await(fn() => System::setTimeOut(function() {
+            var_dump("Hello World 2");
+        }, 1000));
     });
 }
 
-test()->then(function($result) {
-    var_dump($result);
-})->catch(function($error) {
-    var_dump($error);
-});
+function test() {
+    testAsync();
+    var_dump("Hello World 1");
+}
+
+test();
+System::end();
 ```
