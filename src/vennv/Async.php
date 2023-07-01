@@ -8,8 +8,8 @@ final class Async {
     {
         if ($callable instanceof AsyncResult) 
         {
-            new LoopException(
-                "Async::async() does not accept a async as parameter", 
+            new AsyncException(
+                "Async::create() does not accept a async as parameter", 
                 1
             );
         }
