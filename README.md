@@ -168,7 +168,7 @@ interface InterfacePromise {
 }
 ```
 # How to use method by System
-```
+```php
 interface InterfaceSystem {
 
     /**
