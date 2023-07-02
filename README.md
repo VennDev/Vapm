@@ -94,6 +94,62 @@ interface InterfaceSystem {
 }
 ```
 # Examples:
+- Comparison between Async Javascript:
+PHP:🔶
+```php
+System::start();
+
+var_dump("Start");
+
+function doAsyncTask() { 
+	var_dump("Async task started");
+	new Async(function() {
+		Async::await(function() {
+			sleep(2);
+			var_dump("Async task completed");
+		});
+	});
+}
+
+doAsyncTask();
+
+var_dump("End");
+System::end();
+```
+- Result:🥍
+```
+C:\Users\Nam\Desktop\JS>node test.js
+Start
+Async task started
+End
+Async task completed
+```
+JavaScript:🔶
+```javascript
+console.log("Start");
+
+async function doAsyncTask() {
+  console.log("Async task started");
+  await delay(2000);
+  console.log("Async task completed");
+}
+
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+doAsyncTask();
+
+console.log("End");
+```
+- Result:🥍
+```
+C:\Users\Nam\Desktop\JS>node test.js
+Start
+Async task started
+End
+Async task completed
+```
 # Async Await
 ```php
 System::start();
