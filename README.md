@@ -104,10 +104,8 @@ var_dump("Start");
 function doAsyncTask() { 
 	var_dump("Async task started");
 	new Async(function() {
-		Async::await(function() {
-			sleep(2);
-			var_dump("Async task completed");
-		});
+		sleep(2);
+		var_dump("Async task completed");
 	});
 }
 
