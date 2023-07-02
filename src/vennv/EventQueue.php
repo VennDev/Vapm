@@ -222,9 +222,10 @@ final class EventQueue {
                     {
                         while (!$fiber->isTerminated()) 
                         {
-                            if (!Fiber::getCurrent())
+                            if (Fiber::getCurrent())
                             {
                                 Fiber::suspend();
+                                continue;
                             }
 
                             if ($fiber->isSuspended()) 
