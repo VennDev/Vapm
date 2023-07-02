@@ -118,11 +118,11 @@ System::end();
 ```
 - Result:🥍
 ```
-C:\Users\Nam\Desktop\JS>node test.js
-Start
-Async task started
-End
-Async task completed
+C:\Users\Nam\Desktop\Vapm>php test5.php
+string(5) "Start"
+string(18) "Async task started"
+string(3) "End"
+string(20) "Async task completed"
 ```
 - JavaScript:🔶
 ```javascript
