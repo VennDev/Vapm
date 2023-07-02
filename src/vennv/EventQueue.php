@@ -293,7 +293,7 @@ final class EventQueue {
                 {
                     if (!$fiber->isTerminated() && $fiber->isStarted())
                     {
-                        if (!Fiber::getCurrent())
+                        if (Fiber::getCurrent())
                         {
                             Fiber::suspend();
                         }
