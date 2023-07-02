@@ -70,6 +70,30 @@ function test() {
 test();
 System::end();
 ```
+# Async + Promise
+```php
+System::start();
+
+function testPromise($mode) : mixed {
+    return new Promise(function() use ($mode) {
+        if ($mode == 1) {
+            Promise::resolve(1);
+        } else {
+            Promise::reject(2);
+        }
+    });
+}
+
+function test() {
+    new Async(function() {
+        $await = Async::await(testPromise(2));
+        var_dump($await);
+    });
+}
+
+test();
+System::end();
+```
 # Time Out function
 ```php
 System::start();
