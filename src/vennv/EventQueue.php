@@ -3,9 +3,10 @@
 namespace vennv;
 
 use Fiber;
+use Exception;
 use Throwable;
 
-final class EventQueue {
+final class EventQueue implements InterfaceEventQueue {
 
     public const PENDING = 0;
     public const RUNNING = 1;
@@ -29,7 +30,7 @@ final class EventQueue {
         return self::$nextId++;
     }
 
-    public static function add(callable $callable, float $time) : int 
+    public static function add(callable $callable, float $time, bool $inPromise = true) : int
     {
         $id = self::generateId();
             
@@ -37,8 +38,37 @@ final class EventQueue {
             $time
         );
 
+        $newCallback = function() use ($callable, $inPromise, $id)
+        {
+            $fiber = new Fiber(
+                $callable
+            );
+
+            try
+            {
+                $fiber->start();
+            }
+            catch (PromiseException $result)
+            {
+                self::get($id)->setResolved($result->isResolved());
+
+                if (!$inPromise)
+                {
+                    throw new EventQueueException(
+                        "Error: You can't use any Promise method that isn't in Promise's environment."
+                    );
+                }
+                return $result->getData();
+            }
+            catch (Exception | Throwable $result)
+            {
+                return $result->getMessage();
+            }
+            return $fiber->getReturn();
+        };
+
         $fiber = new Fiber(
-            $callable
+            $newCallback
         );
 
         self::$queues[$id] = new Queue(
@@ -83,13 +113,22 @@ final class EventQueue {
         return null;
     }
 
-    private static function checkFiber(Queue $queue, int $id, Fiber $fiber, float $diff, float $timeOut) : bool
+    private static function updateStatus(Queue $queue, int $id, Fiber $fiber, float $diff, float $timeOut) : bool
     {
         if ($queue->getStatus() === self::FINISHED)
         {
             self::$queues[$id] = $queue->setReturn(
                 $fiber->getReturn()
             );
+
+            if ($queue->isResolved())
+            {
+                $queue->useCallableResolve($fiber->getReturn());
+            }
+            else
+            {
+                $queue->useCallableReject($fiber->getReturn());
+            }
 
             if (!self::remove($id)) {
                 try {
@@ -179,7 +218,7 @@ final class EventQueue {
                     }
                 }
 
-                self::checkFiber($queue, $id, $fiber, $diff, $timeOut);
+                self::updateStatus($queue, $id, $fiber, $diff, $timeOut);
             }
         }
     }
@@ -225,7 +264,6 @@ final class EventQueue {
                             if (!is_null(Fiber::getCurrent()) && !$fiber->isSuspended())
                             {
                                 Fiber::suspend();
-                                continue;
                             }
 
                             if ($fiber->isSuspended()) 
@@ -247,10 +285,7 @@ final class EventQueue {
                         }
                     }
 
-                    if (!self::checkFiber($queue, $id, $fiber, $diff, $timeOut))
-                    {
-                        continue;
-                    }
+                    !self::updateStatus($queue, $id, $fiber, $diff, $timeOut);
                 }
             }
 
@@ -313,10 +348,7 @@ final class EventQueue {
                     }
                 }
 
-                if (!self::checkFiber($queue, $id, $fiber, $diff, $timeOut))
-                {
-                    continue;
-                }
+                self::updateStatus($queue, $id, $fiber, $diff, $timeOut);
             }
         }
     }

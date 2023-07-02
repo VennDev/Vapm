@@ -5,7 +5,7 @@ namespace vennv;
 use Fiber;
 use Throwable;
 
-final class Async {
+final class Async implements InterfaceAsync {
 
     private int $id;
 
@@ -17,23 +17,18 @@ final class Async {
     public function __construct(callable $callable) 
     {
         $this->id = EventQueue::add(
-            $callable, 
-            Timer::MINIMUM_WORKING_TIME
+            callable: $callable,
+            time: Timer::MINIMUM_WORKING_TIME,
+            inPromise: false
         );
     }
 
     /**
-     * @param Async|callable $callable $callable
-     *
-     * This function is used to create a new async await function
-     * You should use this function in an async function
-     *
-     * @return mixed
      * @throws Throwable
      */
-    public static function await(Async|callable $callable) : mixed 
+    public static function await(Promise|Async|callable $callable) : mixed
     {
-        if ($callable instanceof Async) 
+        if ($callable instanceof Async || $callable instanceof Promise)
         {
 
             $async = $callable;
@@ -109,11 +104,6 @@ final class Async {
         return $fiber->getReturn();
     }
 
-    /**
-     * @return int
-     * 
-     * This function is used to get the id of the async function
-     */
     public function getId() : int 
     {
         return $this->id;

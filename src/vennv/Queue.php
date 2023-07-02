@@ -6,6 +6,10 @@ use Fiber;
 
 final class Queue {
 
+    private mixed $callableResolve;
+    private mixed $callableReject;
+    private bool $isResolved = false;
+
     public function __construct(
         private int $id,
         private Fiber $fiber,
@@ -13,7 +17,11 @@ final class Queue {
         private float $timeCurrent,
         private int $status,
         private mixed $return = null
-    ) {}
+    )
+    {
+        $this->callableResolve = function($result) {};
+        $this->callableReject = function($result) {};
+    }
 
     public function getId() : int 
     {
@@ -55,6 +63,38 @@ final class Queue {
     {
         $this->return = $return;
         return $this;
+    }
+
+    public function useCallableResolve(mixed $result) : void
+    {
+        ($this->callableResolve)($result);
+    }
+
+    public function setCallableResolve(mixed $callableResolve) : Queue
+    {
+        $this->callableResolve = $callableResolve;
+        return $this;
+    }
+
+    public function useCallableReject(mixed $result) : void
+    {
+        ($this->callableReject)($result);
+    }
+
+    public function setCallableReject(mixed $callableReject) : Queue
+    {
+        $this->callableReject = $callableReject;
+        return $this;
+    }
+
+    public function isResolved() : bool
+    {
+        return $this->isResolved;
+    }
+
+    public function setResolved(bool $isResolved) : void
+    {
+        $this->isResolved = $isResolved;
     }
 
 }
