@@ -8,15 +8,15 @@ use vennv\System;
 System::start();
 function testAsync() {
     new Async(function() {
-        Async::await(fn() => System::setTimeOut(function() {
-            var_dump("Hello World 2");
-        }, 1000));
+        sleep(5);
     });
 }
 
 function test() {
+	$time = microtime(true);
     testAsync();
     var_dump("Hello World 1");
+	var_dump(microtime(true) - $time);
 }
 
 test();

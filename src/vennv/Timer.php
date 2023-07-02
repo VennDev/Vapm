@@ -38,4 +38,9 @@ class Timer {
         EventQueue::runNonBlocking();
     }
 
+    protected static function runWithTick() : void
+    {
+        EventQueue::runWithTick();
+    }
+
 }

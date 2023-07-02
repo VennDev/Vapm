@@ -14,6 +14,8 @@ final class EventQueue {
     public const IS_NOT_TIMEOUT = 0;
     public const IS_TIMEOUT = 1;
 
+    public const TIME_OUT = 5; // 5 seconds
+
     private static int $nextId = 0;
     private static array $queues = [];
     private static array $returns = [];
@@ -81,6 +83,51 @@ final class EventQueue {
         return null;
     }
 
+    private static function checkFiber(Queue $queue, int $id, Fiber $fiber, float $diff, float $timeOut) : bool
+    {
+        if ($queue->getStatus() === self::FINISHED)
+        {
+            self::$queues[$id] = $queue->setReturn(
+                $fiber->getReturn()
+            );
+
+            if (!self::remove($id)) {
+                try {
+                    throw new EventQueueException(
+                        "Error removing loop with id: $id",
+                        0,
+                    );
+                } catch (EventQueueException $e) {
+                    echo $e;
+                }
+            }
+
+            return false;
+        }
+
+        // If the loop is running for more than 5 seconds, it will be stopped.
+        if ($diff >= $timeOut + self::TIME_OUT)
+        {
+            self::$queues[$id] = $queue->setReturn(
+                $fiber->getReturn()
+            );
+
+            if (!self::remove($id)) {
+                try {
+                    throw new EventQueueException(
+                        "Error removing loop with id: $id, in timeout",
+                        0,
+                    );
+                } catch (EventQueueException $e) {
+                    echo $e;
+                }
+            }
+            return false;
+        }
+
+        return true;
+    }
+
     /**
      * @throws Throwable
      */
@@ -88,28 +135,28 @@ final class EventQueue {
     {
         while (!is_null(self::get($id))) 
         {
-            $childLoop = self::get($id);
+            $queue = self::get($id);
 
-            if ($childLoop instanceof Queue) 
+            if ($queue instanceof Queue)
             {
 
-                $fiber = $childLoop->getFiber();
-                $timeCurrent = $childLoop->getTimeCurrent();
-                $timeOut = $childLoop->getTimeOut();
+                $fiber = $queue->getFiber();
+                $timeCurrent = $queue->getTimeCurrent();
+                $timeOut = $queue->getTimeOut();
 
                 $diff = microtime(true) - $timeCurrent;
 
-                if ($diff >= $timeOut && $childLoop->getStatus() === self::PENDING) 
+                if ($diff >= $timeOut && $queue->getStatus() === self::PENDING)
                 {
 
-                    self::$queues[$id] = $childLoop->setStatus(
+                    self::$queues[$id] = $queue->setStatus(
                         self::RUNNING
                     );
 
                     $fiber->start();
                 }
 
-                if ($childLoop->getStatus() === self::RUNNING) 
+                if ($queue->getStatus() === self::RUNNING)
                 {
                     while (!$fiber->isTerminated()) 
                     {
@@ -126,48 +173,13 @@ final class EventQueue {
 
                     if ($fiber->isTerminated()) 
                     {
-                        self::$queues[$id] = $childLoop->setStatus(
+                        self::$queues[$id] = $queue->setStatus(
                             self::FINISHED
                         );
                     }
                 }
 
-                if ($childLoop->getStatus() === self::FINISHED) 
-                {
-                    self::$queues[$id] = $childLoop->setReturn(
-                        $fiber->getReturn()
-                    );
-
-                    if (!self::remove($id)) {
-                        try {
-                            throw new EventQueueException(
-                                "Error removing loop with id: $id",
-                                0,
-                            );
-                        } catch (EventQueueException $e) {
-                            echo $e;
-                        }
-                    }
-                }
-
-                // If the loop is running for more than 5 seconds, it will be stopped.
-                if ($diff >= $timeOut + 5) 
-                {
-                    self::$queues[$id] = $childLoop->setReturn(
-                        $fiber->getReturn()
-                    );
-
-                    if (!self::remove($id)) {
-                        try {
-                            throw new EventQueueException(
-                                "Error removing loop with id: $id, in timeout",
-                                0,
-                            );
-                        } catch (EventQueueException $e) {
-                            echo $e;
-                        }
-                    }
-                }
+                self::checkFiber($queue, $id, $fiber, $diff, $timeOut);
             }
         }
     }
@@ -229,43 +241,9 @@ final class EventQueue {
                         }
                     }
 
-                    if ($queue->getStatus() === self::FINISHED) 
+                    if (!self::checkFiber($queue, $id, $fiber, $diff, $timeOut))
                     {
-                        self::$queues[$id] = $queue->setReturn(
-                            $fiber->getReturn()
-                        );
-
-                        if (!self::remove($id)) {
-                            try {
-                                throw new EventQueueException(
-                                    "Error removing loop with id: $id",
-                                    0,
-                                );
-                            } catch (EventQueueException $e) {
-                                echo $e;
-                            }
-                        }
-
                         continue;
-                    }
-
-                    // If the loop is running for more than 5 seconds, it will be stopped.
-                    if ($diff >= $timeOut + 5) 
-                    {
-                        self::$queues[$id] = $queue->setReturn(
-                            $fiber->getReturn()
-                        );
-
-                        if (!self::remove($id)) {
-                            try {
-                                throw new EventQueueException(
-                                    "Error removing loop with id: $id, in timeout",
-                                    0,
-                                );
-                            } catch (EventQueueException $e) {
-                                echo $e;
-                            }
-                        }
                     }
                 }
             }
@@ -309,8 +287,12 @@ final class EventQueue {
 
                 if ($queue->getStatus() === self::RUNNING)
                 {
-                    if (!$fiber->isTerminated())
+                    if (!$fiber->isTerminated() && $fiber->isStarted())
                     {
+                        if (!Fiber::getCurrent())
+                        {
+                            Fiber::suspend();
+                        }
                         continue;
                     }
 
@@ -320,45 +302,16 @@ final class EventQueue {
                             self::FINISHED
                         );
                     }
+
+                    if ($fiber->isSuspended())
+                    {
+                        $fiber->resume();
+                    }
                 }
 
-                if ($queue->getStatus() === self::FINISHED)
+                if (!self::checkFiber($queue, $id, $fiber, $diff, $timeOut))
                 {
-                    self::$queues[$id] = $queue->setReturn(
-                        $fiber->getReturn()
-                    );
-
-                    if (!self::remove($id)) {
-                        try {
-                            throw new EventQueueException(
-                                "Error removing loop with id: $id",
-                                0,
-                            );
-                        } catch (EventQueueException $e) {
-                            echo $e;
-                        }
-                    }
-
                     continue;
-                }
-
-                // If the loop is running for more than 5 seconds, it will be stopped.
-                if ($diff >= $timeOut + 5)
-                {
-                    self::$queues[$id] = $queue->setReturn(
-                        $fiber->getReturn()
-                    );
-
-                    if (!self::remove($id)) {
-                        try {
-                            throw new EventQueueException(
-                                "Error removing loop with id: $id, in timeout",
-                                0,
-                            );
-                        } catch (EventQueueException $e) {
-                            echo $e;
-                        }
-                    }
                 }
             }
         }
