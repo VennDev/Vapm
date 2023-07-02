@@ -95,7 +95,7 @@ interface InterfaceSystem {
 ```
 # Examples:
 - Comparison between Async Javascript:
-PHP:🔶
+- PHP:🔶
 ```php
 System::start();
 
@@ -124,7 +124,7 @@ Async task started
 End
 Async task completed
 ```
-JavaScript:🔶
+- JavaScript:🔶
 ```javascript
 console.log("Start");
 
