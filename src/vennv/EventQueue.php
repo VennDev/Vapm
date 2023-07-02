@@ -222,6 +222,11 @@ final class EventQueue {
                     {
                         while (!$fiber->isTerminated()) 
                         {
+                            if (!Fiber::getCurrent())
+                            {
+                                Fiber::suspend();
+                            }
+
                             if ($fiber->isSuspended()) 
                             {
                                 $fiber->resume();
@@ -273,7 +278,6 @@ final class EventQueue {
 
                 if ($diff >= $timeOut && $queue->getStatus() === self::PENDING)
                 {
-
                     self::$queues[$id] = $queue->setStatus(
                         self::RUNNING
                     );
@@ -293,6 +297,10 @@ final class EventQueue {
                         {
                             Fiber::suspend();
                         }
+                        if ($fiber->isSuspended())
+                        {
+                            $fiber->resume();
+                        }
                         continue;
                     }
 
@@ -301,11 +309,6 @@ final class EventQueue {
                         self::$queues[$id] = $queue->setStatus(
                             self::FINISHED
                         );
-                    }
-
-                    if ($fiber->isSuspended())
-                    {
-                        $fiber->resume();
                     }
                 }
 
