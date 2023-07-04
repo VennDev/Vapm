@@ -207,7 +207,7 @@ asyncTest();
 System::endSingleJob();
 ```
 - Time Out Function:
-```
+```php
 function testAsync() {
     System::setTimeout(function() {
         echo "Hello World\n";
