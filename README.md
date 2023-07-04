@@ -53,9 +53,31 @@
     /**
      * @throws Throwable
      *
-     * This method is used to add a callback|Promise|Async to the event loop.
+     * Fulfills when all the promises fulfill, rejects when any of the promises rejects.
      */
     public static function all(array $promises) : Promise;
+
+    /**
+     * @throws Throwable
+     *
+     * Settles when any of the promises settles.
+     * In other words, fulfills when any of the promises fulfills, rejects when any of the promises rejects.
+     */
+    public static function race(array $promises) : Promise;
+
+    /**
+     * @throws Throwable
+     *
+     * Fulfills when any of the promises fulfills, rejects when all the promises reject.
+     */
+    public static function any(array $promises) : Promise;
+
+    /**
+     * @throws Throwable
+     *
+     * Fulfills when all promises settle.
+     */
+    public static function allSettled(array $promises) : Promise;
 
     /**
      * @throws Throwable
