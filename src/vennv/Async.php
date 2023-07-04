@@ -27,10 +27,6 @@ final class Async implements InterfaceAsync
             {
                 $fiber->start();
             }
-            catch (PromiseException $promise)
-            {
-                EventQueue::checkPromise($this->id, $promise);
-            }
             catch (Exception | Throwable $error)
             {
                 EventQueue::rejectQueue($this->id, $error);
