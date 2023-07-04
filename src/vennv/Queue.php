@@ -91,6 +91,39 @@ final class Queue
         return $fiber->getReturn();
     }
 
+    private function checkStatus(string $callableFc, string $return) : void
+    {
+        while (count($this->{"$callableFc"}) > 0)
+        {
+            $firstCheck = false;
+            $cancel = false;
+
+            foreach ($this->{"$callableFc"} as $id => $callable)
+            {
+                if ($id !== self::MAIN_QUEUE && $this->{"$return"} instanceof Promise && !$firstCheck)
+                {
+                    EventQueue::getQueue($this->{"$return"}->getId())->setCallableResolve($callable);
+                    $firstCheck = true;
+                }
+                elseif ($id !== self::MAIN_QUEUE)
+                {
+                    EventQueue::getQueue($this->{"$return"}->getId())->then($callable);
+                    unset($this->{"$callableFc"}[$id]);
+                    continue;
+                }
+                if (count($this->{"$callableFc"}) === 1)
+                {
+                    $cancel = true;
+                }
+            }
+
+            if ($cancel)
+            {
+                break;
+            }
+        }
+    }
+
     /**
      * @throws Throwable
      */
@@ -108,35 +141,7 @@ final class Queue
 
             $this->returnResolve = $this->getResult($fiber);
 
-            while (count($this->callableResolve) > 0)
-            {
-                $firstCheck = false;
-                $cancel = false;
-
-                foreach ($this->callableResolve as $id => $callable)
-                {
-                    if ($id !== self::MAIN_QUEUE && $this->returnResolve instanceof Promise && !$firstCheck)
-                    {
-                        EventQueue::getQueue($this->returnResolve->getId())->setCallableResolve($callable);
-                        $firstCheck = true;
-                    }
-                    elseif ($id !== self::MAIN_QUEUE)
-                    {
-                        EventQueue::getQueue($this->returnResolve->getId())->then($callable);
-                        unset($this->callableResolve[$id]);
-                        continue;
-                    }
-                    if (count($this->callableResolve) === 1)
-                    {
-                        $cancel = true;
-                    }
-                }
-
-                if ($cancel)
-                {
-                    break;
-                }
-            }
+            $this->checkStatus("callableResolve", "returnResolve");
         }
     }
 
@@ -160,32 +165,7 @@ final class Queue
 
             $this->returnReject = $this->getResult($fiber);
 
-            while (count($this->callableReject) > 0)
-            {
-                $cancel = false;
-                foreach ($this->callableReject as $id => $callable)
-                {
-                    if ($id !== self::MAIN_QUEUE && $this->returnReject instanceof Promise)
-                    {
-                        EventQueue::getQueue($this->returnReject->getId())->setCallableReject($callable);
-                        $this->returnReject = null;
-                    }
-                    elseif ($id !== self::MAIN_QUEUE)
-                    {
-                        EventQueue::getQueue($this->returnReject->getId())->then($callable);
-                    }
-                    else
-                    {
-                        $cancel = true;
-                    }
-                    unset($this->callableReject[$id]);
-                }
-
-                if ($cancel)
-                {
-                    break;
-                }
-            }
+            $this->checkStatus("callableReject", "returnReject");
         }
     }
 
