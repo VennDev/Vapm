@@ -267,6 +267,14 @@ class EventQueue
                 }
             }
         }
+        foreach (self::$returns as $id => $queue)
+        {
+            $canDrop = $queue->canDrop();
+            if ($canDrop)
+            {
+                unset(self::$returns[$id]);
+            }
+        }
     }
 
     /**

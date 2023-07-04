@@ -11,6 +11,7 @@ final class Queue
     private const MAIN_QUEUE = "Main";
 
     private float $timeStart;
+    private float $timeDrop;
     private mixed $return;
     private array $callableResolve;
     private array $callableReject;
@@ -26,6 +27,7 @@ final class Queue
     )
     {
         $this->timeStart = microtime(true);
+        $this->timeDrop = 5;
         $this->return = null;
         $this->callableResolve[self::MAIN_QUEUE] = function($result) {};
         $this->callableReject[self::MAIN_QUEUE] = function($result) {};
@@ -207,6 +209,11 @@ final class Queue
     {
         $this->callableReject[] = $callable;
         return $this;
+    }
+
+    public function canDrop() : bool
+    {
+        return (microtime(true) - $this->timeStart) > $this->timeDrop;
     }
 
 }
