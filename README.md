@@ -2,6 +2,9 @@
 - A library Async & Promise for PHP
 - The method is based on Fibers, requires you to have php version from >= 8.1
 
+# Next update ?
+- Simply add some other asynchronous features so that this library is as similar to Javascript as possible.
+
 # How to use Async?
 ```php
     /**
