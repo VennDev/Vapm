@@ -8,254 +8,217 @@
 
 # How to use Async?
 ```php
-interface InterfaceAsync
-{
-
     /**
-     * @param Promise|Async|callable $callable $callable $callable
-     * @return mixed
-     *
-     * This function is used to create a new async await function
-     * You should use this function in an async function
+     * This method is used to await a promise.
      */
-    public static function await(Promise|Async|callable $callable) : mixed;
+    public static function await(mixed $callable) : mixed;
 
     /**
-     * @return int
+     * @throws Throwable
      *
-     * This function is used to get the id of the async function
+     * This method is used to wait for all promises to be resolved.
+     */
+    public static function wait() : void;
+
+    /**
+     * This method is used to get the id of the promise.
      */
     public function getId() : int;
-
-}
 ```
 # How to use Promise?
 ```php
-interface InterfacePromise {
-
     /**
-     * This is method getId for get id point of promise
+     * This method is used to add a callback to the queue of callbacks
+     * that will be executed when the promise is resolved.
      */
-    public function getId() : int;
+    public function then(callable $callable) : Queue;
 
     /**
-     * This is method then for add callback to promise
+     * This method is used to add a callback to the queue of callbacks
+     * that will be executed when the promise is rejected.
      */
-    public function then(callable $callable) : Promise;
+    public function catch(callable $callable) : Queue;
 
     /**
-     * This is method catch for add callback to promise
-     */
-    public function catch(callable $callable) : Promise;
-
-    /**
-     * This is method finally for add callback to promise
+     * This method is used to add a callback to the queue of callbacks
+     * that will be executed when the promise is resolved or rejected.
      */
     public static function resolve(mixed $result) : void;
 
     /**
-     * This is method finally for add callback to promise
+     * This method is used to add a callback to the queue of callbacks
+     * that will be executed when the promise is resolved or rejected.
      */
     public static function reject(mixed $result) : void;
 
-}
+    /**
+     * @throws Throwable
+     *
+     * This method is used to add a callback|Promise|Async to the event loop.
+     */
+    public static function all(array $promises) : Async;
+
+    /**
+     * @throws Throwable
+     *
+     * This method is used to get the id of the promise.
+     */
+    public function getId() : int;
 ```
 # How to use method by System?
 ```php
-interface InterfaceSystem {
-
     /**
-     * This is a method used to make your program easier to understand
-     * where the program begins and where it ends.
+     * @throws Throwable
+     *
+     * This method is used to run callback after a certain amount of time.
      */
-    public static function start() : void;
+    public static function setTimeout(callable $callable, int $timeout) : void;
 
     /**
-     * This method is usually used at the end of the whole chunk of your program,
-     * it is used to run the event loop.
+     * @throws Throwable
+     *
+     * This method is used to run a single job.
+     * It is used when you want to run the event loop in a blocking way.
      */
-    public static function end() : void;
+    public static function endSingleJob() : void;
 
     /**
+     * @throws Throwable
+     *
      * This method is usually used at the end of the whole chunk of your program,
      * it is used to run the event loop.
      *
      * This method is used when you want to run the event loop in a non-blocking way.
      * You should run this method in a separate thread and make it repeat every second.
      */
-    public static function endNonBlocking() : void;
-
-    /**
-     * This method is used to add a callable to the loop. The callable will
-     * be executed after the timeOut.
-     */
-    public static function setTimeOut(callable $callable, float $timeOut) : void;
-
-}
+    public static function endMultiJobs() : void;
 ```
 # Examples:
-- Comparison between Async Javascript:
-- PHP:🔶
+- Async:
 ```php
-System::start();
-
-var_dump("Start");
-
-function doAsyncTask() { 
-	var_dump("Async task started");
-	new Async(function() {
-		sleep(2);
-		var_dump("Async task completed");
-	});
+function testA() {
+    sleep(3);
+    return 1;
 }
 
-doAsyncTask();
-
-var_dump("End");
-System::end();
-```
-- Result:🥍
-```
-C:\Users\Nam\Desktop\Vapm>php test5.php
-string(5) "Start"
-string(18) "Async task started"
-string(3) "End"
-string(20) "Async task completed"
-```
-- JavaScript:🔶
-```javascript
-console.log("Start");
-
-async function doAsyncTask() {
-  console.log("Async task started");
-  await delay(2000);
-  console.log("Async task completed");
-}
-
-function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-doAsyncTask();
-
-console.log("End");
-```
-- Result:🥍
-```
-C:\Users\Nam\Desktop\JS>node test.js
-Start
-Async task started
-End
-Async task completed
-```
-# Async Await
-```php
-System::start();
-function fetchData($url) : mixed {
-    return new Async(function() use ($url) {
-        $curl = curl_init();
-
-        curl_setopt($curl, CURLOPT_URL, $url);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-        
-        $response = Async::await(fn() => curl_exec($curl));
-
-        if (!$response) {
-            $error = curl_error($curl);
-            curl_close($curl);
-            return "Error: " . $error;
-        }
-
-        curl_close($curl);
-
-        return $response;
+function testB() {
+    new Async(function () {
+        var_dump("AAA");
+        $result = Async::await(testA());
+        var_dump($result);
+        $result = Async::await(testA());
+        var_dump($result);
     });
 }
 
-function test() {
-    $url = [
-        "https://www.google.com",
-        "https://www.youtube.com"
-    ];
-    
-    foreach ($url as $value) {
-        new Async(function() use ($value) {
-            $res = Async::await(fetchData($value));
-            var_dump($res);
-        });
-    }
-}
+testB();
 
-test();
-System::end();
+System::endSingleJob();
 ```
-# Promise
+- Promise:
 ```php
-System::start();
-
-function testPromise($mode) : mixed {
-    return new Promise(function() use ($mode) {
-        if ($mode == 1) {
-            Promise::resolve(1);
-        } else {
-            Promise::reject(1);
-        }
+function testA() {
+    return new Promise(function() {
+        Promise::resolve("Hello World");
     });
 }
 
-function test() {
-    $promise = testPromise(2);
-    $promise->then(function($value) {
-        echo "resolve: $value\n";
-    })->catch(function($value) {
-        echo "reject: $value\n";
+function testB() {
+    new Async(function () {
+        $result = Async::await(testA());
+        var_dump($result);
     });
 }
 
-test();
-System::end();
+testB();
+
+System::endSingleJob();
 ```
-# Async + Promise
+- Chaining Promises:
 ```php
-System::start();
-
-function testPromise($mode) : mixed {
-    return new Promise(function() use ($mode) {
-        if ($mode == 1) {
-            Promise::resolve(1);
-        } else {
-            Promise::reject(2);
-        }
+function testPromise1() : Promise {
+    return new Promise(function () {
+        Promise::resolve("A");
     });
 }
 
-function test() {
+function testPromise2() : Promise {
+    return new Promise(function () {
+        Promise::resolve("B");
+    });
+}
+
+function testPromise3() : Promise {
+    return new Promise(function () {
+        Promise::resolve("C");
+    });
+}
+
+function testPromise4() : Promise {
+    return new Promise(function () {
+        Promise::resolve("D");
+    });
+}
+
+testPromise1()->then(function ($value) {
+    var_dump($value);
+	return testPromise2();
+})->then(function ($value) {
+    var_dump($value);
+    return testPromise3();
+})->then(function ($value) {
+    var_dump($value);
+    return testPromise4();
+})->then(function ($value) {
+    var_dump($value);
+});
+
+System::endSingleJob();
+```
+- Promise All:
+```php
+function promise1() : Promise {
+    return new Promise(function() {
+        Promise::resolve("promise1");
+    });
+}
+
+function promise2() : Promise {
+    return new Promise(function() {
+        Promise::resolve("promise2");
+    });
+}
+
+function promise3() : Promise {
+    return new Promise(function() {
+        Promise::resolve("promise3");
+    });
+}
+
+function asyncTest() {
     new Async(function() {
-        $await = Async::await(testPromise(2));
-        var_dump($await);
+        $promise = Async::await(Promise::all([
+            promise1(),
+            promise2(),
+            promise3()
+        ]));
+        var_dump($promise);
     });
 }
 
-test();
-System::end();
+asyncTest();
+
+System::endSingleJob();
 ```
-# Time Out function
-```php
-System::start();
+- Time Out Function:
+```
 function testAsync() {
-    new Async(function() {
-        Async::await(fn() => System::setTimeOut(function() {
-            var_dump("Hello World 2");
-        }, 1000));
-    });
+    System::setTimeout(function() {
+        echo "Hello World\n";
+    }, 5000);
+    var_dump("Hello");
 }
 
-function test() {
-    testAsync();
-    var_dump("Hello World 1");
-}
-
-test();
-System::end();
+testAsync();
+System::endSingleJob();
 ```
