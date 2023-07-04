@@ -2,10 +2,6 @@
 - A library Async & Promise for PHP
 - The method is based on Fibers, requires you to have php version from >= 8.1
 
-# Next Update?
-- Promise.all
-- Clean some
-
 # How to use Async?
 ```php
     /**
