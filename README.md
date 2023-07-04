@@ -42,20 +42,20 @@
      * This method is used to add a callback to the queue of callbacks
      * that will be executed when the promise is resolved or rejected.
      */
-    public static function resolve(mixed $result) : void;
+    public static function resolve(int $id, mixed $result) : void;
 
     /**
      * This method is used to add a callback to the queue of callbacks
      * that will be executed when the promise is resolved or rejected.
      */
-    public static function reject(mixed $result) : void;
+    public static function reject(int $id, mixed $result) : void;
 
     /**
      * @throws Throwable
      *
      * This method is used to add a callback|Promise|Async to the event loop.
      */
-    public static function all(array $promises) : Async;
+    public static function all(array $promises) : Promise;
 
     /**
      * @throws Throwable
@@ -117,8 +117,8 @@ System::endSingleJob();
 - Promise:
 ```php
 function testA() {
-    return new Promise(function() {
-        Promise::resolve("Hello World");
+    return new Promise(function($resolve, $reject) {
+        $resolve("Hello World");
     });
 }
 
@@ -135,72 +135,82 @@ System::endSingleJob();
 ```
 - Chaining Promises:
 ```php
-function testPromise1() : Promise {
-    return new Promise(function () {
-        Promise::resolve("A");
+function promise1() : Promise {
+    return new Promise(function($resolve, $reject) {
+        System::setTimeout(function() use ($resolve) {
+            $resolve("promise1");
+        }, 5000);
     });
 }
 
-function testPromise2() : Promise {
-    return new Promise(function () {
-        Promise::resolve("B");
+function promise2() : Promise {
+    return new Promise(function($resolve, $reject) {
+        System::setTimeout(function() use ($resolve) {
+            $resolve("promise2");
+        }, 3000);
     });
 }
 
-function testPromise3() : Promise {
-    return new Promise(function () {
-        Promise::resolve("C");
+function promise3() : Promise {
+    return new Promise(function($resolve, $reject) {
+        System::setTimeout(function() use ($resolve) {
+            $resolve("promise3");
+        }, 3000);
     });
 }
 
-function testPromise4() : Promise {
-    return new Promise(function () {
-        Promise::resolve("D");
+function asyncTest() {
+    new Async(function() {
+		$time = microtime(true);
+        $promise = Async::await(Promise::all([
+            promise1(),
+            promise2(),
+            promise3()
+        ]));
+		var_dump(microtime(true) - $time);
+        var_dump($promise);
     });
 }
 
-testPromise1()->then(function ($value) {
-    var_dump($value);
-	return testPromise2();
-})->then(function ($value) {
-    var_dump($value);
-    return testPromise3();
-})->then(function ($value) {
-    var_dump($value);
-    return testPromise4();
-})->then(function ($value) {
-    var_dump($value);
-});
+asyncTest();
 
 System::endSingleJob();
 ```
 - Promise All:
 ```php
 function promise1() : Promise {
-    return new Promise(function() {
-        Promise::resolve("promise1");
+    return new Promise(function($resolve, $reject) {
+        System::setTimeout(function() use ($resolve) {
+            $resolve("promise1");
+        }, 5000);
     });
 }
 
 function promise2() : Promise {
-    return new Promise(function() {
-        Promise::resolve("promise2");
+    return new Promise(function($resolve, $reject) {
+        System::setTimeout(function() use ($resolve) {
+            $resolve("promise2");
+        }, 3000);
     });
 }
 
 function promise3() : Promise {
-    return new Promise(function() {
-        Promise::resolve("promise3");
+    return new Promise(function($resolve, $reject) {
+        System::setTimeout(function() use ($resolve) {
+            $resolve("promise3");
+        }, 3000);
     });
 }
 
 function asyncTest() {
     new Async(function() {
+		$time = microtime(true);
         $promise = Async::await(Promise::all([
             promise1(),
             promise2(),
             promise3()
         ]));
+		var_dump(microtime(true) - $time);
         var_dump($promise);
     });
 }
