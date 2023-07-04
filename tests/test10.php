@@ -8,8 +8,8 @@ use vennv\Async;
 
 function promise1() : Promise {
     return new Promise(function($resolve, $reject) {
-        System::setTimeout(function() use ($resolve) {
-            $resolve("promise1");
+        System::setTimeout(function() use ($reject) {
+            $reject("promise1");
         }, 5000);
     });
 }
@@ -22,21 +22,12 @@ function promise2() : Promise {
     });
 }
 
-function promise3() : Async {
-    return new Async(function() {
-        return "A";
-    });
-}
-
 function asyncTest() {
     new Async(function() {
-		$time = microtime(true);
-        $promise = Async::await(Promise::allSettled([
+        $promise = Async::await(Promise::any([
             promise1(),
-            promise2(),
-            promise3()
+            promise2()
         ]));
-		var_dump(microtime(true) - $time);
         var_dump($promise);
     });
 }
