@@ -16,7 +16,7 @@ interface InterfaceSystem {
     /**
      * This method is used to fetch data from a url.
      */
-    public static function fetch(string $url) : Promise;
+    public static function fetch(string $url, array $options = [CURLOPT_RETURNTRANSFER => true]) : Promise;
 
     /**
      * This method is used to fetch data from a url. But it uses file_get_contents() instead of curl.

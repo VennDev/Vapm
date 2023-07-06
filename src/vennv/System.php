@@ -16,12 +16,12 @@ final class System extends EventQueue implements InterfaceSystem
         parent::addQueue(new Fiber($callable), false, false, Utils::milliSecsToSecs($timeout));
     }
 
-    public static function fetch(string $url) : Promise 
+    public static function fetch(string $url, array $options = [CURLOPT_RETURNTRANSFER => true]) : Promise 
     {
-        return new Promise(function($resolve, $reject) use ($url) 
+        return new Promise(function($resolve, $reject) use ($url, $options) 
         {
             $ch = curl_init($url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt_array($ch, $options);
             $result = curl_exec($ch);
             if (curl_errno($ch)) {
                 $reject(curl_error($ch));
