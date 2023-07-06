@@ -16,6 +16,20 @@ final class System extends EventQueue
         parent::addQueue(new Fiber($callable), false, false, Utils::milliSecsToSecs($timeout));
     }
 
+    public static function fetch(string $url) : Promise {
+        return new Promise(function($resolve, $reject) use ($url) {
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            $result = curl_exec($ch);
+            if (curl_errno($ch)) {
+                $reject(curl_error($ch));
+            } else {
+                $resolve($result);
+            }
+            curl_close($ch);
+        });
+    }
+
     /**
      * @throws Throwable
      */

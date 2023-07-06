@@ -107,6 +107,11 @@ final class Queue
 
             foreach ($this->{"$callableFc"} as $id => $callable)
             {
+                if ($this->{"$return"} === null) 
+                {
+                    $cancel = true;
+                    break;
+                }
                 if ($id !== self::MAIN_QUEUE && $this->{"$return"} instanceof Promise && !$firstCheck)
                 {
                     EventQueue::getQueue($this->{"$return"}->getId())->setCallableResolve($callable);
