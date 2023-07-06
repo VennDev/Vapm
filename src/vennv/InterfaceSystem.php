@@ -14,6 +14,11 @@ interface InterfaceSystem {
     public static function setTimeout(callable $callable, int $timeout) : void;
 
     /**
+     * This method is used to fetch data from a url.
+     */
+    public static function fetch(string $url) : Promise;
+
+    /**
      * @throws Throwable
      *
      * This method is used to run a single job.
