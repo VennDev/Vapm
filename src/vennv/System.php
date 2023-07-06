@@ -32,7 +32,7 @@ final class System extends EventQueue
         });
     }
 
-    public static function fecthJG(string $url) : Promise 
+    public static function fecthJg(string $url) : Promise 
     {
         return new Promise(function($resolve, $reject) use ($url) 
         {
