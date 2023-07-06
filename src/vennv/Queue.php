@@ -217,7 +217,7 @@ final class Queue
 
     public function catch(callable $callable) : Queue
     {
-        $this->callableReject[] = $callable;
+        $this->setCallableReject($callable);
         return $this;
     }
 
