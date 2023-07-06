@@ -21,7 +21,7 @@ interface InterfaceSystem {
     /**
      * This method is used to fetch data from a url. But it uses file_get_contents() instead of curl.
      */
-    public static function fecthJg(string $url) : Promise;
+    public static function fetchJg(string $url) : Promise;
 
     /**
      * @throws Throwable

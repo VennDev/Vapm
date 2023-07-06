@@ -7,7 +7,7 @@ use Exception;
 use FiberError;
 use Throwable;
 
-class EventQueue
+class EventQueue implements InterfaceEventQueue
 {
 
     private const TIME_OUT = 10;

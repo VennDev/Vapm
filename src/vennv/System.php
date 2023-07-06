@@ -5,7 +5,7 @@ namespace vennv;
 use Fiber;
 use Throwable;
 
-final class System extends EventQueue
+final class System extends EventQueue implements InterfaceSystem
 {
 
     /**
@@ -32,7 +32,7 @@ final class System extends EventQueue
         });
     }
 
-    public static function fecthJg(string $url) : Promise 
+    public static function fetchJg(string $url) : Promise 
     {
         return new Promise(function($resolve, $reject) use ($url) 
         {
