@@ -19,6 +19,11 @@ interface InterfaceSystem {
     public static function fetch(string $url) : Promise;
 
     /**
+     * This method is used to fetch data from a url. But it uses file_get_contents() instead of curl.
+     */
+    public static function fecthJG(string $url) : Promise;
+
+    /**
      * @throws Throwable
      *
      * This method is used to run a single job.
