@@ -290,3 +290,26 @@ function testAsync() {
 testAsync();
 System::endSingleJob();
 ```
+- Fetch & FecthFg
+```php
+$url = "https://www.google.com/";
+
+System::fetch($url)->then(function($value) {
+    var_dump($value);
+})->catch(function($reason) {
+    var_dump($reason);
+});
+
+System::endSingleJob();
+```
+```php
+$url = "https://www.google.com/";
+
+System::fetchFg($url)->then(function($value) {
+    var_dump($value);
+})->catch(function($reason) {
+    var_dump($reason);
+});
+
+System::endSingleJob();
+```
