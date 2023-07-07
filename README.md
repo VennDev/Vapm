@@ -14,6 +14,8 @@
     public static function setTimeout(callable $callable, int $timeout) : void;
 
     /**
+     * @param array<int, mixed> $options
+     *
      * This method is used to fetch data from a url.
      */
     public static function fetch(string $url, array $options = [CURLOPT_RETURNTRANSFER => true]) : Promise;
@@ -47,7 +49,7 @@
     /**
      * This method is used to await a promise.
      */
-    public static function await(mixed $callable) : mixed;
+    public static function await(callable|Promise|Async $callable) : mixed;
 
     /**
      * @throws Throwable
@@ -67,13 +69,13 @@
      * This method is used to add a callback to the queue of callbacks
      * that will be executed when the promise is resolved.
      */
-    public function then(callable $callable) : Queue;
+    public function then(callable $callable) : ?Queue;
 
     /**
      * This method is used to add a callback to the queue of callbacks
      * that will be executed when the promise is rejected.
      */
-    public function catch(callable $callable) : Queue;
+    public function catch(callable $callable) : ?Queue;
 
     /**
      * This method is used to add a callback to the queue of callbacks
@@ -89,6 +91,7 @@
 
     /**
      * @throws Throwable
+     * @param array<callable|Promise|Async> $promises
      *
      * Fulfills when all the promises fulfill, rejects when any of the promises rejects.
      */
@@ -96,6 +99,7 @@
 
     /**
      * @throws Throwable
+     * @param array<callable|Promise|Async> $promises
      *
      * Settles when any of the promises settles.
      * In other words, fulfills when any of the promises fulfills, rejects when any of the promises rejects.
@@ -104,6 +108,7 @@
 
     /**
      * @throws Throwable
+     * @param array<callable|Promise|Async> $promises
      *
      * Fulfills when any of the promises fulfills, rejects when all the promises reject.
      */
@@ -111,6 +116,7 @@
 
     /**
      * @throws Throwable
+     * @param array<callable|Promise|Async> $promises
      *
      * Fulfills when all promises settle.
      */
@@ -121,35 +127,7 @@
      *
      * This method is used to get the id of the promise.
      */
-    public function getId() : int;
-```
-# How to use method by System?
-```php
-    /**
-     * @throws Throwable
-     *
-     * This method is used to run callback after a certain amount of time.
-     */
-    public static function setTimeout(callable $callable, int $timeout) : void;
-
-    /**
-     * @throws Throwable
-     *
-     * This method is used to run a single job.
-     * It is used when you want to run the event loop in a blocking way.
-     */
-    public static function endSingleJob() : void;
-
-    /**
-     * @throws Throwable
-     *
-     * This method is usually used at the end of the whole chunk of your program,
-     * it is used to run the event loop.
-     *
-     * This method is used when you want to run the event loop in a non-blocking way.
-     * You should run this method in a separate thread and make it repeat every second.
-     */
-    public static function endMultiJobs() : void;
+    public function getId() : int; 
 ```
 # Examples:
 - Async:
