@@ -11,13 +11,18 @@
             "email": "1050080275@sv.hcmunre.edu.vn"
         }
     ],
-    "scripts": {
-	"analyse-src": "./vendor/bin/phpstan analyse -c phpstan.neon.dist"
+    "config": {
+	"allow-plugins": {
+		"phpstan/extension-installer": true
+	}
     },
     "require": {
         "php": "^8.2"
     },
     "require-dev": {
         "phpstan/phpstan": "*"
+    },
+    "scripts": {
+	"analyse-src": "./vendor/bin/phpstan analyse -c phpstan.neon.dist"
     }
 }
