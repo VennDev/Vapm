@@ -97,7 +97,9 @@ class EventQueue implements InterfaceEventQueue
                     $queue->useCallableReject($result);
                     break;
                 case StatusQueue::PENDING:
-                    throw new EventQueueError("Queue with id $id is still pending.");
+                    throw new EventQueueError(
+                        str_replace("%id%", $id, Error::QUEUE_STILL_PENDING)
+                    );
             }
 
             self::$returns[$id] = $queue;
@@ -105,7 +107,9 @@ class EventQueue implements InterfaceEventQueue
         }
         else
         {
-            throw new EventQueueError("Queue with id $id not found.");
+            throw new EventQueueError(
+                str_replace("%id%", $id, Error::QUEUE_NOT_FOUND)
+            );
         }
     }
 
@@ -120,7 +124,14 @@ class EventQueue implements InterfaceEventQueue
             $fiber = $queue->getFiber();
             if (!$fiber->isStarted())
             {
-                $fiber->start();
+                try
+                {
+                    $fiber->start();
+                }
+                catch (Exception | Throwable $error)
+                {
+                    EventQueue::rejectQueue($id, $error->getMessage());
+                }
             }
         }
     }
@@ -213,7 +224,7 @@ class EventQueue implements InterfaceEventQueue
                 }
                 catch (Exception | Throwable $error)
                 {
-                    self::rejectQueue($id, $error);
+                    self::rejectQueue($id, $error->getMessage());
                 }
             }
 
@@ -225,7 +236,7 @@ class EventQueue implements InterfaceEventQueue
                 }
                 catch (Exception | Throwable $error)
                 {
-                    self::rejectQueue($id, $error);
+                    self::rejectQueue($id, $error->getMessage());
                 }
             }
 
@@ -237,7 +248,7 @@ class EventQueue implements InterfaceEventQueue
                 }
                 catch (Exception | Throwable $error)
                 {
-                    self::rejectQueue($id, $error);
+                    self::rejectQueue($id, $error->getMessage());
                 }
             }
 
@@ -263,8 +274,21 @@ class EventQueue implements InterfaceEventQueue
         }
         else
         {
-            throw new EventQueueError("Queue with id $id not found.");
+            throw new EventQueueError(
+                str_replace("%id%", $id, Error::QUEUE_NOT_FOUND)
+            );
         }
+    }
+
+    private static function shouldCheckStatus(Queue $queue, float $addTime = 0.0) : bool
+    {
+        $timeOut = $queue->getTimeOut();
+        $timeStart = $queue->getTimeStart();
+        $timeNow = microtime(true);
+
+        $diff = $timeNow - $timeStart;
+
+        return $diff >= $timeOut + $addTime;
     }
 
     /**
@@ -276,28 +300,26 @@ class EventQueue implements InterfaceEventQueue
         {
             if ($queue instanceof Queue)
             {
-                $timeOut = $queue->getTimeOut();
-                $timeStart = $queue->getTimeStart();
-                $timeNow = microtime(true);
-
-                $diff = $timeNow - $timeStart;
-
-                if ($diff >= $timeOut)
+                
+                if (self::shouldCheckStatus($queue))
                 {
                     self::checkStatus($id);
                 }
 
                 // If the queue is still pending after 10 seconds of timeout, reject it.
                 // If you encounter this problem, your current promise trick is too bad.
-                if ($diff >= $timeOut + self::TIME_OUT)
+                if (self::shouldCheckStatus($queue, self::TIME_OUT))
                 {
-                    self::rejectQueue($id, "Queue with id $id timed out.");
+                    self::rejectQueue(
+                        $id, str_replace("%id%", $id, Error::QUEUE_IS_TIMEOUT)
+                    );
                 }
             }
         }
         foreach (self::$returns as $id => $queue)
         {
             $canDrop = $queue->canDrop();
+
             if ($canDrop)
             {
                 unset(self::$returns[$id]);

@@ -2,6 +2,7 @@
 
 namespace vennv;
 
+use Exception;
 use Fiber;
 use Throwable;
 
@@ -95,7 +96,18 @@ final class Queue
             }
         }
 
-        return $fiber->getReturn();
+        try 
+        {
+            $result = $fiber->getReturn();
+        }
+        catch (Exception | Throwable $error)
+        {
+            $result = $error->getMessage();
+            $this->callableResolve = [];
+            $this->callableReject = [];
+        }
+
+        return $result;
     }
 
     private function checkStatus(string $callableFc, string $return) : void
@@ -112,12 +124,19 @@ final class Queue
                     $cancel = true;
                     break;
                 }
-                if ($id !== self::MAIN_QUEUE && $this->{"$return"} instanceof Promise && !$firstCheck)
+                if (
+                    $id !== self::MAIN_QUEUE && 
+                    $this->{"$return"} instanceof Promise && 
+                    !$firstCheck
+                )
                 {
                     EventQueue::getQueue($this->{"$return"}->getId())->setCallableResolve($callable);
                     $firstCheck = true;
                 }
-                elseif ($id !== self::MAIN_QUEUE)
+                elseif (
+                    $id !== self::MAIN_QUEUE && 
+                    $this->{"$return"} instanceof Promise
+                )
                 {
                     EventQueue::getQueue($this->{"$return"}->getId())->then($callable);
                     unset($this->{"$callableFc"}[$id]);
@@ -147,7 +166,15 @@ final class Queue
             $fiber = new Fiber(function() use ($result) {
                 return ($this->callableResolve[self::MAIN_QUEUE])($result);
             });
-            $fiber->start();
+            
+            try 
+            {
+                $fiber->start();
+            } 
+            catch (Throwable | Exception $error) 
+            {
+                echo $error->getMessage();
+            }
 
             unset($this->callableResolve[self::MAIN_QUEUE]);
 
@@ -173,7 +200,15 @@ final class Queue
             $fiber = new Fiber(function () use ($result) {
                 return ($this->callableReject[self::MAIN_QUEUE])($result);
             });
-            $fiber->start();
+            
+            try 
+            {
+                $fiber->start();
+            } 
+            catch (Throwable | Exception $error) 
+            {
+                echo $error->getMessage();
+            }
 
             $this->returnReject = $this->getResult($fiber);
 
@@ -299,8 +334,10 @@ final class Queue
             }
 
             if (
-                $value instanceof Promise || $value instanceof Async ||
-                $result instanceof Promise || $result instanceof Async
+                $value instanceof Promise || 
+                $value instanceof Async ||
+                $result instanceof Promise || 
+                $result instanceof Async
             )
             {
                 $queue = EventQueue::getReturn($value->getId());
@@ -402,7 +439,9 @@ final class Queue
             }
             if ($countRejected === count($this->waitingPromises))
             {
-                $this->return = "[AggregateError: All promises were rejected]";
+                $error = new AggregateError(Error::ALL_PROMISES_WERE_REJECTED);
+                
+                $this->return = $error->__toString();
                 $this->setStatus(StatusQueue::REJECTED);
                 $return = true;
             }

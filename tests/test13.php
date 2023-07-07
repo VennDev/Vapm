@@ -31,6 +31,7 @@ function testPromise3() : Promise {
 
 function testPromise4() : Promise {
     return new Promise(function ($resolve, $reject) {
+		throw new Exception("AAAA");
         System::setTimeout(function () use ($resolve) {
             $resolve("D");
         }, 1000);
@@ -39,7 +40,6 @@ function testPromise4() : Promise {
 
 testPromise1()->then(function ($value) {
     var_dump($value);
-	throw new Exception("Error");
 	return testPromise2();
 })->then(function ($value) {
     var_dump($value);
@@ -49,6 +49,8 @@ testPromise1()->then(function ($value) {
     return testPromise4();
 })->then(function ($value) {
     var_dump($value);
+})->catch(function ($value) {
+	var_dump($value);
 });
 
 System::endSingleJob();

@@ -29,7 +29,7 @@ final class Async implements InterfaceAsync
             }
             catch (Exception | Throwable $error)
             {
-                EventQueue::rejectQueue($this->id, $error);
+                EventQueue::rejectQueue($this->id, $error->getMessage());
             }
         }
     }
@@ -55,8 +55,10 @@ final class Async implements InterfaceAsync
         }
 
         if (
-            $callable instanceof Promise || $callable instanceof Async ||
-            $result instanceof Promise || $result instanceof Async
+            $callable instanceof Promise || 
+            $callable instanceof Async ||
+            $result instanceof Promise || 
+            $result instanceof Async
         )
         {
             $queue = EventQueue::getQueue($callable->getId());
