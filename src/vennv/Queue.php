@@ -418,10 +418,13 @@ final class Queue
             !$this->isAnyPromise()
         )
         {
+            $resultPromise = [];
             foreach ($results as $result)
             {
-                $this->return[] = $result->getResult();
+                $resultPromise[] = $result->getResult();
             }
+
+            $this->return = $resultPromise;
             $this->setStatus(StatusQueue::FULFILLED);
             $return = true;
         }
