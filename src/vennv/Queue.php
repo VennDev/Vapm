@@ -107,9 +107,11 @@ final class Queue
 
     private function getResult(Fiber $fiber) : mixed
     {
+        $timeStart = microtime(true);
+
         while (!$fiber->isTerminated())
         {
-            if ($fiber->isTerminated())
+            if (microtime(true) - $timeStart > $this->timeDrop)
             {
                 break;
             }
