@@ -347,6 +347,7 @@ final class Queue
 
     /**
      * @throws Throwable
+     * @return array<PromiseResult>
      */
     private function checkPromise(Async|Promise $promise) : array
     {

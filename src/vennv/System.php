@@ -25,23 +25,24 @@ final class System extends EventQueue implements InterfaceSystem
             if ($ch === false)
             {
                 $reject('Failed to initialize cURL');
-                return;
-            }
-
-            curl_setopt_array($ch, $options);
-
-            $result = curl_exec($ch);
-
-            if (curl_errno($ch))
-            {
-                $reject(curl_error($ch));
             }
             else
             {
-                $resolve($result);
-            }
+                curl_setopt_array($ch, $options);
 
-            curl_close($ch);
+                $result = curl_exec($ch);
+
+                if (curl_errno($ch))
+                {
+                    $reject(curl_error($ch));
+                }
+                else
+                {
+                    $resolve($result);
+                }
+
+                curl_close($ch);
+            }
         });
     }
 
