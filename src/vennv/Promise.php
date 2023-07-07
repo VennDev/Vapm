@@ -72,6 +72,7 @@ final class Promise implements InterfacePromise
 
     /**
      * @throws Throwable
+     * @param array<callable, Async, Promise> $promises
      */
     public static function all(array $promises) : Promise
     {
@@ -88,6 +89,7 @@ final class Promise implements InterfacePromise
 
     /**
      * @throws Throwable
+     * @param array<callable, Async, Promise> $promises
      */
     public static function race(array $promises) : Promise
     {
@@ -104,6 +106,7 @@ final class Promise implements InterfacePromise
 
     /**
      * @throws Throwable
+     * @param array<callable, Async, Promise> $promises
      */
     public static function any(array $promises) : Promise
     {
@@ -121,6 +124,7 @@ final class Promise implements InterfacePromise
 
     /**
      * @throws Throwable
+     * @param array<callable, Async, Promise> $promises
      */
     public static function allSettled(array $promises) : Promise
     {

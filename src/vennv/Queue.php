@@ -228,7 +228,7 @@ final class Queue
     /**
      * @throws Throwable
      */
-    public function useCallableReject(callable $result) : void
+    public function useCallableReject(mixed $result) : void
     {
         if ($this->getStatus() === StatusQueue::REJECTED)
         {
@@ -302,7 +302,7 @@ final class Queue
     }
 
     /**
-     * @param array<Queue> $waitingPromises
+     * @param array<callable, Async, Promise> $waitingPromises
      */
     public function setWaitingPromises(array $waitingPromises) : void
     {
