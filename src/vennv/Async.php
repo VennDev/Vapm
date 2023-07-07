@@ -40,7 +40,7 @@ final class Async implements InterfaceAsync
     /**
      * @throws Throwable
      */
-    public static function await(mixed $callable) : mixed
+    public static function await(callable|Promise|Async $callable) : mixed
     {
         $result = $callable;
 
