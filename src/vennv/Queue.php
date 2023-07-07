@@ -348,6 +348,30 @@ final class Queue
     /**
      * @throws Throwable
      */
+    private function checkPromise(Async|Promise $promise) : array
+    {
+        $results = [];
+        $queue = EventQueue::getReturn($promise->getId());
+
+        if (!is_null($queue))
+        {
+            if ($queue->getStatus() === StatusQueue::FULFILLED)
+            {
+                $results[] = new PromiseResult($queue->getReturn(), $queue->getStatus());
+            }
+
+            if ($queue->getStatus() === StatusQueue::REJECTED)
+            {
+                $results[] = new PromiseResult($queue->getReturn(), $queue->getStatus());
+            }
+        }
+
+        return $results;
+    }
+
+    /**
+     * @throws Throwable
+     */
     public function hasCompletedAllPromise() : bool
     {
         $return = false;
@@ -376,37 +400,12 @@ final class Queue
 
             if ($value instanceof Promise || $value instanceof Async)
             {
-                $queue = EventQueue::getReturn($value->getId());
-
-                if (!is_null($queue))
-                {
-                    if ($queue->getStatus() === StatusQueue::FULFILLED)
-                    {
-                        $results[] = new PromiseResult($queue->getReturn(), $queue->getStatus());
-                    }
-
-                    if ($queue->getStatus() === StatusQueue::REJECTED)
-                    {
-                        $results[] = new PromiseResult($queue->getReturn(), $queue->getStatus());
-                    }
-                }
+                $results = array_merge($results, $this->checkPromise($value));
             }
-            elseif ($result instanceof Promise || $result instanceof Async)
+
+            if ($result instanceof Promise || $result instanceof Async)
             {
-                $queue = EventQueue::getReturn($value->getId());
-
-                if (!is_null($queue))
-                {
-                    if ($queue->getStatus() === StatusQueue::FULFILLED)
-                    {
-                        $results[] = new PromiseResult($queue->getReturn(), $queue->getStatus());
-                    }
-
-                    if ($queue->getStatus() === StatusQueue::REJECTED)
-                    {
-                        $results[] = new PromiseResult($queue->getReturn(), $queue->getStatus());
-                    }
-                }
+                $results = array_merge($results, $this->checkPromise($result));
             }
         }
 
