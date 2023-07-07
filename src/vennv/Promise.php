@@ -72,7 +72,7 @@ final class Promise implements InterfacePromise
 
     /**
      * @throws Throwable
-     * @param array<callable, Async, Promise> $promises
+     * @param array<callable|Async|Promise> $promises
      */
     public static function all(array $promises) : Promise
     {
