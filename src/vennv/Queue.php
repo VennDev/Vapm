@@ -32,7 +32,7 @@ final class Queue
     private mixed $returnReject;
 
     /**
-     * @var array<callable>
+     * @var array<callable, Async, Promise>
      */
     private array $waitingPromises = [];
 
@@ -133,6 +133,7 @@ final class Queue
 
     /**
      * @throws Throwable
+     * @param array<callable> $callableFc
      */
     private function checkStatus(array $callableFc, mixed $return) : void
     {
@@ -218,7 +219,7 @@ final class Queue
         }
     }
 
-    public function setCallableResolve(mixed $callableResolve) : Queue
+    public function setCallableResolve(callable $callableResolve) : Queue
     {
         $this->callableResolve[self::MAIN_QUEUE] = $callableResolve;
         return $this;
@@ -227,7 +228,7 @@ final class Queue
     /**
      * @throws Throwable
      */
-    public function useCallableReject(mixed $result) : void
+    public function useCallableReject(callable $result) : void
     {
         if ($this->getStatus() === StatusQueue::REJECTED)
         {
@@ -250,7 +251,7 @@ final class Queue
         }
     }
 
-    public function setCallableReject(mixed $callableReject) : Queue
+    public function setCallableReject(callable $callableReject) : Queue
     {
         $this->callableReject[self::MAIN_QUEUE] = $callableReject;
         return $this;
@@ -300,6 +301,9 @@ final class Queue
         return $this->waitingPromises;
     }
 
+    /**
+     * @param array<Queue> $waitingPromises
+     */
     public function setWaitingPromises(array $waitingPromises) : void
     {
         $this->waitingPromises = $waitingPromises;
@@ -368,9 +372,9 @@ final class Queue
             }
 
             if (
-                $value instanceof Promise || 
+                $value instanceof Promise ||
                 $value instanceof Async ||
-                $result instanceof Promise || 
+                $result instanceof Promise ||
                 $result instanceof Async
             )
             {
