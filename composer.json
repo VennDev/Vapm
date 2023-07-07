@@ -11,8 +11,10 @@
             "email": "1050080275@sv.hcmunre.edu.vn"
         }
     ],
-	"scripts": {
-        "analyse-src": "./vendor/bin/phpstan analyse -c phpstan.neon.dist"
+    "scripts": {
+	"make-baseline": "@php ./vendor/bin/phpstan analyze -b phpstan-baseline.php -c phpstan.neon.dist --allow-empty-baseline",
+	"fix-codestyle": "@php ./vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.php --verbose --diff",
+	"gen-translations": "@php ./build/generate-known-translation-apis.php ."
     },
     "require-dev": {
         "phpstan/phpstan": "^1",
