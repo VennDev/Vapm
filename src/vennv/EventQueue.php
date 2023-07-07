@@ -15,12 +15,12 @@ class EventQueue implements InterfaceEventQueue
     private static int $nextId = 0;
 
     /**
-     * @param array<int, Queue> $queues
+     * @var Queue[]
      */
     private static array $queues = [];
 
     /**
-     * @param array<int, Queue> $returns
+     * @var Queue[]
      */
     private static array $returns = [];
 
