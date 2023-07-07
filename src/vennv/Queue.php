@@ -32,7 +32,7 @@ final class Queue
     private mixed $returnReject;
 
     /**
-     * @var array<callable, Async, Promise>
+     * @var array<callable|Async|Promise>
      */
     private array $waitingPromises = [];
 
@@ -296,6 +296,7 @@ final class Queue
         return (microtime(true) - $this->timeStart) > $this->timeDrop;
     }
 
+    /** @return  array<callable|Async|Promise> */
     public function getWaitingPromises() : array
     {
         return $this->waitingPromises;
