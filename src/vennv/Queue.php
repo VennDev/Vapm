@@ -361,9 +361,11 @@ final class Queue
                 $fiber = new Fiber($value);
                 $fiber->start();
 
+                $timeStart = microtime(true);
+
                 while (!$fiber->isTerminated())
                 {
-                    if ($fiber->isTerminated())
+                    if ((microtime(true) - $timeStart) > $this->timeDrop)
                     {
                         break;
                     }
@@ -372,12 +374,24 @@ final class Queue
                 $result = $fiber->getReturn();
             }
 
-            if (
-                $value instanceof Promise ||
-                $value instanceof Async ||
-                $result instanceof Promise ||
-                $result instanceof Async
-            )
+            if ($value instanceof Promise || $value instanceof Async)
+            {
+                $queue = EventQueue::getReturn($value->getId());
+
+                if (!is_null($queue))
+                {
+                    if ($queue->getStatus() === StatusQueue::FULFILLED)
+                    {
+                        $results[] = new PromiseResult($queue->getReturn(), $queue->getStatus());
+                    }
+
+                    if ($queue->getStatus() === StatusQueue::REJECTED)
+                    {
+                        $results[] = new PromiseResult($queue->getReturn(), $queue->getStatus());
+                    }
+                }
+            }
+            elseif ($result instanceof Promise || $result instanceof Async)
             {
                 $queue = EventQueue::getReturn($value->getId());
 

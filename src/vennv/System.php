@@ -29,7 +29,9 @@ final class System extends EventQueue implements InterfaceSystem
             }
 
             curl_setopt_array($ch, $options);
+
             $result = curl_exec($ch);
+
             if (curl_errno($ch))
             {
                 $reject(curl_error($ch));
@@ -38,6 +40,7 @@ final class System extends EventQueue implements InterfaceSystem
             {
                 $resolve($result);
             }
+
             curl_close($ch);
         });
     }
