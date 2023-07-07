@@ -58,9 +58,9 @@ final class Async implements InterfaceAsync
         }
 
         if (
-            $callable instanceof Promise || 
+            $callable instanceof Promise ||
             $callable instanceof Async ||
-            $result instanceof Promise || 
+            $result instanceof Promise ||
             $result instanceof Async
         )
         {
@@ -68,11 +68,11 @@ final class Async implements InterfaceAsync
 
             if (!is_null($queue))
             {
-                while ($queue->getStatus() === StatusQueue::PENDING)
+                while ($queue->getStatus() == StatusQueue::PENDING)
                 {
                     if (
-                        $queue->getStatus() === StatusQueue::REJECTED ||
-                        $queue->getStatus() === StatusQueue::FULFILLED
+                        $queue->getStatus() == StatusQueue::REJECTED ||
+                        $queue->getStatus() == StatusQueue::FULFILLED
                     )
                     {
                         break;
