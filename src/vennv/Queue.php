@@ -18,12 +18,12 @@ final class Queue
     private mixed $return;
 
     /**
-     * @param array<callable> $callableResolve
+     * @var array<callable>
      */
     private array $callableResolve;
 
     /**
-     * @param array<callable> $callableResolve
+     * @var array<callable>
      */
     private array $callableReject;
 
@@ -32,7 +32,7 @@ final class Queue
     private mixed $returnReject;
 
     /**
-     * @param array<callable> $callableResolve
+     * @var array<callable>
      */
     private array $waitingPromises = [];
 

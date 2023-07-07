@@ -62,7 +62,7 @@ class EventQueue implements InterfaceEventQueue
         return self::$queues[$id] ?? null;
     }
 
-    public static function getReturn(int $id) : mixed
+    public static function getReturn(int $id) : ?Queue
     {
         return self::$returns[$id] ?? null;
     }

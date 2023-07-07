@@ -11,13 +11,13 @@ interface InterfacePromise
      * This method is used to add a callback to the queue of callbacks
      * that will be executed when the promise is resolved.
      */
-    public function then(callable $callable) : Queue;
+    public function then(callable $callable) : ?Queue;
 
     /**
      * This method is used to add a callback to the queue of callbacks
      * that will be executed when the promise is rejected.
      */
-    public function catch(callable $callable) : Queue;
+    public function catch(callable $callable) : ?Queue;
 
     /**
      * This method is used to add a callback to the queue of callbacks
