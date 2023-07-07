@@ -14,7 +14,7 @@ interface InterfaceSystem {
     public static function setTimeout(callable $callable, int $timeout) : void;
 
     /**
-     * @param array $options
+     * @param array<int, mixed> $options
      *
      * This method is used to fetch data from a url.
      */

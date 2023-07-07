@@ -269,7 +269,7 @@ class EventQueue implements InterfaceEventQueue
         else
         {
             throw new EventQueueError(
-                str_replace("%id%", $id, Error::QUEUE_NOT_FOUND)
+                str_replace("%id%", "$id", Error::QUEUE_NOT_FOUND)
             );
         }
     }
@@ -292,22 +292,18 @@ class EventQueue implements InterfaceEventQueue
     {
         foreach (self::$queues as $id => $queue)
         {
-            if ($queue instanceof Queue)
+            if (self::shouldCheckStatus($queue))
             {
-                
-                if (self::shouldCheckStatus($queue))
-                {
-                    self::checkStatus($id);
-                }
+                self::checkStatus($id);
+            }
 
-                // If the queue is still pending after 10 seconds of timeout, reject it.
-                // If you encounter this problem, your current promise trick is too bad.
-                if (self::shouldCheckStatus($queue, self::TIME_OUT))
-                {
-                    self::rejectQueue(
-                        $id, str_replace("%id%", "$id", Error::QUEUE_IS_TIMEOUT)
-                    );
-                }
+            // If the queue is still pending after 10 seconds of timeout, reject it.
+            // If you encounter this problem, your current promise trick is too bad.
+            if (self::shouldCheckStatus($queue, self::TIME_OUT))
+            {
+                self::rejectQueue(
+                    $id, str_replace("%id%", "$id", Error::QUEUE_IS_TIMEOUT)
+                );
             }
         }
         
