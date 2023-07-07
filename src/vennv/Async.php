@@ -19,17 +19,20 @@ final class Async implements InterfaceAsync
         $this->id = EventQueue::addQueue(new Fiber($callable));
 
         $queue = EventQueue::getQueue($this->id);
-        $fiber = $queue->getFiber();
 
-        if (!$fiber->isStarted())
+        if (!is_null($queue))
         {
-            try
+            $fiber = $queue->getFiber();
+            if (!$fiber->isStarted())
             {
-                $fiber->start();
-            }
-            catch (Exception | Throwable $error)
-            {
-                EventQueue::rejectQueue($this->id, $error->getMessage());
+                try
+                {
+                    $fiber->start();
+                }
+                catch (Exception | Throwable $error)
+                {
+                    EventQueue::rejectQueue($this->id, $error->getMessage());
+                }
             }
         }
     }

@@ -12,15 +12,34 @@ final class Queue
     private const MAIN_QUEUE = "Main";
 
     private float $timeStart;
+
     private float $timeDrop;
+
     private mixed $return;
+
+    /**
+     * @param array<callable> $callableResolve
+     */
     private array $callableResolve;
+
+    /**
+     * @param array<callable> $callableResolve
+     */
     private array $callableReject;
+
     private mixed $returnResolve;
+
     private mixed $returnReject;
+
+    /**
+     * @param array<callable> $callableResolve
+     */
     private array $waitingPromises = [];
+
     private bool $isRacePromise = false;
+
     private bool $isAnyPromise = false;
+
     private bool $isAllSettled = false;
 
     public function __construct(

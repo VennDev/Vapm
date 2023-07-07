@@ -13,7 +13,15 @@ class EventQueue implements InterfaceEventQueue
     private const TIME_OUT = 10;
 
     private static int $nextId = 0;
+
+    /**
+     * @param array<Queue> $queues
+     */
     private static array $queues = [];
+
+    /**
+     * @param array<Queue> $returns
+     */
     private static array $returns = [];
 
     private static function generateId() : int
@@ -316,6 +324,7 @@ class EventQueue implements InterfaceEventQueue
                 }
             }
         }
+        
         foreach (self::$returns as $id => $queue)
         {
             $canDrop = $queue->canDrop();
