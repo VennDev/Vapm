@@ -15,12 +15,12 @@ class EventQueue implements InterfaceEventQueue
     private static int $nextId = 0;
 
     /**
-     * @param array<Queue> $queues
+     * @param array<int, Queue> $queues
      */
     private static array $queues = [];
 
     /**
-     * @param array<Queue> $returns
+     * @param array<int, Queue> $returns
      */
     private static array $returns = [];
 
@@ -106,7 +106,7 @@ class EventQueue implements InterfaceEventQueue
                     break;
                 case StatusQueue::PENDING:
                     throw new EventQueueError(
-                        str_replace("%id%", $id, Error::QUEUE_STILL_PENDING)
+                        str_replace("%id%", "$id", Error::QUEUE_STILL_PENDING)
                     );
             }
 
@@ -116,7 +116,7 @@ class EventQueue implements InterfaceEventQueue
         else
         {
             throw new EventQueueError(
-                str_replace("%id%", $id, Error::QUEUE_NOT_FOUND)
+                str_replace("%id%", "$id", Error::QUEUE_NOT_FOUND)
             );
         }
     }
@@ -142,20 +142,6 @@ class EventQueue implements InterfaceEventQueue
                 }
             }
         }
-    }
-
-    /**
-     * @throws Throwable
-     */
-    private static function queueFulfilled(int $id) : bool
-    {
-        $queue = self::getQueue($id);
-        if ($queue !== null)
-        {
-            $status = $queue->getStatus();
-            return $status === StatusQueue::FULFILLED || $status === StatusQueue::REJECTED;
-        }
-        return false;
     }
 
     /**
@@ -319,7 +305,7 @@ class EventQueue implements InterfaceEventQueue
                 if (self::shouldCheckStatus($queue, self::TIME_OUT))
                 {
                     self::rejectQueue(
-                        $id, str_replace("%id%", $id, Error::QUEUE_IS_TIMEOUT)
+                        $id, str_replace("%id%", "$id", Error::QUEUE_IS_TIMEOUT)
                     );
                 }
             }

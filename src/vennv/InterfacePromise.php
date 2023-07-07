@@ -33,6 +33,7 @@ interface InterfacePromise
 
     /**
      * @throws Throwable
+     * @param array<callable|Promise|Async> $promises
      *
      * Fulfills when all the promises fulfill, rejects when any of the promises rejects.
      */
@@ -40,6 +41,7 @@ interface InterfacePromise
 
     /**
      * @throws Throwable
+     * @param array<callable|Promise|Async> $promises
      *
      * Settles when any of the promises settles.
      * In other words, fulfills when any of the promises fulfills, rejects when any of the promises rejects.
@@ -48,6 +50,7 @@ interface InterfacePromise
 
     /**
      * @throws Throwable
+     * @param array<callable|Promise|Async> $promises
      *
      * Fulfills when any of the promises fulfills, rejects when all the promises reject.
      */
@@ -55,6 +58,7 @@ interface InterfacePromise
 
     /**
      * @throws Throwable
+     * @param array<callable|Promise|Async> $promises
      *
      * Fulfills when all promises settle.
      */
