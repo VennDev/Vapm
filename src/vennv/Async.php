@@ -57,34 +57,42 @@ final class Async implements InterfaceAsync
             $result = $fiber->getReturn();
         }
 
-        if (
-            $callable instanceof Promise ||
-            $callable instanceof Async ||
-            $result instanceof Promise ||
-            $result instanceof Async
-        )
+        if ($callable instanceof Promise || $callable instanceof Async)
         {
-            $queue = EventQueue::getQueue($callable->getId());
+            self::awaitPromise($callable, $result);
+        }
 
-            if (!is_null($queue))
-            {
-                while ($queue->getStatus() == StatusQueue::PENDING)
-                {
-                    if (
-                        $queue->getStatus() == StatusQueue::REJECTED ||
-                        $queue->getStatus() == StatusQueue::FULFILLED
-                    )
-                    {
-                        break;
-                    }
-                    self::wait();
-                }
-
-                $result = $queue->getReturn();
-            }
+        if ($result instanceof Promise || $result instanceof Async)
+        {
+            self::awaitPromise($result, $result);
         }
 
         return $result;
+    }
+
+    /**
+     * @throws Throwable
+     */
+    private static function awaitPromise(Async|Promise $promise, mixed &$result) : void
+    {
+        $queue = EventQueue::getQueue($promise->getId());
+
+        if (!is_null($queue))
+        {
+            while ($queue->getStatus() == StatusQueue::PENDING)
+            {
+                if (
+                    $queue->getStatus() == StatusQueue::REJECTED ||
+                    $queue->getStatus() == StatusQueue::FULFILLED
+                )
+                {
+                    break;
+                }
+                self::wait();
+            }
+
+            $result = $queue->getReturn();
+        }
     }
 
     /**
