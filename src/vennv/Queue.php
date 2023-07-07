@@ -302,7 +302,7 @@ final class Queue
     }
 
     /**
-     * @param array<callable, Async, Promise> $waitingPromises
+     * @param array<callable|Async|Promise> $waitingPromises
      */
     public function setWaitingPromises(array $waitingPromises) : void
     {
