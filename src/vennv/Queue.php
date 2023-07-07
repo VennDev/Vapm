@@ -131,39 +131,52 @@ final class Queue
         return $result;
     }
 
-    private function checkStatus(string $callableFc, string $return) : void
+    /**
+     * @throws Throwable
+     */
+    private function checkStatus(array $callableFc, mixed $return) : void
     {
-        while (count($this->{"$callableFc"}) > 0)
+        while (count($callableFc) > 0)
         {
             $firstCheck = false;
             $cancel = false;
 
-            foreach ($this->{"$callableFc"} as $id => $callable)
+            foreach ($callableFc as $id => $callable)
             {
-                if ($this->{"$return"} === null) 
+                if ($return === null)
                 {
                     $cancel = true;
                     break;
                 }
                 if (
                     $id !== self::MAIN_QUEUE && 
-                    $this->{"$return"} instanceof Promise && 
+                    $return instanceof Promise &&
                     !$firstCheck
                 )
                 {
-                    EventQueue::getQueue($this->{"$return"}->getId())->setCallableResolve($callable);
+                    $queue = EventQueue::getQueue($return->getId());
+
+                    if (!is_null($queue))
+                    {
+                        $queue->setCallableResolve($callable);
+                    }
                     $firstCheck = true;
                 }
                 elseif (
                     $id !== self::MAIN_QUEUE && 
-                    $this->{"$return"} instanceof Promise
+                    $return instanceof Promise
                 )
                 {
-                    EventQueue::getQueue($this->{"$return"}->getId())->then($callable);
-                    unset($this->{"$callableFc"}[$id]);
+                    $queue = EventQueue::getQueue($return->getId());
+
+                    if (!is_null($queue)) {
+                        $queue->then($callable);
+                    }
+
+                    unset($callableFc[$id]);
                     continue;
                 }
-                if (count($this->{"$callableFc"}) === 1)
+                if (count($callableFc) === 1)
                 {
                     $cancel = true;
                 }
@@ -201,7 +214,7 @@ final class Queue
 
             $this->returnResolve = $this->getResult($fiber);
 
-            $this->checkStatus("callableResolve", "returnResolve");
+            $this->checkStatus($this->callableResolve, $this->returnResolve);
         }
     }
 
@@ -233,7 +246,7 @@ final class Queue
 
             $this->returnReject = $this->getResult($fiber);
 
-            $this->checkStatus("callableReject", "returnReject");
+            $this->checkStatus($this->callableReject, $this->returnReject);
         }
     }
 
