@@ -259,7 +259,7 @@ class EventQueue implements InterfaceEventQueue
 
                 if ($queue->isPromiseAll())
                 {
-                    if ($queue->hasCompletedAllPromise())
+                    if ($queue->hasCompletedAllPromises())
                     {
                         self::fulfillPromise($id);
                     }
