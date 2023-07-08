@@ -23,7 +23,9 @@ interface InterfaceEventQueue
     public static function addQueue(
         Fiber $fiber,
         bool $isPromise = false,
-        float $timeOut = 0.0
+        bool $isRepeatable = false,
+        float $timeOut = 0.0,
+        callable $callable
     ) : int;
 
     /**

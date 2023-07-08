@@ -19,7 +19,10 @@ final class Promise implements InterfacePromise
 
         $this->id = EventQueue::addQueue(
             $fiber,
-            true
+            true,
+            false,
+            0.0,
+            $callback
         );
     }
 

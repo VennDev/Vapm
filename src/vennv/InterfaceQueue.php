@@ -127,9 +127,14 @@ interface InterfaceQueue
     public function setWaitingPromises(array $waitingPromises) : void;
 
     /**
-     * This method check if the queue is a promise for all.
+     * This method to check if the queue is repeatable.
      */
-    public function isPromiseAll() : bool;
+    public function isRepeatable() : bool;
+
+    /**
+     * This method to set the queue is repeatable.
+     */
+    public function setRepeatable(bool $isRepeatable) : void;
 
     /**
      * This method to set the queue is a promise race.
@@ -160,6 +165,23 @@ interface InterfaceQueue
      * This method to check if the queue is a promise all settled.
      */
     public function isAllSettled() : bool;
+
+    /**
+     * This method check if the queue is a promise for all.
+     */
+    public function isPromiseAll() : bool;
+
+    /**
+     * This method to set the queue is a promise all.
+     */
+    public function setPromiseAll(bool $isPromiseAll) : void;
+
+    /**
+     * @return mixed
+     * 
+     * This method to get the Callable.
+     */
+    public function getCallable() : mixed;
 
     /**
      * @throws Throwable

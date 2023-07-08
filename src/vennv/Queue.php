@@ -41,6 +41,7 @@ final class Queue implements InterfaceQueue
     private bool $isAnyPromise = false;
 
     private bool $isAllSettled = false;
+
     private bool $isPromiseAll = false;
 
     public function __construct(
@@ -48,7 +49,9 @@ final class Queue implements InterfaceQueue
         private readonly Fiber $fiber,
         private readonly float $timeOut,
         private StatusQueue $status,
-        private readonly bool $isPromise
+        private readonly bool $isPromise,
+        private readonly bool $isRepeatable = false,
+        private readonly mixed $callable,
     )
     {
         $this->timeStart = microtime(true);
@@ -208,7 +211,7 @@ final class Queue implements InterfaceQueue
             } 
             catch (Throwable | Exception $error) 
             {
-                trigger_error($error->getMessage(), E_USER_NOTICE);
+                throw new QueueError($error->getMessage());
             }
 
             unset($this->callableResolve[self::MAIN_QUEUE]);
@@ -242,7 +245,7 @@ final class Queue implements InterfaceQueue
             } 
             catch (Throwable | Exception $error) 
             {
-                trigger_error($error->getMessage(), E_USER_NOTICE);
+                throw new QueueError($error->getMessage());
             }
 
             $this->returnReject = $this->getResult($fiber);
@@ -310,14 +313,14 @@ final class Queue implements InterfaceQueue
         $this->waitingPromises = $waitingPromises;
     }
 
-    public function isPromiseAll() : bool
+    public function isRepeatable() : bool
     {
-        return $this->isPromiseAll;
+        return $this->isRepeatable;
     }
 
-    public function setPromiseAll(bool $isPromiseAll) : void
+    public function setRepeatable(bool $isRepeatable) : void
     {
-        $this->isPromiseAll = $isPromiseAll;
+        $this->isRepeatable = $isRepeatable;
     }
 
     public function setRacePromise(bool $isRacePromise) : void
@@ -348,6 +351,21 @@ final class Queue implements InterfaceQueue
     public function isAllSettled() : bool
     {
         return $this->isAllSettled;
+    }
+
+    public function isPromiseAll() : bool
+    {
+        return $this->isPromiseAll;
+    }
+
+    public function setPromiseAll(bool $isPromiseAll) : void
+    {
+        $this->isPromiseAll = $isPromiseAll;
+    }
+
+    public function getCallable() : mixed
+    {
+        return $this->callable;
     }
 
     /**
@@ -382,6 +400,7 @@ final class Queue implements InterfaceQueue
     {
         $return = false;
         $results = [];
+
         foreach ($this->waitingPromises as $value)
         {
             $result = $value;
@@ -417,6 +436,7 @@ final class Queue implements InterfaceQueue
         if (count($results) >= count($this->waitingPromises) && $this->isAllSettled())
         {
             $resultPromise = [];
+
             foreach ($results as $result)
             {
                 $resultPromise[] = $result->getResult();
@@ -430,6 +450,7 @@ final class Queue implements InterfaceQueue
         if (count($results) >= count($this->waitingPromises) && $this->isPromiseAll())
         {
             $haveRejected = false;
+
             foreach ($results as $result)
             {
                 if ($result->getStatus() === StatusQueue::REJECTED)
@@ -459,6 +480,7 @@ final class Queue implements InterfaceQueue
         if (count($results) > 0 && $this->isRacePromise())
         {
             $this->return = $results[0]->getResult();
+
             if ($results[0]->getStatus() === StatusQueue::FULFILLED)
             {
                 $this->setStatus(StatusQueue::FULFILLED);
@@ -468,12 +490,14 @@ final class Queue implements InterfaceQueue
             {
                 $this->setStatus(StatusQueue::REJECTED);
             }
+
             $return = true;
         }
 
         if (count($results) > 0 && $this->isAnyPromise())
         {
             $countRejected = 0;
+
             foreach ($results as $result)
             {
                 if ($result->getStatus() === StatusQueue::FULFILLED)
@@ -488,6 +512,7 @@ final class Queue implements InterfaceQueue
                     $countRejected++;
                 }
             }
+
             if ($countRejected === count($this->waitingPromises))
             {
                 $error = new AggregateError(Error::ALL_PROMISES_WERE_REJECTED);
