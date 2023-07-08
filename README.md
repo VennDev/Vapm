@@ -295,7 +295,7 @@ testAsync();
 System::endSingleJob();
 ```
 - ``setInterval`` Function:
-```
+```php
 function asyncTest() {
     System::setInterval(function() {
         var_dump("Hello World!");
