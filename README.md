@@ -33,14 +33,21 @@ Once suspended, execution of the fiber may be resumed with any value using Fiber
     public static function setTimeout(callable $callable, int $timeout) : void;
 
     /**
+     * @throws Throwable
+     *
+     * This method is used to run repeatable callback after a certain amount of time.
+     */
+    public static function setInterval(callable $callable, int $interval) : void;
+
+    /**
      * @param array<int, mixed> $options
      *
-     * This method is used to fetch data from a url.
+     * This method is used to fetch data from an url.
      */
     public static function fetch(string $url, array $options = [CURLOPT_RETURNTRANSFER => true]) : Promise;
 
     /**
-     * This method is used to fetch data from a url. But it uses file_get_contents() instead of curl.
+     * This method is used to fetch data from an url. But it uses file_get_contents() instead of curl.
      */
     public static function fetchJg(string $url) : Promise;
 
