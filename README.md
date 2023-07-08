@@ -19,6 +19,7 @@ Fibers can be suspended in any function call, including those called from within
 Once suspended, execution of the fiber may be resumed with any value using Fiber::resume() or by throwing an exception into the fiber using Fiber::throw(). The value is returned (or exception thrown) from Fiber::suspend().
 ```
 - Shows are: ``Shows that the pause and continuation of Fiber is very effective. Because each Fiber has its own call stack.``
+- It's clear that fibers are a significant improvement, both syntax-wise and in flexibility.
 
 # Next update ?
 - Simply add some other asynchronous features so that this library is as similar to Javascript as possible.
