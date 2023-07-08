@@ -177,11 +177,11 @@ interface InterfaceQueue
     public function setPromiseAll(bool $isPromiseAll) : void;
 
     /**
-     * @return mixed
+     * @return callable
      * 
      * This method to get the Callable.
      */
-    public function getCallable() : mixed;
+    public function getCallable() : callable;
 
     /**
      * @throws Throwable

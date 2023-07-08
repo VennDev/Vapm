@@ -44,6 +44,10 @@ final class Queue implements InterfaceQueue
 
     private bool $isPromiseAll = false;
 
+    
+    /**
+     * @param callable $callable
+     */
     public function __construct(
         private readonly int $id,
         private readonly Fiber $fiber,
@@ -51,7 +55,7 @@ final class Queue implements InterfaceQueue
         private StatusQueue $status,
         private readonly bool $isPromise,
         private readonly bool $isRepeatable = false,
-        private readonly mixed $callable,
+        private $callable,
     )
     {
         $this->timeStart = microtime(true);
@@ -363,7 +367,7 @@ final class Queue implements InterfaceQueue
         $this->isPromiseAll = $isPromiseAll;
     }
 
-    public function getCallable() : mixed
+    public function getCallable() : callable
     {
         return $this->callable;
     }

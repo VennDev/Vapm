@@ -126,10 +126,9 @@ class EventQueue implements InterfaceEventQueue
                     );
             }
 
-            $callablePromise = $queue->getCallable();
-
-            if ($queue->isRepeatable() && is_callable($callablePromise))
+            if ($queue->isRepeatable())
             {  
+                $callablePromise = $queue->getCallable();
                 $fiber = new Fiber($callablePromise);
 
                 self::addQueue(
