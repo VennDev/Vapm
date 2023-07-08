@@ -52,7 +52,7 @@ final class Queue implements InterfaceQueue
         private readonly float $timeOut,
         private StatusQueue $status,
         private readonly bool $isPromise,
-        private readonly bool $isRepeatable = false
+        private readonly bool $isRepeatable
     )
     {
         $this->timeStart = microtime(true);
