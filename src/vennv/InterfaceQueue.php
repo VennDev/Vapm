@@ -132,11 +132,6 @@ interface InterfaceQueue
     public function isRepeatable() : bool;
 
     /**
-     * This method to set the queue is repeatable.
-     */
-    public function setRepeatable(bool $isRepeatable) : void;
-
-    /**
      * This method to set the queue is a promise race.
      */
     public function setRacePromise(bool $isRacePromise) : void;

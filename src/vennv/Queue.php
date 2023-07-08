@@ -319,11 +319,6 @@ final class Queue implements InterfaceQueue
         return $this->isRepeatable;
     }
 
-    public function setRepeatable(bool $isRepeatable) : void
-    {
-        $this->isRepeatable = $isRepeatable;
-    }
-
     public function setRacePromise(bool $isRacePromise) : void
     {
         $this->isRacePromise = $isRacePromise;
