@@ -15,10 +15,10 @@ final class System extends EventQueue implements InterfaceSystem
     {
         parent::addQueue(
             new Fiber($callable), 
+            $callable,
             false, 
             false, 
-            Utils::milliSecsToSecs($timeout),
-            $callable
+            Utils::milliSecsToSecs($timeout)
         );
     }
 
@@ -29,10 +29,10 @@ final class System extends EventQueue implements InterfaceSystem
     {
         parent::addQueue(
             new Fiber($callable), 
+            $callable,
             false, 
             true, 
-            Utils::milliSecsToSecs($interval),
-            $callable
+            Utils::milliSecsToSecs($interval)
         );
     }
 

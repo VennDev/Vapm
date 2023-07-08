@@ -18,10 +18,10 @@ final class Async implements InterfaceAsync
     {
         $this->id = EventQueue::addQueue(
             new Fiber($callable),
+            $callable,
             false,
             false,
-            0.0,
-            $callable
+            0.0
         );
 
         $queue = EventQueue::getQueue($this->id);

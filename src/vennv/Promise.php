@@ -13,16 +13,16 @@ final class Promise implements InterfacePromise
     /**
      * @throws Throwable
      */
-    public function __construct(callable $callback)
+    public function __construct(callable $callable)
     {
-        $fiber = new Fiber($callback);
+        $fiber = new Fiber($callable);
 
         $this->id = EventQueue::addQueue(
             $fiber,
+            $callable,
             true,
             false,
-            0.0,
-            $callback
+            0.0
         );
     }
 
