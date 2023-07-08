@@ -20,7 +20,12 @@ interface InterfaceEventQueue
     /**
      * This method to add a queue.
      */
-    public static function addQueue(Fiber $fiber, bool $isPromise = false, bool $isPromiseAll = false, float $timeOut = 0.0) : int;
+    public static function addQueue(
+        Fiber $fiber,
+        bool $isPromise = false,
+        bool $isPromiseAll = false,
+        float $timeOut = 0.0
+    ) : int;
 
     /**
      * This method to get a queue and check if it exists.
