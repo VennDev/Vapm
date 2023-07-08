@@ -41,14 +41,14 @@ final class Queue implements InterfaceQueue
     private bool $isAnyPromise = false;
 
     private bool $isAllSettled = false;
+    private bool $isPromiseAll = false;
 
     public function __construct(
         private readonly int $id,
         private readonly Fiber $fiber,
         private readonly float $timeOut,
         private StatusQueue $status,
-        private readonly bool $isPromise,
-        private readonly bool $isPromiseAll = false
+        private readonly bool $isPromise
     )
     {
         $this->timeStart = microtime(true);
@@ -315,6 +315,11 @@ final class Queue implements InterfaceQueue
         return $this->isPromiseAll;
     }
 
+    public function setPromiseAll(bool $isPromiseAll) : void
+    {
+        $this->isPromiseAll = $isPromiseAll;
+    }
+
     public function setRacePromise(bool $isRacePromise) : void
     {
         $this->isRacePromise = $isRacePromise;
@@ -403,20 +408,13 @@ final class Queue implements InterfaceQueue
             {
                 $results = array_merge($results, $this->getResultPromise($value));
             }
-
-            if ($result instanceof Promise || $result instanceof Async)
+            elseif ($result instanceof Promise || $result instanceof Async)
             {
                 $results = array_merge($results, $this->getResultPromise($result));
             }
         }
 
-        if (
-            count($results) === count($this->waitingPromises) &&
-            $this->isPromiseAll() &&
-            $this->isAllSettled() &&
-            !$this->isRacePromise() &&
-            !$this->isAnyPromise()
-        )
+        if (count($results) >= count($this->waitingPromises) && $this->isAllSettled())
         {
             $resultPromise = [];
             foreach ($results as $result)
@@ -429,13 +427,7 @@ final class Queue implements InterfaceQueue
             $return = true;
         }
 
-        if (
-            count($results) === count($this->waitingPromises) &&
-            $this->isPromiseAll() &&
-            !$this->isAllSettled() &&
-            !$this->isRacePromise() &&
-            !$this->isAnyPromise()
-        )
+        if (count($results) >= count($this->waitingPromises) && $this->isPromiseAll())
         {
             $haveRejected = false;
             foreach ($results as $result)
