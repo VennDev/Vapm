@@ -321,7 +321,7 @@ System::endSingleJob();
 ```php
 $url = "https://www.google.com/";
 
-System::fetchFg($url)->then(function($value) {
+System::fetchJg($url)->then(function($value) {
     var_dump($value);
 })->catch(function($reason) {
     var_dump($reason);
