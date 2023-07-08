@@ -55,7 +55,7 @@ final class Queue implements InterfaceQueue
         private StatusQueue $status,
         private readonly bool $isPromise,
         private readonly bool $isRepeatable = false,
-        private $callable,
+        private $promiseCallable,
     )
     {
         $this->timeStart = microtime(true);
@@ -367,9 +367,9 @@ final class Queue implements InterfaceQueue
         $this->isPromiseAll = $isPromiseAll;
     }
 
-    public function getCallable() : callable
+    public function getPromiseCallable() : callable
     {
-        return $this->callable;
+        return $this->promiseCallable;
     }
 
     /**

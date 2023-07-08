@@ -181,7 +181,7 @@ interface InterfaceQueue
      * 
      * This method to get the Callable.
      */
-    public function getCallable() : callable;
+    public function getPromiseCallable() : callable;
 
     /**
      * @throws Throwable

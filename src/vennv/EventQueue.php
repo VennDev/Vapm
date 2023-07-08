@@ -55,7 +55,7 @@ class EventQueue implements InterfaceEventQueue
         bool $isPromise = false,
         bool $isRepeatable = false,
         float $timeOut = 0.0,
-        callable $callable
+        callable $promiseCallable
     ) : int
     {
         $id = self::generateId();
@@ -67,7 +67,7 @@ class EventQueue implements InterfaceEventQueue
             StatusQueue::PENDING,
             $isPromise,
             $isRepeatable,
-            $callable
+            $promiseCallable
         );
 
         return $id;
@@ -128,7 +128,7 @@ class EventQueue implements InterfaceEventQueue
 
             if ($queue->isRepeatable())
             {  
-                $callablePromise = $queue->getCallable();
+                $callablePromise = $queue->getPromiseCallable();
                 $fiber = new Fiber($callablePromise);
 
                 self::addQueue(

@@ -25,7 +25,7 @@ interface InterfaceEventQueue
         bool $isPromise = false,
         bool $isRepeatable = false,
         float $timeOut = 0.0,
-        callable $callable
+        callable $promiseCallable
     ) : int;
 
     /**
