@@ -239,7 +239,7 @@ asyncTest();
 
 System::endSingleJob();
 ```
-- Promise All:
+- ``Promise::all()`` Function:
 ```php
 function promise1() : Promise {
     return new Promise(function($resolve, $reject) {
@@ -282,7 +282,7 @@ asyncTest();
 
 System::endSingleJob();
 ```
-- Time Out Function:
+- ``setTimeout`` Function:
 ```php
 function testAsync() {
     System::setTimeout(function() {
@@ -294,7 +294,19 @@ function testAsync() {
 testAsync();
 System::endSingleJob();
 ```
-- Fetch & FecthFg
+- ``setInterval`` Function:
+```
+function asyncTest() {
+    System::setInterval(function() {
+        var_dump("Hello World!");
+    }, 1000);
+}
+
+asyncTest();
+
+System::endSingleJob();
+```
+- ``Fetch & FecthFg``
 ```php
 $url = "https://www.google.com/";
 
