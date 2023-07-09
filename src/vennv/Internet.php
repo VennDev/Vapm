@@ -201,9 +201,7 @@ final class Internet
 
 					if (isset($nameValue[1]))
 					{
-						$headerGroup[
-                            trim(strtolower($nameValue[0]))
-                        ] = trim($nameValue[1]);
+						$headerGroup[trim(strtolower($nameValue[0]))] = trim($nameValue[1]);
 					}
 
 				}
