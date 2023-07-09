@@ -146,7 +146,7 @@ final class Internet
 
 		$curlHandle = curl_init($page);
 
-        if (!$curlHandle)
+        if ($curlHandle === false)
 		{
 			throw new InternetException(
 				"Unable to create new cURL session"
@@ -175,7 +175,7 @@ final class Internet
 		{
 			$raw = curl_exec($curlHandle);
 
-			if (!$raw)
+			if ($raw === false)
 			{
 				throw new InternetException(curl_error($curlHandle));
 			}
