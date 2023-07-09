@@ -169,7 +169,7 @@ final class Promise implements InterfacePromise
         $queue = $samplePromise->getQueue();
         $promise = $samplePromise->getPromise();
 
-        if (!is_null($samplePromise->getQueue()))
+        if (!is_null($queue))
         {
             $queue->setWaitingPromises($promises);
             $queue->setAllSettled(true);

@@ -27,6 +27,7 @@ declare(strict_types = 1);
 namespace vennv;
 
 use Closure;
+use CurlHandle;
 use function array_merge;
 use function curl_close;
 use function curl_error;
@@ -126,8 +127,11 @@ final class Internet
 	 * @param string[]      $extraHeaders extra headers to send as a plain string array
 	 * @param array         $extraOpts    extra CURL-OPT_* to set as an [opt => value] map
 	 * @param Closure|null $onSuccess     function to be called if there is no error. Accepts a resource argument as the cURL handle.
-	 *
-	 * @throws InternetException if a cURL error occurs
+     * @phpstan-param array<int, mixed>                $extraOpts
+     * @phpstan-param list<string>                     $extraHeaders
+     * @phpstan-param (Closure(CurlHandle) : void)|null $onSuccess
+     *
+     * @throws InternetException if a cURL error occurs
 	 */
 	public static function simpleCurl(
 		string $page, 

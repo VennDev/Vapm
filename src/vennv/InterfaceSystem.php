@@ -47,9 +47,9 @@ interface InterfaceSystem {
     /**
      * @param string $url
      * @param array<string|null, string|array> $options
-     * @return Promise
-     * when Promise resolve InternetRequestResult and when Promise reject Error
+     * @return Promise when Promise resolve InternetRequestResult and when Promise reject Error
      * @throws Throwable
+     * @phpstan-param array{method?: string, headers?: array<int, string>, timeout?: int, body?: array<string, string>} $options
      *
      * This method is used to fetch data from an url.
      */
