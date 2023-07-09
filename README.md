@@ -232,7 +232,7 @@ function testPromise4() : Promise {
 
 testPromise1()->then(function ($value) {
     var_dump($value);
-	return testPromise2();
+    return testPromise2();
 })->then(function ($value) {
     var_dump($value);
     return testPromise3();
