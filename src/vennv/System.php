@@ -15,7 +15,7 @@
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
@@ -48,6 +48,7 @@ final class System extends EventQueue implements InterfaceSystem
 
     /**
      * @throws Throwable
+     * @phpstan-param callable $callable
      */
     public static function setInterval(callable $callable, int $interval): void
     {
@@ -60,37 +61,53 @@ final class System extends EventQueue implements InterfaceSystem
         );
     }
 
-    public static function fetch(string $url, array $options = [CURLOPT_RETURNTRANSFER => true]) : Promise 
+    /**
+     * @param string $url
+     * @param array<string|null, string|array> $options
+     * @return Promise
+     * when Promise resolve InternetRequestResult and when Promise reject Error
+     * @throws Throwable
+     * @phpstan-param array{method?: string, headers?: array<int, string>, timeout?: int, body?: array<string, string>} $options
+     */
+    public static function fetch(string $url, array $options = []) : Promise
     {
         return new Promise(function($resolve, $reject) use ($url, $options) 
         {
-            $ch = curl_init($url);
+            $method = $options["method"] ?? "GET";
 
-            if ($ch === false)
+            /** @var array<int, string> $headers */
+            $headers = $options["headers"] ?? [];
+
+            /** @var int $timeout */
+            $timeout = $options["timeout"] ?? 10;
+
+            /** @var array<string, string> $body  */
+            $body = $options["body"] ?? [];
+
+            if ($method === "GET")
             {
-                $reject(Error::FAILED_TO_INITIALIZE_CURL);
+                $result = Internet::getURL($url, $timeout, $headers);
             }
             else
             {
-                curl_setopt_array($ch, $options);
+                $result = Internet::postURL($url, $body, $timeout, $headers);
+            }
 
-                $result = curl_exec($ch);
-
-                if (curl_errno($ch) !== 0)
-                {
-                    $reject(curl_error($ch));
-                }
-                else
-                {
-                    $resolve($result);
-                }
-
-                curl_close($ch);
+            if ($result === null)
+            {
+                $reject(Error::FAILED_IN_FETCHING_DATA);
+            }
+            else
+            {
+                $resolve($result);
             }
         });
     }
 
-    public static function fetchJg(string $url) : Promise 
+    /**
+     * @throws Throwable
+     */
+    public static function fetchJg(string $url) : Promise
     {
         return new Promise(function($resolve, $reject) use ($url) 
         {
