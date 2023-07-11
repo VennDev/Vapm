@@ -262,12 +262,18 @@ final class Promise implements PromiseInterface
                 }
             }
 
-            call_user_func($this->callbackFinally);
+            if (is_callable($this->callbackFinally))
+            {
+                call_user_func($this->callbackFinally);
+            }
         }
         elseif ($this->isRejected())
         {
-            call_user_func($this->callbackReject, $result);
-            call_user_func($this->callbackFinally);
+            if (is_callable($this->callbackReject) && is_callable($this->callbackFinally))
+            {
+                call_user_func($this->callbackReject, $result);
+                call_user_func($this->callbackFinally);
+            }
         }
     }
 

@@ -38,6 +38,11 @@ final class InternetRequestResult implements InternetRequestResultInterface
 
     private int $code;
 
+    /**
+     * @param string[][] $headers
+     * @param string $body
+     * @param int $code
+     */
 	public function __construct(array $headers, string $body, int $code)
 	{
         $this->headers = $headers;
