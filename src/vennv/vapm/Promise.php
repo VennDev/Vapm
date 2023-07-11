@@ -306,10 +306,12 @@ final class Promise implements PromiseInterface
                     if (!is_null($queue1)) 
                     {
                         $queue1->then($callable);
+                        $queue1->catch($this->callbackReject);
                     }
                     elseif (!is_null($queue2))
                     {
                         $queue2->then($callable);
+                        $queue2->catch($this->callbackReject);
                     }
 
                     unset($callbacks[$case]);
