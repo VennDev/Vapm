@@ -255,44 +255,57 @@ System::runSingleEventLoop();
 ```
 - ``Promise::all()`` Function:
 ```php
-function promise1() : Promise {
-    return new Promise(function($resolve, $reject) {
-        System::setTimeout(function() use ($resolve) {
-            $resolve("promise1");
-        }, 5000);
+function testPromise1() : Promise {
+    return new Promise(function ($resolve, $reject) {
+        System::setTimeout(function () use ($resolve) {
+            $resolve("A");
+        }, 1000);
     });
 }
 
-function promise2() : Promise {
-    return new Promise(function($resolve, $reject) {
-        System::setTimeout(function() use ($resolve) {
-            $resolve("promise2");
-        }, 3000);
+function testPromise2() : Promise {
+    return new Promise(function ($resolve, $reject) {
+        System::setTimeout(function () use ($resolve) {
+            $resolve("B");
+        }, 1000);
     });
 }
 
-function promise3() : Promise {
-    return new Promise(function($resolve, $reject) {
-        System::setTimeout(function() use ($resolve) {
-            $resolve("promise3");
-        }, 3000);
+function testPromise3() : Promise {
+    return new Promise(function ($resolve, $reject) {
+        System::setTimeout(function () use ($resolve) {
+            $resolve("C");
+        }, 1000);
     });
 }
 
-function asyncTest() {
-    new Async(function() {
-		$time = microtime(true);
-        $promise = Async::await(Promise::all([
-            promise1(),
-            promise2(),
-            promise3()
-        ]));
-		var_dump(microtime(true) - $time);
-        var_dump($promise);
+function testPromise4() : Promise {
+    return new Promise(function ($resolve, $reject) {
+        System::setTimeout(function () use ($resolve) {
+            $resolve("D");
+        }, 1000);
     });
 }
 
-asyncTest();
+function async() : void {
+	new Async(function() {
+		
+		$timeStart = microtime(true);
+		
+		$promise = Async::await(Promise::all([
+			testPromise1(),
+			testPromise2(),
+			testPromise3(),
+			testPromise4()
+		]));
+		
+		var_dump($promise);
+		
+		var_dump("END ". microtime(true) - $timeStart);
+	});
+}
+
+async();
 
 System::runSingleEventLoop();
 ```
