@@ -66,6 +66,10 @@ final class MacroTask
         return self::$tasks[$id] ?? null;
     }
 
+    /**
+     * @return array<int, SampleMacro>
+     * @phpstan-param array<int, SampleMacro> $tasks
+     */
     public static function getTasks(): array
     {
         return self::$tasks;

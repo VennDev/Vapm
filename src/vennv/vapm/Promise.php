@@ -273,8 +273,8 @@ final class Promise implements PromiseInterface
 
     /**
      * @throws Throwable
-     * @param array<int, callable> $callbacks
-     * @phpstan-param array<int, callable> $callbacks
+     * @param array<callable> $callbacks
+     * @phpstan-param array<callable> $callbacks
      */
     private function checkStatus(array $callbacks, mixed $return) : void
     {

@@ -73,6 +73,10 @@ class EventLoop implements EventLoopInterface
         return self::$queues[$id] ?? null;
     }
 
+    /**
+     * @return array<int, Promise>
+     * @phpstan-param array<int, Promise> $queues
+     */
     public static function getQueues(): array
     {
         return self::$queues;
@@ -98,6 +102,10 @@ class EventLoop implements EventLoopInterface
         return self::$returns[$id] ?? null;
     }
 
+    /**
+     * @return array<int, Promise>
+     * @phpstan-param array<int, Promise> $queues
+     */
     public static function getReturns(): array
     {
         return self::$returns;

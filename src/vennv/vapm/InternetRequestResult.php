@@ -30,7 +30,7 @@ final class InternetRequestResult implements InternetRequestResultInterface
 {
 
 	/**
-	 * @param string[][] $headers
+	 * @var string[][] $headers
 	 */
     private array $headers;
 

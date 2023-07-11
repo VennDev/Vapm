@@ -52,27 +52,20 @@ final class Async implements AsyncInterface
      */
     public static function await(Promise|Async|callable $await): mixed
     {
-        $result = null;
-
         if (is_callable($await))
         {
             $await = new Async($await);
         }
 
-        if ($await instanceof Async || $await instanceof Promise)
+        $return = EventLoop::getReturn($await->getId());
+
+        while ($return === null)
         {
             $return = EventLoop::getReturn($await->getId());
-
-            while ($return === null)
-            {
-                $return = EventLoop::getReturn($await->getId());
-                FiberManager::wait();
-            }
-            
-            $result = $return->getResult();
+            FiberManager::wait();
         }
 
-        return $result;
+        return $return->getResult();
     }
 
 }

@@ -37,6 +37,10 @@ interface EventLoopInterface
 
     public static function getQueue(int $id): ?Promise;
 
+    /**
+     * @return array<int, Promise>
+     * @phpstan-param array<int, Promise> $queues
+     */
     public static function getQueues(): array;
 
     public static function addReturn(Promise $promise): void;
@@ -45,6 +49,10 @@ interface EventLoopInterface
 
     public static function getReturn(int $id): ?Promise;
 
+    /**
+     * @return array<int, Promise>
+     * @phpstan-param array<int, Promise> $queues
+     */
     public static function getReturns(): array;
 
 }
