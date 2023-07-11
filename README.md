@@ -3,9 +3,8 @@
 - The method is based on Fibers, requires you to have php version from >= 8.1
 
 # Clarify
-- The library is based on a stop-and-stop mechanism with fiber that makes tasks such as reading files or fetching results from a website non-blocking mechanisms.
+- This is a fiber-based library of php that helps your code become asynchronous, and uses asynchronous methods such as fetch, read, ... help for for the use of reading or retrieving results from the website in a non-blocking manner.
 - As explained by PHP:
-
 Fibers represent full-stack, interruptible functions. Fibers may be suspended from anywhere in the call-stack, pausing execution within the fiber until the fiber is resumed at a later time.
 
 Fibers pause the entire execution stack, so the direct caller of the function does not need to change how it invokes the function.
