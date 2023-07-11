@@ -28,16 +28,36 @@ Once suspended, execution of the fiber may be resumed with any value using Fiber
     /**
      * @throws Throwable
      *
-     * This method is used to run callback after a certain amount of time.
+     * This function is used to run the event loop with multiple event loops
      */
-    public static function setTimeout(callable $callable, int $timeout) : void;
+    public static function runEventLoop(): void;
 
     /**
      * @throws Throwable
      *
-     * This method is used to run repeatable callback after a certain amount of time.
+     * This function is used to run the event loop with single event loop
      */
-    public static function setInterval(callable $callable, int $interval) : void;
+    public static function runSingleEventLoop(): void;
+
+    /**
+     * This function is used to run a callback in the event loop with timeout
+     */
+    public static function setTimeout(callable $callback, int $timeout): SampleMacro;
+
+    /**
+     * This function is used to clear the timeout
+     */
+    public static function clearTimeout(SampleMacro $sampleMacro): void;
+
+    /**
+     * This function is used to run a callback in the event loop with interval
+     */
+    public static function setInterval(callable $callback, int $interval): SampleMacro;
+
+    /**
+     * This function is used to clear the interval
+     */
+    public static function clearInterval(SampleMacro $sampleMacro): void;
 
     /**
      * @param string $url
@@ -45,120 +65,99 @@ Once suspended, execution of the fiber may be resumed with any value using Fiber
      * @return Promise when Promise resolve InternetRequestResult and when Promise reject Error
      * @throws Throwable
      * @phpstan-param array{method?: string, headers?: array<int, string>, timeout?: int, body?: array<string, string>} $options
-     *
-     * This method is used to fetch data from an url.
      */
     public static function fetch(string $url, array $options = []) : Promise;
 
     /**
      * @throws Throwable
-     * This method is used to fetch data from an url. But it uses file_get_contents() instead of curl.
-     */
-    public static function fetchJg(string $url) : Promise;
-
-    /**
-     * @throws Throwable
      *
-     * This method is used to run a single job.
-     * It is used when you want to run the event loop in a blocking way.
+     * This is a function used only to retrieve results from an address or file path via the file_get_contents method
      */
-    public static function endSingleJob() : void;
-
-    /**
-     * @throws Throwable
-     *
-     * This method is usually used at the end of the whole chunk of your program,
-     * it is used to run the event loop.
-     *
-     * This method is used when you want to run the event loop in a non-blocking way.
-     * You should run this method in a separate thread and make it repeat every second.
-     */
-    public static function endMultiJobs() : void;
+    public static function read(string $path) : Promise;   
 ```
 # How to use Async?
 ```php
-    /**
-     * This method is used to await a promise.
-     */
-    public static function await(callable|Promise|Async $callable) : mixed;
+    public function getId(): int;
 
     /**
      * @throws Throwable
-     *
-     * This method is used to wait for all promises to be resolved.
      */
-    public static function wait() : void;
-
-    /**
-     * This method is used to get the id of the promise.
-     */
-    public function getId() : int;
+    public static function await(Promise|Async|callable $await): mixed;
 ```
 # How to use Promise?
 ```php
-    /**
-     * This method is used to add a callback to the queue of callbacks
-     * that will be executed when the promise is resolved.
-     */
-    public function then(callable $callable) : ?Queue;
+    public function getId(): int;
 
-    /**
-     * This method is used to add a callback to the queue of callbacks
-     * that will be executed when the promise is rejected.
-     */
-    public function catch(callable $callable) : ?Queue;
+    public function getFiber(): Fiber;
 
-    /**
-     * This method is used to add a callback to the queue of callbacks
-     * that will be executed when the promise is resolved or rejected.
-     */
-    public static function resolve(int $id, mixed $result) : void;
+    public function isJustGetResult(): bool;
 
-    /**
-     * This method is used to add a callback to the queue of callbacks
-     * that will be executed when the promise is resolved or rejected.
-     */
-    public static function reject(int $id, mixed $result) : void;
+    public function getTimeOut(): float;
 
-    /**
-     * @throws Throwable
-     * @param array<callable|Promise|Async> $promises
-     *
-     * Fulfills when all the promises fulfill, rejects when any of the promises rejects.
-     */
-    public static function all(array $promises) : Promise;
+    public function getTimeStart(): float;
 
-    /**
-     * @throws Throwable
-     * @param array<callable|Promise|Async> $promises
-     *
-     * Settles when any of the promises settles.
-     * In other words, fulfills when any of the promises fulfills, rejects when any of the promises rejects.
-     */
-    public static function race(array $promises) : Promise;
+    public function getTimeEnd(): float;
 
-    /**
-     * @throws Throwable
-     * @param array<callable|Promise|Async> $promises
-     *
-     * Fulfills when any of the promises fulfills, rejects when all the promises reject.
-     */
-    public static function any(array $promises) : Promise;
+    public function setTimeEnd(float $timeEnd): void;
+
+    public function canDrop(): bool;
+
+    public function getStatus(): string;
+
+    public function isPending(): bool;
+
+    public function isResolved(): bool;
+
+    public function isRejected(): bool;
+
+    public function getResult(): mixed;
+
+    public function getReturn(): mixed;
+
+    public function getCallback(): callable;
+
+    public function resolve(mixed $value): void;
+
+    public function reject(mixed $value): void;
+
+    public function then(callable $callback): Promise;
+
+    public function catch(callable $callback): Promise;
+
+    public function finally(callable $callback): Promise;
 
     /**
      * @throws Throwable
-     * @param array<callable|Promise|Async> $promises
-     *
-     * Fulfills when all promises settle.
      */
-    public static function allSettled(array $promises) : Promise;
+    public function useCallbacks(): void;
 
     /**
      * @throws Throwable
-     *
-     * This method is used to get the id of the promise.
+     * @param array<int, Async|Promise|callable> $promises
+     * @phpstan-param array<int, Async|Promise|callable> $promises
      */
-    public function getId() : int; 
+    public static function all(array $promises): Promise;
+
+    /**
+     * @throws Throwable
+     * @param array<int, Async|Promise|callable> $promises
+     * @phpstan-param array<int, Async|Promise|callable> $promises
+     */
+    public static function allSettled(array $promises): Promise;
+
+    /**
+     * @throws Throwable
+     * @param array<int, Async|Promise|callable> $promises
+     * @phpstan-param array<int, Async|Promise|callable> $promises
+     */
+    public static function any(array $promises): Promise;
+
+    /**
+     * @throws Throwable
+     * @param array<int, Async|Promise|callable> $promises
+     * @phpstan-param array<int, Async|Promise|callable> $promises
+     */
+    public static function race(array $promises): Promise;
 ```
 # Examples:
 - Async:
@@ -180,7 +179,7 @@ function testB() {
 
 testB();
 
-System::endSingleJob();
+System::runSingleEventLoop();
 ```
 - Promise:
 ```php
@@ -199,7 +198,7 @@ function testB() {
 
 testB();
 
-System::endSingleJob();
+System::runSingleEventLoop();
 ```
 - Chaining Promises:
 ```php
@@ -248,7 +247,7 @@ testPromise1()->then(function ($value) {
     var_dump($value);
 });
 
-System::endSingleJob();
+System::runSingleEventLoop();
 ```
 - ``Promise::all()`` Function:
 ```php
@@ -291,7 +290,7 @@ function asyncTest() {
 
 asyncTest();
 
-System::endSingleJob();
+System::runSingleEventLoop();
 ```
 - ``setTimeout`` Function:
 ```php
@@ -315,9 +314,9 @@ function asyncTest() {
 
 asyncTest();
 
-System::endSingleJob();
+System::runSingleEventLoop();
 ```
-- ``Fetch & FecthFg``
+- ``Fetch & Read`` Function:
 ```php
 $url = "https://www.google.com/";
 
@@ -327,16 +326,16 @@ System::fetch($url)->then(function($value) {
     var_dump($reason);
 });
 
-System::endSingleJob();
+System::runSingleEventLoop();
 ```
 ```php
 $url = "https://www.google.com/";
 
-System::fetchJg($url)->then(function($value) {
+System::read($url)->then(function($value) {
     var_dump($value);
 })->catch(function($reason) {
     var_dump($reason);
 });
 
-System::endSingleJob();
+System::runSingleEventLoop();
 ```
