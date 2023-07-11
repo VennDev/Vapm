@@ -314,6 +314,7 @@ async();
 
 System::runSingleEventLoop();
 ```
+- Similarly you can try it with methods like: `allSettled`, `any`, `race`
 - ``setTimeout`` Function:
 ```php
 function testAsync() {
