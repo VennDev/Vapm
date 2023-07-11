@@ -1,5 +1,5 @@
 # Vapm
-- A library Async and Promise for PHP
+- A library for PHP about Async, Promise and other non-blocking methods.
 - The method is based on Fibers, requires you to have php version from >= 8.1
 
 # Clarify
