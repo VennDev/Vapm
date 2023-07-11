@@ -293,8 +293,7 @@ function testPromise4() : Promise {
 }
 
 function async() : void {
-	new Async(function() {
-		
+	new Async(function() {	
 		$timeStart = microtime(true);
 		
 		$promise = Async::await(Promise::all([
@@ -315,6 +314,7 @@ async();
 System::runSingleEventLoop();
 ```
 - Similarly you can try it with methods like: `allSettled`, `any`, `race`
+
 - ``setTimeout`` Function:
 ```php
 function testAsync() {
