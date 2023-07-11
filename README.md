@@ -5,7 +5,7 @@
 # Clarify
 - This is a fiber-based library of php that helps your code become asynchronous, and uses asynchronous methods such as fetch, read, ... help for for the use of reading or retrieving results from the website in a non-blocking manner.
 - As explained by PHP:
-<<<
+
 Fibers represent full-stack, interruptible functions. Fibers may be suspended from anywhere in the call-stack, pausing execution within the fiber until the fiber is resumed at a later time.
 
 Fibers pause the entire execution stack, so the direct caller of the function does not need to change how it invokes the function.
@@ -17,7 +17,7 @@ Unlike stack-less Generators, each Fiber has its own call stack, allowing them t
 Fibers can be suspended in any function call, including those called from within the PHP VM, such as functions provided to array_map() or methods called by foreach on an Iterator object.
 
 Once suspended, execution of the fiber may be resumed with any value using Fiber::resume() or by throwing an exception into the fiber using Fiber::throw(). The value is returned (or exception thrown) from Fiber::suspend().
->>>
+
 - Shows are: Shows that the pause and continuation of Fiber is very effective. Because each Fiber has its own call stack.
 - It's clear that fibers are a significant improvement, both syntax-wise and in flexibility.
 
