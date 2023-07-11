@@ -178,7 +178,7 @@ while (true) {
 System::runSingleEventLoop();
 ```
 
-# Examples:
+# Some examples:
 - Async:
 ```php
 function testA() {
