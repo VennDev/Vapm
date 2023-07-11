@@ -39,7 +39,6 @@ interface EventLoopInterface
 
     /**
      * @return array<int, Promise>
-     * @phpstan-param array<int, Promise> $queues
      */
     public static function getQueues(): array;
 
@@ -51,7 +50,6 @@ interface EventLoopInterface
 
     /**
      * @return array<int, Promise>
-     * @phpstan-param array<int, Promise> $queues
      */
     public static function getReturns(): array;
 

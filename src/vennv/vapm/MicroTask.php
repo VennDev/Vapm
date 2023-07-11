@@ -51,6 +51,9 @@ final class MicroTask
         return self::$tasks[$id] ?? null;
     }
 
+    /**
+     * @return array<int, Promise>
+     */
     public static function getTasks(): array
     {
         return self::$tasks;

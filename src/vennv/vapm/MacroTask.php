@@ -68,7 +68,6 @@ final class MacroTask
 
     /**
      * @return array<int, SampleMacro>
-     * @phpstan-param array<int, SampleMacro> $tasks
      */
     public static function getTasks(): array
     {
