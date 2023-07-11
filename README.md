@@ -167,7 +167,16 @@ Once suspended, execution of the fiber may be resumed with any value using Fiber
 
 - There are two methods: runEventLoop and runSingleEventLoop you can use them for the necessary purpose!
 - Use runEventLoop when you have a loop in your program.
+```php
+while (true) {
+	System::runEventLoop();
+}
+```
 - Use runSingleEventLoop when you simply end a program and run asynchronous tasks in an event loop.
+```php
+// Your Program
+System::runSingleEventLoop();
+```
 
 # Examples:
 - Async:
