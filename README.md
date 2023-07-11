@@ -1,9 +1,9 @@
 # Vapm
-- A library Async & Promise for PHP
+- A library Async and Promise for PHP
 - The method is based on Fibers, requires you to have php version from >= 8.1
 
 # Clarify
-- This is a fiber-based library of php that helps your code become asynchronous, and uses asynchronous methods such as fetch, read, ... help for for the use of reading or retrieving results from the website in a non-blocking manner.
+- This is a fiber-based library of php that helps your code become asynchronous, and uses asynchronous methods such as fetch, read, ... help for the use of reading or retrieving results from the website in a non-blocking manner.
 - As explained by PHP:
 
 Fibers represent full-stack, interruptible functions. Fibers may be suspended from anywhere in the call-stack, pausing execution within the fiber until the fiber is resumed at a later time.
@@ -21,7 +21,10 @@ Once suspended, execution of the fiber may be resumed with any value using Fiber
 - Shows are: Shows that the pause and continuation of Fiber is very effective. Because each Fiber has its own call stack.
 - It's clear that fibers are a significant improvement, both syntax-wise and in flexibility.
 
-# Next update ?
+# Why is it called unblocking? 
+- With this library, Fiber will take care of everything, thereby helping to check if the main thread is still working and stop promises or tasks in the EventLoop queue.
+
+# Next update?
 - Simply add some other asynchronous features so that this library is as similar to Javascript as possible.
 # How to use System?
 ```php
