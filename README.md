@@ -245,6 +245,10 @@ testPromise1()->then(function ($value) {
     return testPromise4();
 })->then(function ($value) {
     var_dump($value);
+})->catch(function ($value) {
+    var_dump($value);
+})->finally(function() {
+    var_dump("Complete!");
 });
 
 System::runSingleEventLoop();
