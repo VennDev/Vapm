@@ -376,3 +376,4 @@ System::read($url)->then(function($value) {
 
 System::runSingleEventLoop();
 ```
+- You can use the Read() method to read a file path that you want.
