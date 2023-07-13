@@ -168,7 +168,11 @@ final class GreenThread implements GreenThreadInterface
         self::$status[$name]->sleep($seconds);
 
         $fiberCurrent = Fiber::getCurrent();
-        $fiberCurrent?->suspend();
+
+        if ($fiberCurrent !== null)
+        {
+            $fiberCurrent::suspend();
+        }
     }
 
     public static function getStatus(string|int $name): StatusThread|null
