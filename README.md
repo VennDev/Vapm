@@ -377,3 +377,100 @@ System::read($url)->then(function($value) {
 System::runSingleEventLoop();
 ```
 - You can use the Read() method to read a file path that you want.
+
+# Green Thread
+- Why do I call it Green Thread?
+
+Because it implements threads that are separated from the main thread, the main thread retains its work performance without having to wait for sequential tasks, but they can run in parallel.
+
+- How to use?
+```php
+    /**
+     * @param string|int $name
+     * @param callable $callback
+     * @param array<int, mixed> $params
+     *
+     * This method is used to register a green thread.
+     */
+    public static function register(string|int $name, callable $callback, array $params): void;
+
+    /**
+     * @throws Throwable
+     */
+    public static function run(): void;
+
+    /**
+     * This method is used to clear the data of the green threads.
+     */
+    public static function clear(): void;
+
+    /**
+     * @return array<int, string|int>
+     *
+     * This method is used to get the names of the green threads.
+     */
+    public static function getNames(): array;
+
+    /**
+     * @return array<int, Fiber>
+     *
+     * This method is used to get the fibers of the green threads.
+     */
+    public static function getFibers(): array;
+
+    /**
+     * @return array<int, array<int, mixed>>
+     *
+     * This method is used to get the params of the green threads.
+     */
+    public static function getParams(): array;
+
+    /**
+     * @return array<string|int, mixed>
+     *
+     * This method is used to get the outputs of the green threads.
+     */
+    public static function getOutputs(): array;
+
+    /**
+     * @param string|int $name
+     * @return mixed
+     *
+     * This method is used to get the output of a green thread.
+     */
+    public static function getOutput(string|int $name): mixed;
+
+    /**
+     * @throws Throwable
+     */
+    public static function sleep(string $name, int $seconds): void;
+
+    /**
+     * @param string|int $name
+     * @return StatusThread|null
+     *
+     * This method is used to get the status of a green thread.
+     */
+    public static function getStatus(string|int $name): StatusThread|null;
+```
+
+- Example:
+```php
+function thread (string $print, int $loop) {
+    $i = $loop;
+
+    while ($i--)
+    {
+        var_dump("Thread '{$print}' printing '{$print}' for {$i} times!");
+		GreenThread::sleep($print, 1);
+    }
+
+    var_dump("Thread '{$print}' finished after printing '{$print}' for {$loop} times!");
+}
+
+foreach(range('A', 'F') as $c) {
+    GreenThread::register($c, 'thread', [$c, rand(5, 20)]);
+}
+
+System::runSingleEventLoop();
+```
