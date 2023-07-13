@@ -462,7 +462,7 @@ function thread (string $print, int $loop) {
     while ($i--)
     {
         var_dump("Thread '{$print}' printing '{$print}' for {$i} times!");
-		GreenThread::sleep($print, 1);
+	GreenThread::sleep($print, 1);
     }
 
     var_dump("Thread '{$print}' finished after printing '{$print}' for {$loop} times!");
