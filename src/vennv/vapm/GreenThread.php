@@ -43,7 +43,7 @@ final class GreenThread implements GreenThreadInterface
     private static array $fibers = [];
 
     /**
-     * @var array<int, array<int, mixed>>
+     * @var array<int, array>
      */
     private static array $params = [];
 

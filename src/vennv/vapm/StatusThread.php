@@ -32,6 +32,7 @@ final class StatusThread implements StatusThreadInterface
 {
 
     private int|float $timeSleeping = 0;
+
     private int|float $sleepStartTime;
 
     public function __construct()
