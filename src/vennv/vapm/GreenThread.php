@@ -32,19 +32,29 @@ use Throwable;
 final class GreenThread implements GreenThreadInterface
 {
 
-    /* @var array<int, string|int> */
+    /**
+     * @var array<int, string|int>
+     */
     private static array $names = [];
 
-    /* @var array<int, Fiber> */
+    /**
+     * @var array<int, Fiber>
+     */
     private static array $fibers = [];
 
-    /* @var array<int, array<int, mixed>> */
+    /**
+     * @var array<int, array<int, mixed>>
+     */
     private static array $params = [];
 
-    /* @var array<string|int, mixed> */
+    /**
+     * @var array<string|int, mixed>
+     */
     private static array $outputs = [];
 
-    /* @var array<string|int, StatusThread> */
+    /**
+     * @var array<string|int, StatusThread>
+     */
     private static array $status = [];
 
     /**
