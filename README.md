@@ -182,7 +182,6 @@ System::runSingleEventLoop();
 - Async:
 ```php
 function testA() {
-    sleep(3);
     return 1;
 }
 
