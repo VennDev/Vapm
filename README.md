@@ -532,16 +532,15 @@ Because it implements threads that are separated from the main thread, the main 
 
 - Example:
 ```php
-function thread (string $print, int $loop) {
-    $i = $loop;
+function thread (string $thread, int $loop) {
 
+    $i = $loop;
     while ($i--)
     {
-        var_dump("Thread '{$print}' printing '{$print}' for {$i} times!");
-	GreenThread::sleep($print, 1);
+        var_dump("Thread '{$thread}' printing '{$thread}' for {$i} times!");
+        GreenThread::sleep($thread, 1);
     }
-
-    var_dump("Thread '{$print}' finished after printing '{$print}' for {$loop} times!");
+    var_dump("Thread '{$thread}' finished after printing '{$thread}' for {$loop} times!");
 }
 
 foreach(range('A', 'F') as $c) {
