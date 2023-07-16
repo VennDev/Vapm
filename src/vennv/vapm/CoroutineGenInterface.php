@@ -32,11 +32,10 @@ interface CoroutineGenInterface
 {
 
     /**
-     * @param array<int, Generator|callable>|callable $coroutines
-     * @param ?callable $callback
+     * @param Generator|callable ...$coroutines
      * @return void
      */
-    public static function runBlocking(array|callable $coroutines, ?callable $callback = null): void;
+    public static function runBlocking(Generator|callable ...$coroutines): void;
 
     public static function launch(callable $callback): Generator;
 

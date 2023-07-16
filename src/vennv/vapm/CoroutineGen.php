@@ -37,41 +37,28 @@ final class CoroutineGen implements CoroutineGenInterface
     protected static ?SplQueue $taskQueue = null;
 
     /**
-     * @param array<int, Generator|callable>|callable $coroutines
-     * @param ?callable $callback
+     * @param Generator|callable ...$coroutines
      * @return void
      */
-    public static function runBlocking(array|callable $coroutines, ?callable $callback = null): void
+    public static function runBlocking(Generator|callable ...$coroutines): void
     {
         if (self::$taskQueue === null) 
         {
             self::$taskQueue = new SplQueue();
         }
 
-        if (is_callable($coroutines))
+        foreach ($coroutines as $coroutine)
         {
-            call_user_func($coroutines);
-        }
-        elseif (is_array($coroutines))
-        {
-            foreach ($coroutines as $coroutine) 
+            if (is_callable($coroutine))
             {
-                if ($coroutine instanceof Generator)
-                {
-                    $tid = ++self::$maxTaskId;
-                    self::schedule(new ChildCoroutine($tid, $coroutine));
-                }
-                
-                if (is_callable($coroutine))
-                {
-                    call_user_func($coroutine);
-                }
+                $coroutine = call_user_func($coroutine);
             }
-        }
 
-        if ($callback !== null)
-        {
-            call_user_func($callback);
+            if ($coroutine instanceof Generator)
+            {
+                $tid = ++self::$maxTaskId;
+                self::schedule(new ChildCoroutine($tid, $coroutine));
+            }
         }
 
         self::run();
@@ -84,26 +71,29 @@ final class CoroutineGen implements CoroutineGenInterface
 
     private static function schedule(ChildCoroutine $ChildCoroutine): void
     {
-        self::$taskQueue->enqueue($ChildCoroutine);
+        self::$taskQueue?->enqueue($ChildCoroutine);
     }
 
     private static function run(): void
     {
-        while (!self::$taskQueue->isEmpty()) 
+        if (self::$taskQueue !== null)
         {
-            /**
-             * @var ChildCoroutine $ChildCoroutine
-             */
-            $ChildCoroutine = self::$taskQueue->dequeue();
-            $ChildCoroutine->run();
+            while (!self::$taskQueue->isEmpty())
+            {
+                /**
+                 * @var ChildCoroutine $ChildCoroutine
+                 */
+                $ChildCoroutine = self::$taskQueue->dequeue();
+                $ChildCoroutine->run();
 
-            if ($ChildCoroutine->isFinished()) 
-            {
-                //TODO: Remove from queue
-            } 
-            else 
-            {
-                self::schedule($ChildCoroutine);
+                if ($ChildCoroutine->isFinished())
+                {
+                    //TODO: Remove from queue
+                }
+                else
+                {
+                    self::schedule($ChildCoroutine);
+                }
             }
         }
     }

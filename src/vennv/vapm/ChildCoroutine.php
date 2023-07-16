@@ -38,7 +38,7 @@ final class ChildCoroutine implements ChildCoroutineInterface
 
     protected Exception $exception;
 
-    public function __construct($id, Generator $coroutine)
+    public function __construct(int $id, Generator $coroutine)
     {
         $this->id = $id;
         $this->coroutine = $coroutine;
