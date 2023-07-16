@@ -1,6 +1,6 @@
 # Vapm
 - A library for PHP about Async, Promise and other non-blocking methods.
-- The method is based on Fibers, requires you to have php version from >= 8.1
+- The method is based on Fibers & Generator, requires you to have php version from >= 8.1
 
 # Clarify
 - This is a fiber-based library of php that helps your code become asynchronous, and uses asynchronous methods such as fetch, read, ... help for the use of reading or retrieving results from the website in a non-blocking manner.
