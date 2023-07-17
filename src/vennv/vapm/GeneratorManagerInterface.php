@@ -32,7 +32,7 @@ interface GeneratorManagerInterface
 {
 
     /**
-     * @param array<int|float|string, mixed> $array
+     * @param array $array
      * @return Generator
      * @phpstan-param array<int|float|string, mixed> $array
      *
@@ -43,7 +43,6 @@ interface GeneratorManagerInterface
     /**
      * @param Generator $generator
      * @return Generator
-     * @phpstan-param array<int|float|string, mixed> $array
      *
      * This method is used to get a generator from a generator.
      */
