@@ -26,55 +26,19 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
-use Throwable;
-use function microtime;
+use Generator;
 
-final class MicroTask
+final class GeneratorManager implements GeneratorManagerInterface
 {
 
-    /**
-     * @var array<int, Promise>
-     */
-    private static array $tasks = [];
-
-    public static function addTask(int $id, Promise $promise): void
+    public static function getFromArray(array $array): Generator
     {
-        self::$tasks[$id] = $promise;
+        yield from $array;
     }
 
-    public static function removeTask(int $id): void
+    public static function getFromGenerator(Generator $generator): Generator
     {
-        unset(self::$tasks[$id]);
-    }
-
-    public static function getTask(int $id): ?Promise
-    {
-        return self::$tasks[$id] ?? null;
-    }
-
-    /**
-     * @return array<int, Promise>
-     */
-    public static function getTasks(): array
-    {
-        return self::$tasks;
-    }
-
-    /**
-     * @throws Throwable
-     */
-    public static function run(): void
-    {
-        foreach (GeneratorManager::getFromArray(self::$tasks) as $id => $promise)
-        {
-            /** @var Promise $promise */
-            $promise->useCallbacks();
-            $promise->setTimeEnd(microtime(true));
-            
-            EventLoop::addReturn($promise);
-
-            self::removeTask($id);
-        }
+        yield from $generator;
     }
 
 }
