@@ -32,7 +32,7 @@ final class GeneratorManager implements GeneratorManagerInterface
 {
 
     /**
-     * @param array $array
+     * @param array<int|float|string, mixed> $array
      * @return Generator
      * @phpstan-param array<int|float|string, mixed> $array
      *
