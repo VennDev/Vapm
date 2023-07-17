@@ -31,11 +31,25 @@ use Generator;
 final class GeneratorManager implements GeneratorManagerInterface
 {
 
+    /**
+     * @param array $array
+     * @return Generator
+     * @phpstan-param array<int|float|string, mixed> $array
+     *
+     * This method is used to get a generator from an array.
+     */
     public static function getFromArray(array $array): Generator
     {
         yield from $array;
     }
 
+    /**
+     * @param Generator $generator
+     * @return Generator
+     * @phpstan-param array<int|float|string, mixed> $array
+     *
+     * This method is used to get a generator from a generator.
+     */
     public static function getFromGenerator(Generator $generator): Generator
     {
         yield from $generator;
