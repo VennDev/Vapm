@@ -27,6 +27,7 @@ declare(strict_types = 1);
 namespace vennv\vapm;
 
 use ReflectionException;
+use Throwable;
 
 interface ThreadInterface
 {
@@ -34,7 +35,10 @@ interface ThreadInterface
     public function onRun(): void;
 
     /**
+     * @param array $mode
      * @throws ReflectionException
+     * @throws Throwable
+     * @phpstan-param array<int, array> $mode
      */
     public function start(array $mode = DescriptorSpec::BASIC): void;
 

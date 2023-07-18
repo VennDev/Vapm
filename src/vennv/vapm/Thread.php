@@ -36,8 +36,10 @@ abstract class Thread implements ThreadInterface
     abstract public function onRun(): void;
 
     /**
+     * @param array $mode
      * @throws ReflectionException
      * @throws Throwable
+     * @phpstan-param array<int, array> $mode
      */
     public function start(array $mode = DescriptorSpec::BASIC): void
     {
