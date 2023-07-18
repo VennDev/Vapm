@@ -36,10 +36,10 @@ abstract class Thread implements ThreadInterface
     abstract public function onRun(): void;
 
     /**
-     * @param array $mode
+     * @param array<int, array<string> $mode
      * @throws ReflectionException
      * @throws Throwable
-     * @phpstan-param array<int, array> $mode
+     * @phpstan-param array<int, array<string>> $mode
      */
     public function start(array $mode = DescriptorSpec::BASIC): void
     {
@@ -84,7 +84,7 @@ abstract class Thread implements ThreadInterface
                 fclose($pipes[1]);
                 fclose($pipes[2]);
 
-                if ($error !== '')
+                if ($error !== '' && is_string($error))
                 {
                     throw new ThreadException($error);
                 }

@@ -35,10 +35,10 @@ interface ThreadInterface
     public function onRun(): void;
 
     /**
-     * @param array $mode
+     * @param array<int, array<string> $mode
      * @throws ReflectionException
      * @throws Throwable
-     * @phpstan-param array<int, array> $mode
+     * @phpstan-param array<int, array<string>> $mode
      */
     public function start(array $mode = DescriptorSpec::BASIC): void;
 
