@@ -29,6 +29,7 @@ namespace vennv\vapm;
 use Generator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use SplFileInfo;
 use function preg_match;
 
 final class Utils
@@ -46,11 +47,14 @@ final class Utils
 
         foreach ($iterator as $file)
         {
-            $fname = $file->getFilename();
-
-            if (preg_match('%\.php$%', $fname))
+            if ($file instanceof SplFileInfo)
             {
-                yield $file->getPathname();
+                $fname = $file->getFilename();
+
+                if (preg_match('%\.php$%', $fname))
+                {
+                    yield $file->getPathname();
+                }
             }
         }
     }

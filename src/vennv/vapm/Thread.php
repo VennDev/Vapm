@@ -66,15 +66,18 @@ abstract class Thread extends Threaded implements ThreadInterface
                 $pipes
             );
 
-            $newClass = new $className();
-
             if (is_resource($process))
             {
                 stream_set_blocking($pipes[1], false);
                 stream_set_blocking($pipes[2], false);
 
-                fwrite($pipes[0], json_encode($newClass->getShared()));
-                fclose($pipes[0]);
+                $data = json_encode($this->getShared());
+
+                if (is_string($data))
+                {
+                    fwrite($pipes[0], $data);
+                    fclose($pipes[0]);
+                }
 
                 while (proc_get_status($process)['running'])
                 {

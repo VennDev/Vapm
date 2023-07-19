@@ -39,6 +39,10 @@ class Threaded
 
     private bool $stopped = false;
 
+    /**
+     * @var array<string, mixed>
+     * @phpstan-var array<string, mixed>
+     */
     private static array $shared = [];
 
     public function __construct()
