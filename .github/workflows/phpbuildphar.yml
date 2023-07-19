@@ -8,10 +8,12 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
+    
     - name: build phar
       uses: docker://phpdoc/phar-ga:master
       with:
         args: box compile
+        
     - name: sign phar
       uses: docker://phpdoc/phar-ga:latest
       env:
