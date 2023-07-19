@@ -252,11 +252,16 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
 
     public static function getSharedData(): array
     {
-        $data = json_decode(fgets(STDIN), true);
+        $data = fgets(STDIN);
 
-        if (is_array($data))
+        if (is_string($data))
         {
-            return $data;
+            $data = json_decode($data, true);
+
+            if (is_array($data))
+            {
+                return $data;
+            }
         }
 
         return [];
@@ -284,7 +289,10 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
         {
             $result = json_decode($data[1], true);
 
-            self::setShared($result);
+            if (is_array($result))
+            {
+                self::setShared($result);
+            }
         }
     }
 
@@ -381,20 +389,26 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
                 }
                 else
                 {
-                    $explode = explode(PHP_EOL, $output);
-
-                    foreach ($explode as $item)
+                    if (!is_bool($output))
                     {
-                        if ($item !== '' && is_string($item))
-                        {
-                            if (self::isPostMainThread($item))
-                            {
-                                self::loadSharedData($item);
-                            }
+                        $explode = explode(PHP_EOL, $output);
 
-                            if (self::isAlert($item))
+                        foreach ($explode as $item)
+                        {
+                            if (is_string($item))
                             {
-                                self::loadAlert($item);
+                                if ($item !== '')
+                                {
+                                    if (self::isPostMainThread($item))
+                                    {
+                                        self::loadSharedData($item);
+                                    }
+
+                                    if (self::isAlert($item))
+                                    {
+                                        self::loadAlert($item);
+                                    }
+                                }
                             }
                         }
                     }
