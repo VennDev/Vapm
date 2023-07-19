@@ -1,6 +1,8 @@
 name: PHP Composer
 
 on:
+  release:
+    types: [published]
   push:
     branches: [ "main" ]
   pull_request:
@@ -41,12 +43,12 @@ jobs:
       - name: Run PHPStan
         run: vendor/bin/phpstan analyze
       
-      - name: build phar
+      - name: Build Phar
         uses: docker://phpdoc/phar-ga:master
         with:
           args: box compile
         
-      - name: sign phar
+      - name: Sign Phar
         uses: docker://phpdoc/phar-ga:latest
         env:
           PASSPHRASE: ${{ secrets.PASSPHRASE }}
