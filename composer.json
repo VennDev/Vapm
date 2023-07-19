@@ -17,12 +17,18 @@
 	}
     },
     "require": {
-        "php": "^8.2"
+        "php": "^8.2",
+	"php-64bit": "*",
+	"composer-runtime-api": "^2.0"
     },
     "require-dev": {
         "phpstan/phpstan": "*"
     },
     "scripts": {
-	"analyse-src": "./vendor/bin/phpstan analyse -c phpstan.neon.dist"
+	"analyse-src": "./vendor/bin/phpstan analyse -c phpstan.neon.dist",
+	"make-server": [
+		 "@composer install --no-dev --classmap-authoritative --ignore-platform-reqs",
+		 "@php -dphar.readonly=0 build/server-phar.php"
+      	]
     }
 }
