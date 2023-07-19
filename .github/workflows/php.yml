@@ -1,0 +1,21 @@
+on:
+  release:
+    types: [published]
+    
+name: PHP Build Phar
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - name: build phar
+      uses: docker://phpdoc/phar-ga:master
+      with:
+        args: box compile
+    - name: sign phar
+      uses: docker://phpdoc/phar-ga:latest
+      env:
+        PASSPHRASE: ${{ secrets.PASSPHRASE }}
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      with:
+        args: gpg --command-fd 0 --pinentry-mode loopback -u info@phpdoc.org --batch
+          --detach-sign --output build/phpDocumentor.phar.asc build/phpDocumentor.phar
