@@ -51,7 +51,7 @@ final class Utils
             {
                 $fname = $file->getFilename();
 
-                if (preg_match('%\.php$%', $fname))
+                if (preg_match('%\.php$%', $fname) === 1)
                 {
                     yield $file->getPathname();
                 }

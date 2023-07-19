@@ -71,7 +71,7 @@ abstract class Thread extends Threaded implements ThreadInterface
                 stream_set_blocking($pipes[1], false);
                 stream_set_blocking($pipes[2], false);
 
-                $data = json_encode($this->getShared());
+                $data = json_encode(self::getShared());
 
                 if (is_string($data))
                 {
