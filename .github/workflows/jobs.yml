@@ -1,8 +1,6 @@
-name: PHP Composer
+name: PHP Jobs
 
 on:
-  release:
-    types: [published]
   push:
     branches: [ "main" ]
   pull_request:
@@ -13,7 +11,7 @@ permissions:
 
 jobs:
   build:
-    name: PHPStan analysis
+    name: Jobs
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -42,17 +40,8 @@ jobs:
 
       - name: Run PHPStan
         run: vendor/bin/phpstan analyze
-      
-      - name: Build Phar
-        uses: docker://phpdoc/phar-ga:master
-        with:
-          args: box compile
         
-      - name: Sign Phar
-        uses: docker://phpdoc/phar-ga:latest
-        env:
-          PASSPHRASE: ${{ secrets.PASSPHRASE }}
-          SECRET_KEY: ${{ secrets.SECRET_KEY }}
-        with:
-          args: gpg --command-fd 0 --pinentry-mode loopback -u info@phpdoc.org --batch
-            --detach-sign --output build/phpDocumentor.phar.asc build/phpDocumentor.phar
+      - name: Box Packager for Phar
+        # You may pin to the exact commit or the version.
+        # uses: gplanchat/github-action-box@23c4a0595fd158bf07baf609e4f5cb6f44f2b3ee
+        uses: gplanchat/github-action-box@v1.0
