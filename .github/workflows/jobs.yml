@@ -40,8 +40,3 @@ jobs:
 
       - name: Run PHPStan
         run: vendor/bin/phpstan analyze
-        
-      - name: Box Packager for Phar
-        # You may pin to the exact commit or the version.
-        # uses: gplanchat/github-action-box@23c4a0595fd158bf07baf609e4f5cb6f44f2b3ee
-        uses: gplanchat/github-action-box@23c4a0595fd158bf07baf609e4f5cb6f44f2b3ee
