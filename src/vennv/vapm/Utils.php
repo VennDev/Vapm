@@ -26,12 +26,33 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
+use Generator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use function preg_match;
+
 final class Utils
 {
 
-    public static function milliSecsToSecs(float $milliSecs) : float
+    public static function milliSecsToSecs(float $milliSecs): float
     {
         return $milliSecs / 1000;
+    }
+
+    public static function getAllPHP(string $path): Generator
+    {
+        $dir = new RecursiveDirectoryIterator($path);
+        $iterator = new RecursiveIteratorIterator($dir);
+
+        foreach ($iterator as $file)
+        {
+            $fname = $file->getFilename();
+
+            if (preg_match('%\.php$%', $fname))
+            {
+                yield $file->getPathname();
+            }
+        }
     }
 
 }
