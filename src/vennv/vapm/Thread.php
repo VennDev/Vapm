@@ -395,19 +395,16 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
 
                         foreach ($explode as $item)
                         {
-                            if (is_string($item))
+                            if ($item !== '')
                             {
-                                if ($item !== '')
+                                if (self::isPostMainThread($item))
                                 {
-                                    if (self::isPostMainThread($item))
-                                    {
-                                        self::loadSharedData($item);
-                                    }
+                                    self::loadSharedData($item);
+                                }
 
-                                    if (self::isAlert($item))
-                                    {
-                                        self::loadAlert($item);
-                                    }
+                                if (self::isAlert($item))
+                                {
+                                    self::loadAlert($item);
                                 }
                             }
                         }
