@@ -198,7 +198,7 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
 
     private static string $input;
 
-    public function __construct(string $input)
+    public function __construct(string $input = '')
     {
         self::$input = $input;
     }
