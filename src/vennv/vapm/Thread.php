@@ -361,6 +361,27 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
         }
     }
 
+    private static function getAlert(string $data): array
+    {
+        $result = [];
+        $explode = explode(PHP_EOL, $data);
+
+        foreach ($explode as $item)
+        {
+            if ($item !== '')
+            {
+                $dataExplode = explode('=>', $data);
+
+                if ($dataExplode[0] === self::POST_ALERT_THREAD)
+                {
+                    $result[] = json_decode($dataExplode[1], true);
+                }
+            }
+        }
+
+        return $result;
+    }
+
     abstract public function onRun(): void;
 
     /**
@@ -476,7 +497,7 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
             proc_close($process);
             unset(self::$threads[$this->getPid()]);
 
-            return $output;
+            return self::getAlert($output);
         });
     }
 
