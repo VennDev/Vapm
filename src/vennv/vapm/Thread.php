@@ -361,6 +361,11 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
         }
     }
 
+    /**
+     * @param string $data
+     * @return array<int, array<string, mixed>>
+     * @phpstan-return array<int, array<string, mixed>>
+     */
     private static function getAlert(string $data): array
     {
         $result = [];
@@ -386,13 +391,15 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
 
     /**
      * @param array<int, array<string>> $mode
+     * @return Async
      * @throws ReflectionException
      * @throws Throwable
      * @phpstan-param array<int, array<string>> $mode
+     * @phpstan-return Async<array<string, mixed>>
      */
     public function start(array $mode = DescriptorSpec::BASIC): Async
     {
-        return new Async(function() use ($mode): mixed
+        return new Async(function() use ($mode): array
         {
             $className = get_called_class();
 
