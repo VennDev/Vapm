@@ -362,24 +362,28 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
     }
 
     /**
-     * @param string $data
-     * @return array<int, array<string, mixed>>
-     * @phpstan-return array<int, array<string, mixed>>
+     * @param false|string $data
+     * @return array<int, mixed>
+     * @phpstan-return array<int, mixed>
      */
-    private static function getAlert(string $data): array
+    private static function getAlert(false|string $data): array
     {
         $result = [];
-        $explode = explode(PHP_EOL, $data);
 
-        foreach ($explode as $item)
+        if (is_string($data))
         {
-            if ($item !== '')
-            {
-                $dataExplode = explode('=>', $data);
+            $explode = explode(PHP_EOL, $data);
 
-                if ($dataExplode[0] === self::POST_ALERT_THREAD)
+            foreach ($explode as $item)
+            {
+                if ($item !== '')
                 {
-                    $result[] = json_decode($dataExplode[1], true);
+                    $dataExplode = explode('=>', $data);
+
+                    if ($dataExplode[0] === self::POST_ALERT_THREAD)
+                    {
+                        $result[] = json_decode($dataExplode[1], true);
+                    }
                 }
             }
         }
@@ -395,7 +399,7 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
      * @throws ReflectionException
      * @throws Throwable
      * @phpstan-param array<int, array<string>> $mode
-     * @phpstan-return Async<array<string, mixed>>
+     * @phpstan-return Async
      */
     public function start(array $mode = DescriptorSpec::BASIC): Async
     {
