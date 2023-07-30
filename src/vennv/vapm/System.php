@@ -77,13 +77,13 @@ interface SystemInterface {
     public static function fetch(string $url, array $options = []) : Promise;
 
     /**
-     * @param array<int, string> $curls
+     * @param string ...$curls
      * @return Promise
      * @throws Throwable
      *
      * Use this to curl multiple addresses at once
      */
-    public static function fetchAll(array $curls) : Promise;
+    public static function fetchAll(string ...$curls) : Promise;
 
     /**
      * @throws Throwable
@@ -173,19 +173,23 @@ final class System extends EventLoop implements SystemInterface {
     }
 
     /**
-     * @param array<int, string> $curls
+     * @param string ...$curls
      * @return Promise
      * @throws Throwable
      *
      * Use this to curl multiple addresses at once
      */
-    public static function fetchAll(array $curls) : Promise {
+    public static function fetchAll(string ...$curls) : Promise {
         return new Promise(function ($resolve, $reject) use ($curls) : void {
             $multiHandle = curl_multi_init();
             $handles = [];
 
             foreach ($curls as $url) {
                 $handle = curl_init($url);
+
+                if ($handle === false) {
+                    $reject(Error::FAILED_IN_FETCHING_DATA);
+                }
 
                 curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
                 curl_multi_add_handle($multiHandle, $handle);
