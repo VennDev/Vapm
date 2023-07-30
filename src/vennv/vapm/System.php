@@ -189,12 +189,12 @@ final class System extends EventLoop implements SystemInterface {
 
                 if ($handle === false) {
                     $reject(Error::FAILED_IN_FETCHING_DATA);
+                } else {
+                    curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
+                    curl_multi_add_handle($multiHandle, $handle);
+
+                    $handles[] = $handle;
                 }
-
-                curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
-                curl_multi_add_handle($multiHandle, $handle);
-
-                $handles[] = $handle;
             }
 
             $running = null;
