@@ -57,7 +57,7 @@ interface CoroutineScopeInterface {
      *
      * This function launches a coroutine.
      */
-    public function launch(ChildCoroutine|CoroutineScope $childCoroutine) : void;
+    public function launch(mixed $childCoroutine) : void;
 
     /**
      * This function runs the coroutine.
@@ -102,25 +102,9 @@ final class CoroutineScope implements CoroutineScopeInterface {
                 self::schedule($callback);
             } else if (is_callable($callback)) {
                 if (self::$dispatcher === Dispatchers::IO) {
-                    $class = new class extends Thread {
-
-                        private mixed $callback;
-
-                        public function __construct(callable $callback) {
-                            $this->callback = $callback;
-                            parent::__construct('');
-                        }
-
-                        public function onRun() : void {
-                            if (is_callable($this->callback)) {
-                                call_user_func($this->callback);
-                            }
-                        }
-
-                    };
-
-                    $class = new $class($callback);
-                    $class->start();
+                    $thread = new CoroutineThread('');
+                    $thread->setCallback($callback);
+                    $thread->start();
                 }
 
                 if (self::$dispatcher === Dispatchers::DEFAULT) {
