@@ -36,19 +36,19 @@ interface CoroutineScopeInterface {
      *
      * This function checks if the coroutine has finished.
      */
-    public static function isFinished() : bool;
+    public function isFinished() : bool;
 
     /**
      * @return bool
      *
      * This function checks if the coroutine has been cancelled.
      */
-    public static function isCancelled() : bool;
+    public function isCancelled() : bool;
 
     /**
      * This function cancels the coroutine.
      */
-    public static function cancel() : void;
+    public function cancel() : void;
 
     /**
      * @param ChildCoroutine|CoroutineScope $childCoroutine
@@ -57,7 +57,7 @@ interface CoroutineScopeInterface {
      *
      * This function launches a coroutine.
      */
-    public static function launch(ChildCoroutine|CoroutineScope $childCoroutine) : void;
+    public function launch(ChildCoroutine|CoroutineScope $childCoroutine) : void;
 
     /**
      * This function runs the coroutine.
@@ -80,15 +80,15 @@ final class CoroutineScope implements CoroutineScopeInterface {
         self::$dispatcher = $dispatcher;
     }
 
-    public static function isFinished() : bool {
+    public function isFinished() : bool {
         return self::$finished;
     }
 
-    public static function isCancelled() : bool {
+    public function isCancelled() : bool {
         return self::$cancelled;
     }
 
-    public static function cancel() : void {
+    public function cancel() : void {
         self::$cancelled = true;
     }
 
@@ -96,13 +96,13 @@ final class CoroutineScope implements CoroutineScopeInterface {
      * @throws ReflectionException
      * @throws Throwable
      */
-    public static function launch(mixed ...$callbacks) : void {
+    public function launch(mixed ...$callbacks) : void {
         foreach ($callbacks as $callback) {
             if ($callback instanceof CoroutineScope) {
                 self::schedule($callback);
             } else if (is_callable($callback)) {
                 if (self::$dispatcher === Dispatchers::IO) {
-                    $class = (new class extends Thread {
+                    $class = new class extends Thread {
 
                         private mixed $callback;
 
@@ -112,11 +112,14 @@ final class CoroutineScope implements CoroutineScopeInterface {
                         }
 
                         public function onRun() : void {
-                            call_user_func($this->callback);
+                            if (is_callable($this->callback)) {
+                                call_user_func($this->callback);
+                            }
                         }
 
-                    })($callback);
+                    };
 
+                    $class = new $class($callback);
                     $class->start();
                 }
 

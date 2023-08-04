@@ -37,7 +37,7 @@ interface CoroutineGenInterface {
      *
      * This is a blocking function that runs all the coroutines passed to it.
      */
-    public static function runBlocking(Generator|callable ...$coroutines) : void;
+    public static function runBlocking(mixed ...$coroutines) : void;
 
     /**
      * @param callable $callback
