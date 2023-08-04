@@ -51,13 +51,13 @@ interface CoroutineScopeInterface {
     public function cancel() : void;
 
     /**
-     * @param ChildCoroutine|CoroutineScope $childCoroutine
+     * @param mixed ...$callbacks
      * @throws ReflectionException
      * @throws Throwable
      *
      * This function launches a coroutine.
      */
-    public function launch(mixed $childCoroutine) : void;
+    public function launch(mixed ...$callbacks) : void;
 
     /**
      * This function runs the coroutine.
