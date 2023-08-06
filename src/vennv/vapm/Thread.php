@@ -22,12 +22,14 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
+use Closure;
 use ReflectionClass;
 use ReflectionException;
 use RuntimeException;
 use Throwable;
 use function is_string;
 use function is_array;
+use function is_callable;
 use function explode;
 use function fwrite;
 use function fclose;
@@ -397,7 +399,7 @@ abstract class Thread implements ThreadInterface, ThreadedInterface {
                 $input = '\'' . self::$inputs[get_called_class()] . '\'';
             }
 
-            if (is_callable($input)) {
+            if (is_callable($input) && $input instanceof Closure) {
                 $input = Utils::closureToString($input);
                 $input = Utils::outlineToInline($input);
 
