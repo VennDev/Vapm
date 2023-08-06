@@ -63,7 +63,7 @@ interface UtilsInterface {
     /**
      * @return array<int, string>|string
      *
-     * Fix input thread
+     * Fix input command
      */
     public static function fixInputCommand(string $text) : array|string;
 
