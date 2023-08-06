@@ -63,9 +63,9 @@ interface ThreadInterface {
 interface ThreadedInterface {
 
     /**
-     * @return string
+     * @return mixed
      */
-    public function getInput() : string;
+    public function getInput() : mixed;
 
     /**
      * This method use to get the pid of the thread
@@ -205,7 +205,7 @@ abstract class Thread implements ThreadInterface, ThreadedInterface {
         self::$inputs[get_called_class()] = $input;
     }
 
-    public function getInput() : string {
+    public function getInput() : mixed {
         return self::$inputs[get_called_class()];
     }
 

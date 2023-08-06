@@ -54,11 +54,15 @@ interface UtilsInterface {
     public static function getAllPHP(string $path) : Generator;
 
     /**
+     * @return array<int, string>|string
+     *
      * Transform a string to inline
      */
     public static function outlineToInline(string $text) : array|string;
 
     /**
+     * @return array<int, string>|string
+     *
      * Fix input thread
      */
     public static function fixInputCommand(string $text) : array|string;
@@ -79,6 +83,10 @@ final class Utils implements UtilsInterface {
         $startLine = $reflection->getStartLine();
         $endLine = $reflection->getEndLine();
         $filename = $reflection->getFileName();
+
+        if ($filename === false || $startLine === false || $endLine === false) {
+            throw new ReflectionException(Error::CANNOT_FIND_FUNCTION_KEYWORD);
+        }
 
         $lines = file($filename);
         if ($lines === false) {
@@ -119,10 +127,16 @@ final class Utils implements UtilsInterface {
         }
     }
 
+    /**
+     * @return array<int, string>|string
+     */
     public static function outlineToInline(string $text) : array|string {
         return str_replace(array("\r", "\n", "\t", '  '), '', $text);
     }
 
+    /**
+     * @return array<int, string>|string
+     */
     public static function fixInputCommand(string $text) : array|string {
         return str_replace('"', '\'', $text);
     }
