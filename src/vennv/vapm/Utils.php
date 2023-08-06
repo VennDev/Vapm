@@ -44,9 +44,9 @@ interface UtilsInterface {
     /**
      * @throws ReflectionException
      *
-     * Transform a closure to string
+     * Transform a closure or callable to string
      */
-    public static function closureToString(Closure $closure) : string;
+    public static function closureToString(Closure|callable $closure) : string;
 
     /**
      * Get all PHP files in a directory
@@ -78,7 +78,7 @@ final class Utils implements UtilsInterface {
     /**
      * @throws ReflectionException
      */
-    public static function closureToString(Closure $closure) : string {
+    public static function closureToString(Closure|callable $closure) : string {
         $reflection = new ReflectionFunction($closure);
         $startLine = $reflection->getStartLine();
         $endLine = $reflection->getEndLine();
