@@ -24,6 +24,7 @@ namespace vennv\vapm;
 
 use ReflectionClass;
 use ReflectionException;
+use RuntimeException;
 use Throwable;
 use function is_string;
 use function is_array;
@@ -195,12 +196,12 @@ abstract class Thread implements ThreadInterface, ThreadedInterface {
     private static array $threads = [];
 
     /**
-     * @var array<string, string>
-     * @phpstan-var array<string, string>
+     * @var array<string, mixed>
+     * @phpstan-var array<string, mixed>
      */
     private static array $inputs = [];
 
-    public function __construct(string $input) {
+    public function __construct(mixed $input = '') {
         self::$inputs[get_called_class()] = $input;
     }
 
@@ -391,7 +392,20 @@ abstract class Thread implements ThreadInterface, ThreadedInterface {
                 $pathAutoLoad
             );
 
-            $command = 'php -r "require_once \'' . $pathAutoLoad . '\'; include \'' . $class . '\'; $class = new ' . static::class . '(\'' . self::$inputs[get_called_class()] . '\'); $class->onRun();"';
+            $input = self::$inputs[get_called_class()];
+            if (is_string($input)) {
+                $input = '\'' . self::$inputs[get_called_class()] . '\'';
+            }
+
+            if (is_callable($input)) {
+                $input = Utils::fixInputCommand(Utils::outlineToInline(Utils::closureToString($input)) . ';');
+            }
+
+            if (!is_string($input)) {
+                throw new RuntimeException('Input must be string or callable');
+            }
+
+            $command = 'php -r "require_once \'' . $pathAutoLoad . '\'; include \'' . $class . '\'; $input = ' . $input . ' $class = new ' . static::class . '($input); $class->onRun();"';
 
             unset(self::$inputs[get_called_class()]);
 

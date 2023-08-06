@@ -22,16 +22,86 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
+use Closure;
 use Generator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use ReflectionException;
+use ReflectionFunction;
 use SplFileInfo;
 use function preg_match;
+use function file;
+use function implode;
+use function array_slice;
 
-final class Utils {
+interface UtilsInterface {
+
+    /**
+     * Transform milliseconds to seconds
+     */
+    public static function milliSecsToSecs(float $milliSecs) : float;
+
+    /**
+     * @throws ReflectionException
+     *
+     * Transform a closure to string
+     */
+    public static function closureToString(Closure $closure) : string;
+
+    /**
+     * Get all PHP files in a directory
+     */
+    public static function getAllPHP(string $path) : Generator;
+
+    /**
+     * Transform a string to inline
+     */
+    public static function outlineToInline(string $text) : array|string;
+
+    /**
+     * Fix input thread
+     */
+    public static function fixInputCommand(string $text) : array|string;
+
+}
+
+final class Utils implements UtilsInterface {
 
     public static function milliSecsToSecs(float $milliSecs) : float {
         return $milliSecs / 1000;
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    public static function closureToString(Closure $closure) : string {
+        $reflection = new ReflectionFunction($closure);
+        $startLine = $reflection->getStartLine();
+        $endLine = $reflection->getEndLine();
+        $filename = $reflection->getFileName();
+
+        $lines = file($filename);
+        if ($lines === false) {
+            throw new ReflectionException(Error::CANNOT_READ_FILE);
+        }
+
+        $result = implode("", array_slice($lines, $startLine - 1, $endLine - $startLine + 1));
+
+        $startPos = strpos($result, 'function');
+        if ($startPos === false) {
+            $startPos = strpos($result, 'fn');
+
+            if ($startPos === false) {
+                throw new ReflectionException(Error::CANNOT_FIND_FUNCTION_KEYWORD);
+            }
+        }
+
+        $endBracketPos = strrpos($result, '}');
+        if ($endBracketPos === false) {
+            throw new ReflectionException(Error::CANNOT_FIND_FUNCTION_KEYWORD);
+        }
+
+        return substr($result, $startPos, $endBracketPos - $startPos + 1);
     }
 
     public static function getAllPHP(string $path) : Generator {
@@ -47,6 +117,14 @@ final class Utils {
                 }
             }
         }
+    }
+
+    public static function outlineToInline(string $text) : array|string {
+        return str_replace(array("\r", "\n", "\t", '  '), '', $text);
+    }
+
+    public static function fixInputCommand(string $text) : array|string {
+        return str_replace('"', '\'', $text);
     }
 
 }
