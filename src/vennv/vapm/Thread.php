@@ -398,7 +398,14 @@ abstract class Thread implements ThreadInterface, ThreadedInterface {
             }
 
             if (is_callable($input)) {
-                $input = Utils::fixInputCommand(Utils::outlineToInline(Utils::closureToString($input)) . ';');
+                $input = Utils::closureToString($input);
+                $input = Utils::outlineToInline($input);
+
+                if (!is_string($input)) {
+                    throw new RuntimeException('Input must be string or callable');
+                }
+
+                $input = Utils::fixInputCommand($input . ';');
             }
 
             if (!is_string($input)) {
