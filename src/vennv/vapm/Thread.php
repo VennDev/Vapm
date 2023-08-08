@@ -403,6 +403,11 @@ abstract class Thread implements ThreadInterface, ThreadedInterface {
             if (is_callable($input) && $input instanceof Closure) {
                 $input = Utils::closureToString($input);
                 $input = Utils::removeComments($input);
+
+                if (!is_string($input)) {
+                    throw new RuntimeException(Error::INPUT_MUST_BE_STRING_OR_CALLABLE);
+                }
+
                 $input = Utils::outlineToInline($input);
 
                 if (!is_string($input)) {

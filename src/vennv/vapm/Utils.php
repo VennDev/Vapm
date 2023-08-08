@@ -70,7 +70,7 @@ interface UtilsInterface {
     /**
      * Remove comments from a string
      */
-    public static function removeComments(string $text) : string;
+    public static function removeComments(string $text) : null|string|array;
 
 }
 
@@ -146,8 +146,12 @@ final class Utils implements UtilsInterface {
         return str_replace('"', '\'', $text);
     }
 
-    public static function removeComments(string $text) : string {
+    public static function removeComments(string $text) : null|string|array {
         $text = preg_replace('/\/\/.*?(\r\n|\n|$)/', '', $text);
+        if ($text === null || is_array($text)) {
+            return null;
+        }
+
         return preg_replace('/\/\*.*?\*\//ms', '', $text);
     }
 
