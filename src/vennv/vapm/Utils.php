@@ -67,6 +67,11 @@ interface UtilsInterface {
      */
     public static function fixInputCommand(string $text) : array|string;
 
+    /**
+     * Remove comments from a string
+     */
+    public static function removeComments(string $text) : string;
+
 }
 
 final class Utils implements UtilsInterface {
@@ -139,6 +144,11 @@ final class Utils implements UtilsInterface {
      */
     public static function fixInputCommand(string $text) : array|string {
         return str_replace('"', '\'', $text);
+    }
+
+    public static function removeComments(string $text) : string {
+        $text = preg_replace('/\/\/.*?(\r\n|\n|$)/', '', $text);
+        return preg_replace('/\/\*.*?\*\//ms', '', $text);
     }
 
 }
