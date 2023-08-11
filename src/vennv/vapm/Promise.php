@@ -223,6 +223,8 @@ final class Promise implements PromiseInterface {
      * @throws Throwable
      */
     public function __construct(callable $callback, bool $justGetResult = false) {
+        System::init();
+
         $this->id = EventLoop::generateId();
 
         $this->callback = $callback;

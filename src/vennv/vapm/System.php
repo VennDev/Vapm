@@ -51,6 +51,13 @@ interface SystemInterface {
     public static function runSingleEventLoop() : void;
 
     /**
+     * @throws Throwable
+     *
+     * This function is used to initialize the event loop
+     */
+    public static function init() : void;
+
+    /**
      * This function is used to run a callback in the event loop with timeout
      */
     public static function setTimeout(callable $callback, int $timeout) : SampleMacro;
@@ -120,6 +127,8 @@ final class System extends EventLoop implements SystemInterface {
      */
     private static array $timings = [];
 
+    private static bool $hasInit = false;
+
     /**
      * @throws Throwable
      */
@@ -134,7 +143,22 @@ final class System extends EventLoop implements SystemInterface {
         parent::runSingle();
     }
 
+    public static function init() : void {
+        if (!self::$hasInit) {
+            self::$hasInit = true;
+
+            register_shutdown_function(function () {
+                self::runSingleEventLoop();
+            });
+        }
+    }
+
+    /**
+     * @throws Throwable
+     */
     public static function setTimeout(callable $callback, int $timeout) : SampleMacro {
+        self::init();
+
         $sampleMacro = new SampleMacro($callback, $timeout);
         MacroTask::addTask($sampleMacro);
 
@@ -147,7 +171,12 @@ final class System extends EventLoop implements SystemInterface {
         }
     }
 
+    /**
+     * @throws Throwable
+     */
     public static function setInterval(callable $callback, int $interval) : SampleMacro {
+        self::init();
+
         $sampleMacro = new SampleMacro($callback, $interval, true);
         MacroTask::addTask($sampleMacro);
 
@@ -221,7 +250,7 @@ final class System extends EventLoop implements SystemInterface {
                 }
             }
 
-            $running = null;
+            $running = 0;
 
             do {
                 $status = curl_multi_exec($multiHandle, $running);
