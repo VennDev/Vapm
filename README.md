@@ -8,3 +8,7 @@
 
 # How to use my lib?
 - [Click Here](https://venndev.gitbook.io/vapm/)
+
+# Credits
+- Email: pnam5005@gmail.com
+- Paypal: lifeboat909@gmail.com
