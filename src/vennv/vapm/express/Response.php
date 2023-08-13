@@ -22,6 +22,7 @@ declare(strict_types = 1);
 
 namespace vennv\vapm\express;
 
+use Exception;
 use vennv\vapm\Async;
 use vennv\vapm\http\Protocol;
 use vennv\vapm\http\Status;
@@ -181,11 +182,21 @@ final class Response implements ResponseInterface {
             if (is_array($body)) {
                 foreach ($body as $value) {
                     $value = Async::await($value);
-                    socket_write($this->client, $value);
+
+                    if (is_array($value)) {
+                        $value = json_encode($value);
+                    }
+
+                    socket_write($this->client, (string)$value);
                 }
             } else {
                 $body = Async::await($body);
-                socket_write($this->client, $body);
+
+                if (is_array($body)) {
+                    $body = json_encode($body);
+                }
+
+                socket_write($this->client, (string)$body);
             }
         });
     }
@@ -211,7 +222,13 @@ final class Response implements ResponseInterface {
      */
     public function json(array $data, int $status = Status::OK) : void {
         $this->status = $status;
-        $this->render(json_encode($data), ['Content-Type: application/json']);
+        $encode = json_encode($data);
+
+        if ($encode === false) {
+            throw new Exception('JSON encode error');
+        }
+
+        $this->render($encode, ['Content-Type: application/json']);
     }
 
     /**

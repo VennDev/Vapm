@@ -22,6 +22,7 @@ declare(strict_types = 1);
 
 namespace vennv\vapm\express;
 
+use RuntimeException;
 use vennv\vapm\Async;
 use vennv\vapm\System;
 use Throwable;
@@ -96,6 +97,10 @@ final class Express implements ExpressInterface {
 
     public function listen(int $port, callable $callback) : void {
         $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+
+        if ($socket === false) {
+            throw new RuntimeException('Error to create socket');
+        }
 
         socket_set_option($socket, SOL_SOCKET, SO_REUSEADDR, 1);
         socket_bind($socket, self::$address, $port);

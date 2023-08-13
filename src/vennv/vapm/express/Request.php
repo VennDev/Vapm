@@ -108,7 +108,7 @@ final class Request implements RequestInterface {
     }
 
     public function accept(string $type) : bool {
-        $accept = $this->getHeader('Accept');
+        $accept = $this->getHeader();
         if ($accept === null) {
             return false;
         }
@@ -123,11 +123,11 @@ final class Request implements RequestInterface {
         return false;
     }
 
-    private function getHeader(string $name) : ?string {
+    private function getHeader() : ?string {
         $headers = $this->getHeaders();
 
         foreach ($headers as $header) {
-            if (str_replace(' ', '', $header[0]) === $name) {
+            if (str_replace(' ', '', $header[0]) === 'Accept') {
                 return $header[1];
             }
         }
@@ -135,6 +135,9 @@ final class Request implements RequestInterface {
         return null;
     }
 
+    /**
+     * @return array<int, array<int, string>>
+     */
     private function getHeaders() : array {
         $headers = [];
         $data = explode("\r\n", $this->getRawHeaders());
