@@ -188,7 +188,14 @@ final class Response implements ResponseInterface {
         return new Async(function () use ($path) : void {
             require_once $this->path . $path;
 
-            $body = str_replace(['/', '.php'], '', $path)($this->args);
+            $function = str_replace(['/', '.php'], '', $path);
+
+            if (function_exists($function)) {
+                $body = Async::await($function($this->args));
+            } else {
+                throw new Exception("Cannot find function 'main' for $path, example: index.php -> index()");
+            }
+
             if (is_array($body)) {
                 foreach ($body as $value) {
                     /** @var string $data */
@@ -197,9 +204,6 @@ final class Response implements ResponseInterface {
                     socket_write($this->client, $data);
                 }
             } else {
-                /** @var string $body */
-                $body = Async::await($body);
-
                 socket_write($this->client, $body);
             }
         });

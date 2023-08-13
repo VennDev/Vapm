@@ -59,6 +59,10 @@ final class Routes {
      * @return callable
      */
     public function getCallback() : callable {
+        if (!is_callable($this->callback)) {
+            throw new \RuntimeException("The callback is not callable");
+        }
+
         return $this->callback;
     }
 
