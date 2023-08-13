@@ -60,7 +60,7 @@ interface ExpressInterface {
 
     public function get(string $path, callable $callback) : void;
 
-    public function use(string|callable ...$args) : void;
+    public function use(string $path, callable $callback) : void;
 
     public function post(string $path, callable $callback) : void;
 
@@ -135,16 +135,8 @@ final class Express implements ExpressInterface {
         self::$routes[$path] = new Routes(Method::GET, $path, $callback);
     }
 
-    public function use(string|callable ...$args) : void {
-        foreach ($args as $key => $arg) {
-            if (is_string($arg) && isset($args[$key + 1]) && is_callable($args[$key + 1])) {
-                self::$middlewares[$arg] = $args[$key + 1];
-            }
-
-            if (is_callable($arg)) {
-                self::$middlewares['/'] = $arg;
-            }
-        }
+    public function use(string $path, callable $callback) : void {
+        self::$middlewares[$path] = $callback;
     }
 
     public function post(string $path, callable $callback) : void {
