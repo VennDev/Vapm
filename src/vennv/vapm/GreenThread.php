@@ -31,6 +31,7 @@ interface GreenThreadInterface {
      * @param string|int $name
      * @param callable $callback
      * @param array<int, mixed> $params
+     * @throws Throwable
      *
      * This method is used to register a green thread.
      */
@@ -128,8 +129,11 @@ final class GreenThread implements GreenThreadInterface {
      * @param string|int $name
      * @param callable $callback
      * @param array<int, mixed> $params
+     * @throws Throwable
      */
     public static function register(string|int $name, callable $callback, array $params) : void {
+        System::init();
+
         if (isset(self::$outputs[$name])) {
             unset(self::$outputs[$name]);
         }
