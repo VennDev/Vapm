@@ -149,7 +149,7 @@ final class Status {
     public static function getStatusName(mixed $value) : int|string|null {
         $class = new ReflectionClass(self::class);
         $constants = $class->getConstants();
-        $constantName = array_search($value, $constants);
+        $constantName = array_search($value, $constants, true);
 
         return $constantName !== false ? $constantName : null;
     }

@@ -24,6 +24,7 @@ namespace vennv\vapm\express;
 
 use RuntimeException;
 use vennv\vapm\Async;
+use vennv\vapm\http\Method;
 use vennv\vapm\System;
 use Throwable;
 use Socket;
@@ -45,25 +46,36 @@ interface ExpressInterface {
 
     public function getSockets() : ?Socket;
 
-    public function listen(int $port, callable $callback) : void;
-
-    public function Method() : string;
-
     public function path() : string;
 
     public function setPath(string $path) : void;
 
+    public function enable() : void;
+
+    public function enabled() : bool;
+
+    public function disable() : void;
+
+    public function disabled() : bool;
+
     public function get(string $path, callable $callback) : void;
 
-    public function use(callable $callback, string $path = "/") : void;
+    public function use(string|callable ...$args) : void;
 
     public function post(string $path, callable $callback) : void;
+
+    public function put(string $path, callable $callback) : void;
+
+    /**
+     * @throws Throwable
+     */
+    public function listen(int $port, callable $callback) : void;
 
 }
 
 final class Express implements ExpressInterface {
 
-    public const VERSION = '1.0.0-ALPHA';
+    public const VERSION = '1.0.0-ALPHA5';
 
     /**
      * @var array<string|float|int, Routes>
@@ -77,9 +89,9 @@ final class Express implements ExpressInterface {
 
     private static string $path = '';
 
-    private static string $method = '';
-
     private static string $address = '127.0.0.1';
+
+    private bool $enable = true;
 
     private ?Socket $socket = null;
 
@@ -95,6 +107,81 @@ final class Express implements ExpressInterface {
         return $this->socket;
     }
 
+    public function path() : string {
+        return self::$path;
+    }
+
+    public function setPath(string $path) : void {
+        self::$path = $path;
+    }
+
+    public function enable() : void {
+        $this->enable = true;
+    }
+
+    public function enabled() : bool {
+        return $this->enable;
+    }
+
+    public function disable() : void {
+        $this->enable = false;
+    }
+
+    public function disabled() : bool {
+        return !$this->enable;
+    }
+
+    public function get(string $path, callable $callback) : void {
+        self::$routes[$path] = new Routes(Method::GET, $path, $callback);
+    }
+
+    public function use(string|callable ...$args) : void {
+        foreach ($args as $key => $arg) {
+            if (is_string($arg)) {
+                self::$middlewares[$arg] = $args[$key + 1];
+            }
+
+            if (is_callable($arg)) {
+                self::$middlewares['/'] = $arg;
+            }
+        }
+    }
+
+    public function post(string $path, callable $callback) : void {
+        self::$routes[$path] = new Routes(Method::POST, $path, $callback);
+    }
+
+    public function put(string $path, callable $callback) : void {
+        self::$routes[$path] = new Routes(Method::PUT, $path, $callback);
+    }
+
+    /**
+     * @param Routes $route
+     * @param Socket $client
+     * @param string $method
+     * @param array<int|float|string, mixed> $args
+     * @return Async
+     * @throws Throwable
+     */
+    private function processRoute(Routes $route, Socket $client, string $method, array $args = []) : Async {
+        return new Async(function () use ($route, $client, $method, $args) : void {
+            $callback = $route->getCallback();
+            $methodRequire = $route->getMethod();
+
+            if (is_callable($callback) && $methodRequire === $method || $methodRequire === 'ALL') {
+                $data = [$client, self::$path, $method, $args];
+
+                $request = new Request(...$data);
+                $response = new Response(...$data);
+
+                Async::await(call_user_func($callback, $request, $response));
+            }
+        });
+    }
+
+    /**
+     * @throws Throwable
+     */
     public function listen(int $port, callable $callback) : void {
         $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 
@@ -104,17 +191,21 @@ final class Express implements ExpressInterface {
 
         socket_set_option($socket, SOL_SOCKET, SO_REUSEADDR, 1);
         socket_bind($socket, self::$address, $port);
-        socket_listen($socket);
+        socket_listen($socket, 1);
         socket_set_nonblock($socket);
 
         $this->socket = $socket;
 
         call_user_func($callback);
 
-        while (true) {
+        while ($this->enable) {
             $client = socket_accept($socket);
 
             if ($client !== false) {
+                socket_getpeername($client, $address, $port);
+
+                echo "New connection from " . $address . ":" . $port . "\n";
+
                 new Async(function () use ($client) : void {
                     $data = socket_read($client, 1024);
 
@@ -133,18 +224,12 @@ final class Express implements ExpressInterface {
                         $method = $dataRequest[0];
                         $path = $dataRequest[1];
 
-                        self::$method = $method;
-
                         if (isset(self::$middlewares[$path])) {
                             Async::await(call_user_func(self::$middlewares[$path]));
                         }
 
-                        if (isset(self::$routes[$path]) && $client instanceof Socket) {
-                            Async::await($this->processRoute(self::$routes[$path], $client, $finalRequest));
-                        }
-                    } else {
-                        if (isset(self::$routes["/"])) {
-                            Async::await($this->processRoute(self::$routes["/"], $client));
+                        if (isset(self::$routes[$path])) {
+                            Async::await($this->processRoute(self::$routes[$path], $client, $method, $finalRequest));
                         }
                     }
 
@@ -154,55 +239,6 @@ final class Express implements ExpressInterface {
 
             System::runEventLoop();
         }
-    }
-
-    /**
-     * @param Routes $route
-     * @param Socket $client
-     * @param array<int|float|string, mixed> $args
-     * @return Async
-     * @throws Throwable
-     */
-    private function processRoute(Routes $route, Socket $client, array $args = []) : Async {
-        return new Async(function () use ($route, $client, $args) : void {
-            $callback = $route->getCallback();
-            $method = $route->getMethod();
-
-            if (is_callable($callback)) {
-                $request = new Request($client, self::$path, $method, $args);
-                $response = new Response($client, self::$path, $method, $args);
-
-                Async::await(call_user_func($callback, $request, $response));
-            }
-
-            if (is_string($route)) {
-                echo $route;
-            }
-        });
-    }
-
-    public function Method() : string {
-        return self::$method;
-    }
-
-    public function path() : string {
-        return self::$path;
-    }
-
-    public function setPath(string $path) : void {
-        self::$path = $path;
-    }
-
-    public function get(string $path, callable $callback) : void {
-        self::$routes[$path] = new Routes('GET', $path, $callback);
-    }
-
-    public function use(callable $callback, string $path = "/") : void {
-        self::$middlewares[$path] = $callback;
-    }
-
-    public function post(string $path, callable $callback) : void {
-        self::$routes[$path] = new Routes('POST', $path, $callback);
     }
 
 }

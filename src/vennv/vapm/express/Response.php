@@ -49,6 +49,8 @@ interface ResponseInterface {
 
     public function getStatus() : int;
 
+    public function status(int $status) : void;
+
     /**
      * @return array<int|float|string, mixed>
      */
@@ -149,6 +151,10 @@ final class Response implements ResponseInterface {
         return $this->status;
     }
 
+    public function status(int $status) : void {
+        $this->status = $status;
+    }
+
     /**
      * @return array<int|float|string, mixed>
      */
@@ -218,6 +224,7 @@ final class Response implements ResponseInterface {
     }
 
     /**
+     * @param array<int|float|string, mixed> $data
      * @throws Throwable
      */
     public function json(array $data, int $status = Status::OK) : void {
