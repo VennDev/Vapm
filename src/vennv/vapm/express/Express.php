@@ -194,10 +194,6 @@ final class Express implements ExpressInterface {
             $client = socket_accept($socket);
 
             if ($client !== false) {
-                socket_getpeername($client, $address, $port);
-
-                echo "New connection from " . $address . ":" . $port . "\n";
-
                 new Async(function () use ($client) : void {
                     $data = socket_read($client, 1024);
 
@@ -230,6 +226,8 @@ final class Express implements ExpressInterface {
             }
 
             System::runEventLoop();
+
+            usleep(1000);
         }
     }
 
