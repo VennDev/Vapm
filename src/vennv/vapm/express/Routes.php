@@ -22,6 +22,9 @@ declare(strict_types = 1);
 
 namespace vennv\vapm\express;
 
+use RuntimeException;
+use function is_callable;
+
 final class Routes {
 
     private string $method;
@@ -60,7 +63,7 @@ final class Routes {
      */
     public function getCallback() : callable {
         if (!is_callable($this->callback)) {
-            throw new \RuntimeException("The callback is not callable");
+            throw new RuntimeException("The callback is not callable");
         }
 
         return $this->callback;
