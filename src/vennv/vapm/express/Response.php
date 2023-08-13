@@ -204,6 +204,10 @@ final class Response implements ResponseInterface {
                     socket_write($this->client, $data);
                 }
             } else {
+                if (!is_string($body)) {
+                    throw new Exception('Body must be string');
+                }
+
                 socket_write($this->client, $body);
             }
         });
