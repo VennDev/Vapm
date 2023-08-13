@@ -3,8 +3,8 @@
 - The method is based on Fibers & Generator & Processes, requires you to have php version from >= 8.1
 
 # Version
-- Async: `1.8.0`
-- Express: `1.0.0-ALPHA5`
+- Parallel/Concurrent: `1.8.0` includes: `async await, promise, coroutines, threads, ...`
+- Express: `1.0.0-ALPHA5` This is package like JavaScript.
 
 # Next update?
 - Simply add some other asynchronous features so that this library is as similar to Javascript & Kotlin as possible.
