@@ -137,7 +137,7 @@ final class Express implements ExpressInterface {
 
     public function use(string|callable ...$args) : void {
         foreach ($args as $key => $arg) {
-            if (is_string($arg)) {
+            if (is_string($arg) && isset($args[$key + 1]) && is_callable($args[$key + 1])) {
                 self::$middlewares[$arg] = $args[$key + 1];
             }
 
@@ -168,7 +168,7 @@ final class Express implements ExpressInterface {
             $callback = $route->getCallback();
             $methodRequire = $route->getMethod();
 
-            if (is_callable($callback) && $methodRequire === $method || $methodRequire === 'ALL') {
+            if ($methodRequire === $method || $methodRequire === 'ALL') {
                 $data = [$client, self::$path, $method, $args];
 
                 $request = new Request(...$data);

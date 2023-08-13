@@ -75,6 +75,7 @@ interface ResponseInterface {
     public function send(string $data, int $status = Status::OK) : void;
 
     /**
+     * @param array<int|float|string, mixed> $data
      * @throws Throwable
      */
     public function json(array $data, int $status = Status::OK) : void;
@@ -162,6 +163,9 @@ final class Response implements ResponseInterface {
         return $this->args;
     }
 
+    /**
+     * @param array<int|float|string, mixed> $options
+     */
     private function buildHeader(array $options = ['Content-Type: text/html']) : void {
         $protocol = $this->protocol;
         $status = $this->status;
@@ -187,22 +191,16 @@ final class Response implements ResponseInterface {
             $body = str_replace(['/', '.php'], '', $path)($this->args);
             if (is_array($body)) {
                 foreach ($body as $value) {
-                    $value = Async::await($value);
+                    /** @var string $data */
+                    $data = Async::await($value);
 
-                    if (is_array($value)) {
-                        $value = json_encode($value);
-                    }
-
-                    socket_write($this->client, (string)$value);
+                    socket_write($this->client, $data);
                 }
             } else {
+                /** @var string $body */
                 $body = Async::await($body);
 
-                if (is_array($body)) {
-                    $body = json_encode($body);
-                }
-
-                socket_write($this->client, (string)$body);
+                socket_write($this->client, $body);
             }
         });
     }

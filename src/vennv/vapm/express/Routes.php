@@ -56,9 +56,9 @@ final class Routes {
     }
 
     /**
-     * @return mixed
+     * @return callable
      */
-    public function getCallback() : mixed {
+    public function getCallback() : callable {
         return $this->callback;
     }
 
