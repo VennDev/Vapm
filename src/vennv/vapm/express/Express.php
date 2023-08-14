@@ -160,7 +160,7 @@ final class Express implements ExpressInterface {
     private static array $routes = [];
 
     /**
-     * @var array<string|float|int, callable>
+     * @var array<string|float|int, mixed>
      */
     private static array $middlewares = [];
 
