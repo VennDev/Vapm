@@ -73,7 +73,7 @@ final class Request implements RequestInterface {
     private array $args;
 
     /**
-     * @var string|array<string, mixed>
+     * @var string|array<int|float|string, mixed>
      */
     public string|array $body;
 
