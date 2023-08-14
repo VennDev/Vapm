@@ -28,6 +28,7 @@ use vennv\vapm\http\Status;
 use Socket;
 use function explode;
 use function str_replace;
+use function in_array;
 use function count;
 
 interface RequestInterface {

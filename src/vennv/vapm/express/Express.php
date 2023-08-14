@@ -57,14 +57,16 @@ interface ExpressInterface {
      *
      * This is a built-in middleware function in Express. It parses incoming requests with JSON payloads and is based on body-parser.
      */
-    public function json(array $options = [
-        'inflate' => true,
-        'strict' => true,
-        'limit' => '100kb',
-        'type' => 'application/json',
-        'verify' => null,
-        'reviver' => null,
-    ]) : callable;
+    public function json(
+        array $options = [
+            'inflate' => true,
+            'strict' => true,
+            'limit' => '100kb',
+            'type' => 'application/json',
+            'verify' => null,
+            'reviver' => null,
+        ]
+    ) : callable;
 
     /**
      * @param array<string, mixed> $options
@@ -72,19 +74,21 @@ interface ExpressInterface {
      *
      * This is a built-in middleware function in Express. It parses incoming requests with urlencoded payloads and is based on body-parser.
      */
-    public function static(array $options = [
-        'maxAge' => 0,
-        'immutable' => false,
-        'redirect' => true,
-        'index' => 'index.html',
-        'extensions' => false,
-        'setHeaders' => null,
-        'fallthrough' => true,
-        'cacheControl' => true,
-        'dotfiles' => 'ignore',
-        'etag' => true,
-        'lastModified' => true
-    ]) : callable;
+    public function static(
+        array $options = [
+            'maxAge' => 0,
+            'immutable' => false,
+            'redirect' => true,
+            'index' => 'index.html',
+            'extensions' => false,
+            'setHeaders' => null,
+            'fallthrough' => true,
+            'cacheControl' => true,
+            'dotfiles' => 'ignore',
+            'etag' => true,
+            'lastModified' => true
+        ]
+    ) : callable;
 
     /**
      * @return string
@@ -225,33 +229,37 @@ final class Express implements ExpressInterface {
     /**
      * @param array<string, mixed> $options
      */
-    public function json(array $options = [
-        'inflate' => true,
-        'strict' => true,
-        'limit' => '100kb',
-        'type' => 'application/json',
-        'verify' => null,
-        'reviver' => null,
-    ]) : callable {
+    public function json(
+        array $options = [
+            'inflate' => true,
+            'strict' => true,
+            'limit' => '100kb',
+            'type' => 'application/json',
+            'verify' => null,
+            'reviver' => null,
+        ]
+    ) : callable {
         return fn() => $this->options['json'] = array_merge($this->options['json'], $options);
     }
 
     /**
      * @param array<string, mixed> $options
      */
-    public function static(array $options = [
-        'maxAge' => 0,
-        'immutable' => false,
-        'redirect' => true,
-        'index' => 'index.html',
-        'extensions' => false,
-        'setHeaders' => null,
-        'fallthrough' => true,
-        'cacheControl' => true,
-        'dotfiles' => 'ignore',
-        'etag' => true,
-        'lastModified' => true
-    ]) : callable {
+    public function static(
+        array $options = [
+            'maxAge' => 0,
+            'immutable' => false,
+            'redirect' => true,
+            'index' => 'index.html',
+            'extensions' => false,
+            'setHeaders' => null,
+            'fallthrough' => true,
+            'cacheControl' => true,
+            'dotfiles' => 'ignore',
+            'etag' => true,
+            'lastModified' => true
+        ]
+    ) : callable {
         return fn() => $this->options['static'] = array_merge($this->options['static'], $options);
     }
 
@@ -440,7 +448,7 @@ final class Express implements ExpressInterface {
                             [$request, $response] = $this->getCallbackFromRequest($client, $path, $data, $method, $finalRequest);
 
                             foreach (self::$middlewares[$path] as $middleware) {
-                                $dataCallBack = Async::await(call_user_func($middleware, $request, $response, fn() => self::NEXT));
+                                $dataCallBack = call_user_func($middleware, $request, $response, fn() => self::NEXT);
 
                                 if ($dataCallBack !== self::NEXT) {
                                     break;
