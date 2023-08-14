@@ -52,7 +52,7 @@ use const SOL_TCP;
 interface ExpressInterface {
 
     /**
-     * @param array $options
+     * @param array<string, mixed> $options
      * @return callable
      *
      * This is a built-in middleware function in Express. It parses incoming requests with JSON payloads and is based on body-parser.
@@ -67,7 +67,7 @@ interface ExpressInterface {
     ]) : callable;
 
     /**
-     * @param array $options
+     * @param array<string, mixed> $options
      * @return callable
      *
      * This is a built-in middleware function in Express. It parses incoming requests with urlencoded payloads and is based on body-parser.
@@ -219,6 +219,9 @@ final class Express implements ExpressInterface {
 
     private ?Socket $socket = null;
 
+    /**
+     * @param array<string, mixed> $options
+     */
     public function json(array $options = [
         'inflate' => true,
         'strict' => true,
@@ -230,6 +233,9 @@ final class Express implements ExpressInterface {
         return fn() => $this->options['json'] = array_merge($this->options['json'], $options);
     }
 
+    /**
+     * @param array<string, mixed> $options
+     */
     public function static(array $options = [
         'maxAge' => 0,
         'immutable' => false,
