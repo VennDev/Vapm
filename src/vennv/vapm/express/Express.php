@@ -444,6 +444,7 @@ final class Express implements ExpressInterface {
                          */
                         [$method, $path, $finalRequest] = $this->getRequestData($data);
 
+                        $canContinue = true;
                         if (isset(self::$middlewares[$path])) {
                             [$request, $response] = $this->getCallbackFromRequest($client, $path, $data, $method, $finalRequest);
 
@@ -451,12 +452,13 @@ final class Express implements ExpressInterface {
                                 $dataCallBack = call_user_func($middleware, $request, $response, fn() => self::NEXT);
 
                                 if ($dataCallBack !== self::NEXT) {
+                                    $canContinue = false;
                                     break;
                                 }
                             }
                         }
 
-                        if (isset(self::$routes[$path])) {
+                        if (isset(self::$routes[$path]) && $canContinue) {
                             Async::await($this->processRoute(self::$routes[$path], $client, $data, $method, $finalRequest));
                         }
                     }
