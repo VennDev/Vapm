@@ -5,7 +5,7 @@
 
 # Version
 - Parallel/Concurrent: `1.8.0` - Includes: ```async await, promise, coroutines, threads, ...```
-- Express: `1.0.0-ALPHA7` - This is package like JavaScript.
+- Express: `ALPHA8` - This is package like JavaScript.
 
 # Next update?
 - Simply add some other asynchronous features so that this library is as similar to Javascript & Kotlin as possible.
