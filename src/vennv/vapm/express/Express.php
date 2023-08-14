@@ -255,6 +255,9 @@ final class Express implements ExpressInterface {
         return fn() => $this->options['static'] = array_merge($this->options['static'], $options);
     }
 
+    /**
+     * @return array<string, array<string, mixed>>
+     */
     public function getOptions() : array {
         return $this->options;
     }

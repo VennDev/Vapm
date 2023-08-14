@@ -165,6 +165,9 @@ final class Request implements RequestInterface {
         return null;
     }
 
+    /**
+     * @return array<int|float|string, mixed>
+     */
     private function toJson() : array {
         $data =  [
             'method' => $this->method,
