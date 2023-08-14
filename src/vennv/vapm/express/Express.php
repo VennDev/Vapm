@@ -256,7 +256,7 @@ final class Express implements ExpressInterface {
 
     /**
      * @param string $data
-     * @return array<int, string|array<int|float|string, mixed>>
+     * @return array<int, mixed>
      */
     private function getRequestData(string $data) : array {
         $data = explode("\r\n", $data);
@@ -337,6 +337,11 @@ final class Express implements ExpressInterface {
                     $data = socket_read($client, self::LENGTH_BUFFER);
 
                     if ($data !== false) {
+                        /**
+                         * @var string $method
+                         * @var string $path
+                         * @var array<int|float|string, mixed> $finalRequest
+                         */
                         [$method, $path, $finalRequest] = $this->getRequestData($data);
 
                         if (isset(self::$middlewares[$path])) {
