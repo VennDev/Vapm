@@ -468,9 +468,14 @@ final class Express implements ExpressInterface {
                          * @var array<int|float|string, mixed> $finalRequest
                          */
                         [$method, $path, $finalRequest] = $this->getRequestData($data);
-                        [$request, $response] = $this->getCallbackFromRequest($client, $path, $data, $method, $finalRequest);
-                        $canNext = true;
 
+                        /**
+                         * @var Request $request
+                         * @var Response $response
+                         */
+                        [$request, $response] = $this->getCallbackFromRequest($client, $path, $data, $method, $finalRequest);
+
+                        $canNext = true;
                         foreach (self::$middlewares['*'] as $middleware) {
                             $this->processMiddlewares($middleware, $request, $response, $canNext);
                         }
