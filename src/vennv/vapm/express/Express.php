@@ -1,9 +1,10 @@
 <?php
 
 /**
- * Vapm - A library for PHP about Async, Promise, Coroutine, GreenThread,
- *      Thread and other non-blocking methods. The method is based on Fibers &
- *      Generator & Processes, requires you to have php version from >= 8.1
+ * Vapm - A library support for PHP about Async, Promise, Coroutine, Thread, GreenThread
+ *          and other non-blocking methods. The library also includes some Javascript packages
+ *          such as Express. The method is based on Fibers & Generator & Processes, requires
+ *          you to have php version from >= 8.1
  *
  * Copyright (C) 2023  VennDev
  *
@@ -38,36 +39,110 @@ use const AF_INET;
 use const SOCK_STREAM;
 use const SOL_TCP;
 
+/**
+ * This is version 1.0.0-ALPHA7 of Express
+ */
 interface ExpressInterface {
 
+    /**
+     * @return string
+     *
+     * This method will return the address of the server
+     */
     public function getAddresses() : string;
 
+    /**
+     * @param string $address
+     *
+     * This method will set the address of the server
+     */
     public function setAddresses(string $address) : void;
 
+    /**
+     * @return Socket|null
+     *
+     * This method will return the socket of the server
+     */
     public function getSockets() : ?Socket;
 
+    /**
+     * @return string
+     *
+     * This method will return the path of the server
+     */
     public function path() : string;
 
+    /**
+     * @param string $path
+     *
+     * This method will set the path of the server
+     */
     public function setPath(string $path) : void;
 
+    /**
+     * @return void
+     *
+     * This method will enable the server
+     */
     public function enable() : void;
 
+    /**
+     * @return bool
+     *
+     * This method will return the status of the server is enabled or not
+     */
     public function enabled() : bool;
 
+    /**
+     * @return void
+     *
+     * This method will disable the server
+     */
     public function disable() : void;
 
+    /**
+     * @return bool
+     *
+     * This method will return the status of the server is disabled or not
+     */
     public function disabled() : bool;
 
-    public function get(string $path, callable $callback) : void;
+    /**
+     * @param string $path
+     * @param callable ...$args
+     *
+     * This method will create a route with method GET
+     */
+    public function get(string $path, mixed ...$args) : void;
 
+    /**
+     * @param string $path
+     * @param callable ...$args
+     *
+     * This method will create a route with method POST
+     */
+    public function post(string $path, mixed ...$args) : void;
+
+    /**
+     * @param string $path
+     * @param callable ...$args
+     *
+     * This method will create a route with method PUT
+     */
+    public function put(string $path, mixed ...$args) : void;
+
+    /**
+     * @param string $path
+     * @param callable $callback
+     *
+     * This method to create middleware for the server
+     */
     public function use(string $path, callable $callback) : void;
-
-    public function post(string $path, callable $callback) : void;
-
-    public function put(string $path, callable $callback) : void;
 
     /**
      * @throws Throwable
+     *
+     * This method will start the server
      */
     public function listen(int $port, callable $callback) : void;
 
@@ -75,7 +150,9 @@ interface ExpressInterface {
 
 final class Express implements ExpressInterface {
 
-    public const VERSION = '1.0.0-ALPHA5';
+    public const LENGTH_BUFFER = 1024; // The length of the buffer to read the data
+
+    public const NEXT = 'next';
 
     /**
      * @var array<string|float|int, Routes>
@@ -131,20 +208,86 @@ final class Express implements ExpressInterface {
         return !$this->enable;
     }
 
-    public function get(string $path, callable $callback) : void {
-        self::$routes[$path] = new Routes(Method::GET, $path, $callback);
+    private function toRoute(string $method, string $path, mixed ...$args) : ?Routes {
+        $lastArg = $args[count($args) - 1];
+
+        if (is_callable($lastArg)) {
+            $callback = $lastArg;
+            $args = array_slice($args, 0, count($args) - 1);
+        } else {
+            $callback = fn() => $lastArg;
+        }
+
+        foreach ($args as $arg) {
+            if (is_callable($arg)) {
+                call_user_func($arg);
+            }
+
+            if (is_bool($arg) && $arg === false) {
+                return null;
+            }
+        }
+
+        return new Routes($method, $path, $callback);
+    }
+
+    public function get(string $path, mixed ...$args) : void {
+        $route = $this->toRoute(Method::GET, $path, ...$args);
+        if ($route !== null) self::$routes[$path] = $route;
+    }
+
+    public function post(string $path, mixed ...$args) : void {
+        $route = $this->toRoute(Method::POST, $path, ...$args);
+        if ($route !== null) self::$routes[$path] = $route;
+    }
+
+    public function put(string $path, mixed ...$args) : void {
+        $route = $this->toRoute(Method::PUT, $path, ...$args);
+        if ($route !== null) self::$routes[$path] = $route;
     }
 
     public function use(string $path, callable $callback) : void {
-        self::$middlewares[$path] = $callback;
+        if (!isset(self::$middlewares[$path])) {
+            self::$middlewares[$path] = [];
+        }
+
+        self::$middlewares[$path][] = $callback;
     }
 
-    public function post(string $path, callable $callback) : void {
-        self::$routes[$path] = new Routes(Method::POST, $path, $callback);
+    /**
+     * @param string $data
+     * @return array<int, mixed> $data
+     */
+    private function getRequestData(string $data) : array {
+        $data = explode("\r\n", $data);
+
+        $dataRequest = explode(' ', $data[0]);
+        $finalRequest = explode(' ', $data[count($data) - 1]);
+        $finalRequest = explode('&', $finalRequest[0]);
+
+        foreach ($finalRequest as $value) {
+            $explode = explode('=', $value);
+            $finalRequest[$explode[0]] = $explode[1] ?? '';
+        }
+
+        $method = $dataRequest[0];
+        $path = $dataRequest[1];
+
+        return [$method, $path, $finalRequest];
     }
 
-    public function put(string $path, callable $callback) : void {
-        self::$routes[$path] = new Routes(Method::PUT, $path, $callback);
+    /**
+     * @param Socket $client
+     * @param string $path
+     * @param string $method
+     * @param array<int, mixed> $args
+     * @return array<string, Request|Response>
+     */
+    private function getCallbackFromRequest(Socket $client, string $path, string $method, array $args = []) : array {
+        $request = new Request($client, $path, $method, $args);
+        $response = new Response($client, $path, $method, $args);
+
+        return [$request, $response];
     }
 
     /**
@@ -161,11 +304,7 @@ final class Express implements ExpressInterface {
             $methodRequire = $route->getMethod();
 
             if ($methodRequire === $method || $methodRequire === 'ALL') {
-                $data = [$client, self::$path, $method, $args];
-
-                $request = new Request(...$data);
-                $response = new Response(...$data);
-
+                [$request, $response] = $this->getCallbackFromRequest($client, self::$path, $method, $args);
                 Async::await(call_user_func($callback, $request, $response));
             }
         });
@@ -195,25 +334,21 @@ final class Express implements ExpressInterface {
 
             if ($client !== false) {
                 new Async(function () use ($client) : void {
-                    $data = socket_read($client, 1024);
+                    $data = socket_read($client, self::LENGTH_BUFFER);
 
                     if ($data !== false) {
-                        $data = explode("\r\n", $data);
-
-                        $dataRequest = explode(' ', $data[0]);
-                        $finalRequest = explode(' ', $data[count($data) - 1]);
-                        $finalRequest = explode('&', $finalRequest[0]);
-
-                        foreach ($finalRequest as $value) {
-                            $explode = explode('=', $value);
-                            $finalRequest[$explode[0]] = $explode[1] ?? '';
-                        }
-
-                        $method = $dataRequest[0];
-                        $path = $dataRequest[1];
+                        [$method, $path, $finalRequest] = $this->getRequestData($data);
 
                         if (isset(self::$middlewares[$path])) {
-                            Async::await(call_user_func(self::$middlewares[$path]));
+                            [$request, $response] = $this->getCallbackFromRequest($client, $path, $method, $finalRequest);
+
+                            foreach (self::$middlewares[$path] as $middleware) {
+                                $data = Async::await(call_user_func($middleware, $request, $response, fn() => self::NEXT));
+
+                                if ($data !== self::NEXT) {
+                                    break;
+                                }
+                            }
                         }
 
                         if (isset(self::$routes[$path])) {
