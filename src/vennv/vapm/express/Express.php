@@ -280,7 +280,7 @@ final class Express implements ExpressInterface {
      * @param Socket $client
      * @param string $path
      * @param string $method
-     * @param array<int, mixed> $args
+     * @param array<int|float|string, mixed> $args
      * @return array<int, Request|Response>
      */
     private function getCallbackFromRequest(Socket $client, string $path, string $method, array $args = []) : array {
