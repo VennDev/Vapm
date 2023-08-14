@@ -440,9 +440,9 @@ final class Express implements ExpressInterface {
                             [$request, $response] = $this->getCallbackFromRequest($client, $path, $data, $method, $finalRequest);
 
                             foreach (self::$middlewares[$path] as $middleware) {
-                                $data = Async::await(call_user_func($middleware, $request, $response, fn() => self::NEXT));
+                                $dataCallBack = Async::await(call_user_func($middleware, $request, $response, fn() => self::NEXT));
 
-                                if ($data !== self::NEXT) {
+                                if ($dataCallBack !== self::NEXT) {
                                     break;
                                 }
                             }
