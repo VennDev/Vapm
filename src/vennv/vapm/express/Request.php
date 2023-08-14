@@ -47,17 +47,21 @@ interface RequestInterface {
      */
     public function getArgs() : array;
 
-    public function accept(string $type) : bool;
+    public function accepts(string ...$types) : bool;
 
 }
 
 final class Request implements RequestInterface {
+
+    private Express $express;
 
     private Socket $client;
 
     private string $method;
 
     private string $path;
+
+    private string $dataClient;
 
     private string $protocol = Protocol::HTTP_1_1;
 
@@ -68,17 +72,29 @@ final class Request implements RequestInterface {
      */
     private array $args;
 
+    public string|array $body;
+
     /**
+     * @param Express $express
      * @param Socket $client
      * @param string $path
+     * @param string $dataClient
      * @param string $method
      * @param array<int|float|string, mixed> $args
      */
-    public function __construct(Socket $client, string $path, string $method = '', array $args = []) {
+    public function __construct(Express $express, Socket $client, string $path, string $dataClient, string $method = '', array $args = []) {
+        $this->express = $express;
         $this->client = $client;
-        $this->method = $method;
         $this->path = $path;
+        $this->dataClient = $dataClient;
+        $this->method = $method;
         $this->args = $args;
+        $this->body = $dataClient;
+
+        $options = $this->express->getOptions();
+        if (count($options['json']) > 0) {
+            $this->body = $this->toJson();
+        }
     }
 
     public function getClient() : Socket {
@@ -108,15 +124,19 @@ final class Request implements RequestInterface {
         return $this->args;
     }
 
-    public function accept(string $type) : bool {
-        $accept = $this->getHeader();
+    public function accepts(string ...$types) : bool {
+        $accept = $this->getAccepts();
+
         if ($accept === null) {
-            return false;
+            return true;
         }
 
         $accept = explode(',', $accept);
-        foreach ($accept as $item) {
-            if (str_replace(' ', '', $item) === $type) {
+
+        foreach ($accept as $value) {
+            $value = str_replace(' ', '', $value);
+
+            if (in_array($value, $types, true)) {
                 return true;
             }
         }
@@ -124,62 +144,44 @@ final class Request implements RequestInterface {
         return false;
     }
 
-    private function getHeader() : ?string {
-        $headers = $this->getHeaders();
+    private function getAccepts() : ?string {
+        $headers = explode("\r\n", $this->dataClient);
 
         foreach ($headers as $header) {
-            if (str_replace(' ', '', $header[0]) === 'Accept') {
-                return $header[1];
+            $header = explode(':', $header);
+
+            if (count($header) === 2) {
+                [$key, $value] = $header;
+
+                if ($key === 'Accept') {
+                    return $value;
+                }
             }
         }
 
         return null;
     }
 
-    /**
-     * @return array<int, array<int, string>>
-     */
-    private function getHeaders() : array {
-        $headers = [];
-        $data = explode("\r\n", $this->getRawHeaders());
+    private function toJson() : array {
+        $data =  [
+            'method' => $this->method,
+            'path' => $this->path,
+            'protocol' => $this->protocol,
+            'status' => $this->status,
+            'args' => $this->args
+        ];
 
-        foreach ($data as $header) {
+        $headers = explode("\r\n", $this->dataClient);
+
+        foreach ($headers as $header) {
             $header = explode(':', $header);
 
             if (count($header) === 2) {
-                $headers[] = [$header[0], $header[1]];
+                [$key, $value] = $header;
+
+                $data[$key] = $value;
             }
         }
-
-        return $headers;
-    }
-
-    private function getRawHeaders() : string {
-        $headers = '';
-        $data = explode("\r\n\r\n", $this->getRaw());
-
-        if (count($data) === 2) {
-            $headers = $data[0];
-        }
-
-        return $headers;
-    }
-
-    private function getRaw() : string {
-        $raw = '';
-        $data = explode("\r\n\r\n", $this->get());
-
-        if (count($data) === 2) {
-            $raw = $data[1];
-        }
-
-        return $raw;
-    }
-
-    public function get() : string {
-        $data = $this->getMethod() . ' ' . $this->getPath() . ' ' . $this->getProtocol() . "\r\n";
-        $data .= $this->getRawHeaders() . "\r\n";
-        $data .= $this->getRaw();
 
         return $data;
     }

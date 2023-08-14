@@ -52,6 +52,41 @@ use const SOL_TCP;
 interface ExpressInterface {
 
     /**
+     * @param array $options
+     * @return callable
+     *
+     * This is a built-in middleware function in Express. It parses incoming requests with JSON payloads and is based on body-parser.
+     */
+    public function json(array $options = [
+        'inflate' => true,
+        'strict' => true,
+        'limit' => '100kb',
+        'type' => 'application/json',
+        'verify' => null,
+        'reviver' => null,
+    ]) : callable;
+
+    /**
+     * @param array $options
+     * @return callable
+     *
+     * This is a built-in middleware function in Express. It parses incoming requests with urlencoded payloads and is based on body-parser.
+     */
+    public function static(array $options = [
+        'maxAge' => 0,
+        'immutable' => false,
+        'redirect' => true,
+        'index' => 'index.html',
+        'extensions' => false,
+        'setHeaders' => null,
+        'fallthrough' => true,
+        'cacheControl' => true,
+        'dotfiles' => 'ignore',
+        'etag' => true,
+        'lastModified' => true
+    ]) : callable;
+
+    /**
      * @return string
      *
      * This method will return the address of the server
@@ -161,6 +196,11 @@ final class Express implements ExpressInterface {
 
     public const NEXT = 'next';
 
+    private array $options = [
+        'static' => [],
+        'json' => []
+    ];
+
     /**
      * @var array<string|float|int, Routes>
      */
@@ -178,6 +218,37 @@ final class Express implements ExpressInterface {
     private bool $enable = true;
 
     private ?Socket $socket = null;
+
+    public function json(array $options = [
+        'inflate' => true,
+        'strict' => true,
+        'limit' => '100kb',
+        'type' => 'application/json',
+        'verify' => null,
+        'reviver' => null,
+    ]) : callable {
+        return fn() => $this->options['json'] = array_merge($this->options['json'], $options);
+    }
+
+    public function static(array $options = [
+        'maxAge' => 0,
+        'immutable' => false,
+        'redirect' => true,
+        'index' => 'index.html',
+        'extensions' => false,
+        'setHeaders' => null,
+        'fallthrough' => true,
+        'cacheControl' => true,
+        'dotfiles' => 'ignore',
+        'etag' => true,
+        'lastModified' => true
+    ]) : callable {
+        return fn() => $this->options['static'] = array_merge($this->options['static'], $options);
+    }
+
+    public function getOptions() : array {
+        return $this->options;
+    }
 
     public function getAddresses() : string {
         return self::$address;
@@ -286,12 +357,13 @@ final class Express implements ExpressInterface {
     /**
      * @param Socket $client
      * @param string $path
+     * @param string $dataClient
      * @param string $method
      * @param array<int|float|string, mixed> $args
      * @return array<int, Request|Response>
      */
-    private function getCallbackFromRequest(Socket $client, string $path, string $method, array $args = []) : array {
-        $request = new Request($client, $path, $method, $args);
+    private function getCallbackFromRequest(Socket $client, string $path, string $dataClient, string $method, array $args = []) : array {
+        $request = new Request($this, $client, $path, $dataClient, $method, $args);
         $response = new Response($client, $path, $method, $args);
 
         return [$request, $response];
@@ -300,18 +372,19 @@ final class Express implements ExpressInterface {
     /**
      * @param Routes $route
      * @param Socket $client
+     * @param string $dataClient
      * @param string $method
      * @param array<int|float|string, mixed> $args
      * @return Async
      * @throws Throwable
      */
-    private function processRoute(Routes $route, Socket $client, string $method, array $args = []) : Async {
-        return new Async(function () use ($route, $client, $method, $args) : void {
+    private function processRoute(Routes $route, Socket $client, string $dataClient, string $method, array $args = []) : Async {
+        return new Async(function () use ($route, $client, $dataClient, $method, $args) : void {
             $callback = $route->getCallback();
             $methodRequire = $route->getMethod();
 
             if ($methodRequire === $method || $methodRequire === 'ALL') {
-                [$request, $response] = $this->getCallbackFromRequest($client, self::$path, $method, $args);
+                [$request, $response] = $this->getCallbackFromRequest($client, self::$path, $dataClient, $method, $args);
                 Async::await(call_user_func($callback, $request, $response));
             }
         });
@@ -352,7 +425,7 @@ final class Express implements ExpressInterface {
                         [$method, $path, $finalRequest] = $this->getRequestData($data);
 
                         if (isset(self::$middlewares[$path])) {
-                            [$request, $response] = $this->getCallbackFromRequest($client, $path, $method, $finalRequest);
+                            [$request, $response] = $this->getCallbackFromRequest($client, $path, $data, $method, $finalRequest);
 
                             foreach (self::$middlewares[$path] as $middleware) {
                                 $data = Async::await(call_user_func($middleware, $request, $response, fn() => self::NEXT));
@@ -364,7 +437,7 @@ final class Express implements ExpressInterface {
                         }
 
                         if (isset(self::$routes[$path])) {
-                            Async::await($this->processRoute(self::$routes[$path], $client, $method, $finalRequest));
+                            Async::await($this->processRoute(self::$routes[$path], $client, $data, $method, $finalRequest));
                         }
                     }
 

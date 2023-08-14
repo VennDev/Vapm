@@ -50,7 +50,7 @@ interface ResponseInterface {
 
     public function getStatus() : int;
 
-    public function status(int $status) : void;
+    public function status(int $status) : ResponseInterface;
 
     /**
      * @return array<int|float|string, mixed>
@@ -153,8 +153,10 @@ final class Response implements ResponseInterface {
         return $this->status;
     }
 
-    public function status(int $status) : void {
+    public function status(int $status) : self {
         $this->status = $status;
+
+        return $this;
     }
 
     /**
