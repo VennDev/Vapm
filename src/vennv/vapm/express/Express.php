@@ -256,7 +256,7 @@ final class Express implements ExpressInterface {
 
     /**
      * @param string $data
-     * @return array<int, mixed> $data
+     * @return array<int, string|array<int|float|string, mixed>>
      */
     private function getRequestData(string $data) : array {
         $data = explode("\r\n", $data);
