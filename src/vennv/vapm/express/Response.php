@@ -25,6 +25,7 @@ namespace vennv\vapm\express;
 
 use Exception;
 use vennv\vapm\Async;
+use vennv\vapm\AsyncInterface;
 use vennv\vapm\http\Protocol;
 use vennv\vapm\http\Status;
 use Socket;
@@ -60,46 +61,46 @@ interface ResponseInterface {
     /**
      * @param string $path
      * @param array<int|float|string, mixed> $options
-     * @return Async
+     * @return AsyncInterface
      * @throws Throwable
      */
-    public function render(string $path, array $options = ['Content-Type: text/html']) : Async;
+    public function render(string $path, array $options = ['Content-Type: text/html']) : AsyncInterface;
 
     /**
      * @throws Throwable
      */
-    public function redirect(string $path, int $status = Status::FOUND) : void;
+    public function redirect(string $path, int $status = Status::FOUND) : AsyncInterface;
 
     /**
      * @throws Throwable
      */
-    public function send(string $data, int $status = Status::OK) : void;
+    public function send(string $data, int $status = Status::OK) : AsyncInterface;
 
     /**
      * @param array<int|float|string, mixed> $data
      * @throws Throwable
      */
-    public function json(array $data, int $status = Status::OK) : void;
+    public function json(array $data, int $status = Status::OK) : AsyncInterface;
 
     /**
      * @throws Throwable
      */
-    public function download(string $path, int $status = Status::OK) : void;
+    public function download(string $path, int $status = Status::OK) : AsyncInterface;
 
     /**
      * @throws Throwable
      */
-    public function file(string $path, int $status = Status::OK) : void;
+    public function file(string $path, int $status = Status::OK) : AsyncInterface;
 
     /**
      * @throws Throwable
      */
-    public function image(string $path, int $status = Status::OK) : void;
+    public function image(string $path, int $status = Status::OK) : AsyncInterface;
 
     /**
      * @throws Throwable
      */
-    public function video(string $path, int $status = Status::OK) : void;
+    public function video(string $path, int $status = Status::OK) : AsyncInterface;
 
 }
 
@@ -182,10 +183,10 @@ final class Response implements ResponseInterface {
     /**
      * @param string $path
      * @param array<int|float|string, mixed> $options
-     * @return Async
+     * @return AsyncInterface
      * @throws Throwable
      */
-    public function render(string $path, array $options = ['Content-Type: text/html']) : Async {
+    public function render(string $path, array $options = ['Content-Type: text/html']) : AsyncInterface {
         $this->buildHeader($options);
 
         return new Async(function () use ($path) : void {
@@ -219,24 +220,24 @@ final class Response implements ResponseInterface {
     /**
      * @throws Throwable
      */
-    public function redirect(string $path, int $status = Status::FOUND) : void {
+    public function redirect(string $path, int $status = Status::FOUND) : AsyncInterface {
         $this->status = $status;
-        $this->render($path);
+        return $this->render($path);
     }
 
     /**
      * @throws Throwable
      */
-    public function send(string $data, int $status = Status::OK) : void {
+    public function send(string $data, int $status = Status::OK) : AsyncInterface {
         $this->status = $status;
-        $this->render($data);
+        return $this->render($data);
     }
 
     /**
      * @param array<int|float|string, mixed> $data
      * @throws Throwable
      */
-    public function json(array $data, int $status = Status::OK) : void {
+    public function json(array $data, int $status = Status::OK) : AsyncInterface {
         $this->status = $status;
         $encode = json_encode($data);
 
@@ -244,39 +245,39 @@ final class Response implements ResponseInterface {
             throw new Exception('JSON encode error');
         }
 
-        $this->render($encode, ['Content-Type: application/json']);
+        return $this->render($encode, ['Content-Type: application/json']);
     }
 
     /**
      * @throws Throwable
      */
-    public function download(string $path, int $status = Status::OK) : void {
+    public function download(string $path, int $status = Status::OK) : AsyncInterface {
         $this->status = $status;
-        $this->render($path, ['Content-Type: application/octet-stream']);
+        return $this->render($path, ['Content-Type: application/octet-stream']);
     }
 
     /**
      * @throws Throwable
      */
-    public function file(string $path, int $status = Status::OK) : void {
+    public function file(string $path, int $status = Status::OK) : AsyncInterface {
         $this->status = $status;
-        $this->render($path, ['Content-Type: ' . mime_content_type($path)]);
+        return $this->render($path, ['Content-Type: ' . mime_content_type($path)]);
     }
 
     /**
      * @throws Throwable
      */
-    public function image(string $path, int $status = Status::OK) : void {
+    public function image(string $path, int $status = Status::OK) : AsyncInterface {
         $this->status = $status;
-        $this->render($path, ['Content-Type: image/' . pathinfo($path, PATHINFO_EXTENSION)]);
+        return $this->render($path, ['Content-Type: image/' . pathinfo($path, PATHINFO_EXTENSION)]);
     }
 
     /**
      * @throws Throwable
      */
-    public function video(string $path, int $status = Status::OK) : void {
+    public function video(string $path, int $status = Status::OK) : AsyncInterface {
         $this->status = $status;
-        $this->render($path, ['Content-Type: video/' . pathinfo($path, PATHINFO_EXTENSION)]);
+        return $this->render($path, ['Content-Type: video/' . pathinfo($path, PATHINFO_EXTENSION)]);
     }
 
 }
