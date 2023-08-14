@@ -196,6 +196,9 @@ final class Express implements ExpressInterface {
 
     public const NEXT = 'next';
 
+    /**
+     * @var array<string, mixed>
+     */
     private array $options = [
         'static' => [],
         'json' => []
