@@ -281,7 +281,7 @@ final class Express implements ExpressInterface {
      * @param string $path
      * @param string $method
      * @param array<int, mixed> $args
-     * @return array<string, Request|Response>
+     * @return array<int, Request|Response>
      */
     private function getCallbackFromRequest(Socket $client, string $path, string $method, array $args = []) : array {
         $request = new Request($client, $path, $method, $args);
