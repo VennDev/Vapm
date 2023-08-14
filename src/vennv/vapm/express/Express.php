@@ -178,12 +178,9 @@ interface ExpressInterface {
     public function put(string $path, mixed ...$args) : void;
 
     /**
-     * @param string $path
-     * @param callable $callback
-     *
-     * This method to create middleware for the server
+     * @param string|callable ...$args
      */
-    public function use(string $path, callable $callback) : void;
+    public function use(string|callable ...$args) : void;
 
     /**
      * @throws Throwable
@@ -216,7 +213,9 @@ final class Express implements ExpressInterface {
     /**
      * @var array<string|float|int, array<string|float|int, callable>>
      */
-    private static array $middlewares = [];
+    private static array $middlewares = [
+        '*' => []
+    ];
 
     private static string $path = '';
 
@@ -344,12 +343,21 @@ final class Express implements ExpressInterface {
         if ($route !== null) self::$routes[$path] = $route;
     }
 
-    public function use(string $path, callable $callback) : void {
-        if (!isset(self::$middlewares[$path])) {
-            self::$middlewares[$path] = [];
-        }
+    public function use(string|callable ...$args) : void {
+        if (is_callable($args[0])) {
+            self::$middlewares['*'][] = $args[0];
+        } else {
+            $path = $args[0];
+            $callback = $args[1];
 
-        self::$middlewares[$path][] = $callback;
+            if (!isset(self::$middlewares[$path])) {
+                self::$middlewares[$path] = [];
+            }
+
+            if (is_callable($callback)) {
+                self::$middlewares[$path][] = $callback;
+            }
+        }
     }
 
     /**
@@ -411,6 +419,23 @@ final class Express implements ExpressInterface {
     }
 
     /**
+     * @param callable $callback
+     * @param Request $request
+     * @param Response $response
+     * @param bool $canNext
+     * @return bool
+     */
+    private function processMiddlewares(callable $callback, Request $request, Response $response, bool &$canNext) : bool {
+        $dataCallBack = call_user_func($callback, $request, $response, fn() => self::NEXT);
+
+        if ($dataCallBack !== self::NEXT) {
+            return $canNext = false;
+        }
+
+        return true;
+    }
+
+    /**
      * @throws Throwable
      */
     public function listen(int $port, callable $callback) : void {
@@ -443,22 +468,24 @@ final class Express implements ExpressInterface {
                          * @var array<int|float|string, mixed> $finalRequest
                          */
                         [$method, $path, $finalRequest] = $this->getRequestData($data);
+                        [$request, $response] = $this->getCallbackFromRequest($client, $path, $data, $method, $finalRequest);
+                        $canNext = true;
 
-                        $canContinue = true;
+                        foreach (self::$middlewares['*'] as $middleware) {
+                            $this->processMiddlewares($middleware, $request, $response, $canNext);
+                        }
+
                         if (isset(self::$middlewares[$path])) {
-                            [$request, $response] = $this->getCallbackFromRequest($client, $path, $data, $method, $finalRequest);
-
                             foreach (self::$middlewares[$path] as $middleware) {
-                                $dataCallBack = call_user_func($middleware, $request, $response, fn() => self::NEXT);
+                                $result = $this->processMiddlewares($middleware, $request, $response, $canNext);
 
-                                if ($dataCallBack !== self::NEXT) {
-                                    $canContinue = false;
+                                if (!$result) {
                                     break;
                                 }
                             }
                         }
 
-                        if (isset(self::$routes[$path]) && $canContinue) {
+                        if (isset(self::$routes[$path]) && $canNext) {
                             Async::await($this->processRoute(self::$routes[$path], $client, $data, $method, $finalRequest));
                         }
                     }
