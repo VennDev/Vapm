@@ -25,6 +25,7 @@ namespace vennv\vapm\express;
 
 use vennv\vapm\http\Protocol;
 use vennv\vapm\http\Status;
+use vennv\vapm\Utils;
 use Socket;
 use function explode;
 use function str_replace;
@@ -74,9 +75,9 @@ final class Request implements RequestInterface {
     private array $args;
 
     /**
-     * @var string|array<int|float|string, mixed>
+     * @var string|array<int|float|string, mixed>|object
      */
-    public string|array $body;
+    public string|array|object $body;
 
     /**
      * @param Express $express
@@ -95,8 +96,8 @@ final class Request implements RequestInterface {
         $this->args = $args;
         $this->body = $dataClient;
 
-        $options = $this->express->getOptions();
-        if (count($options['json']) > 0) {
+        $options = $this->getOptions();
+        if ($options->enable === true) {
             $this->body = $this->toJson();
         }
     }
@@ -166,11 +167,15 @@ final class Request implements RequestInterface {
         return null;
     }
 
+    private function getOptions() : object {
+        return (object)$this->express->getOptions()['json'];
+    }
+
     /**
-     * @return array<int|float|string, mixed>
+     * @return string|object
      */
-    private function toJson() : array {
-        $data =  [
+    private function toJson() : string|object {
+        $data = [
             'method' => $this->method,
             'path' => $this->path,
             'protocol' => $this->protocol,
@@ -188,6 +193,35 @@ final class Request implements RequestInterface {
 
                 $data[$key] = $value;
             }
+        }
+
+        $options = $this->getOptions();
+        if (Utils::getBytes($data) > $options->limit) {
+            return 'Payload Too Large';
+        }
+
+        if ($options->reviver !== null && is_callable($options->reviver)) {
+            foreach ($data as $key => $value) {
+                $data[$key] = call_user_func($options->reviver, $key, $value);
+            }
+        }
+
+        if (!$options->strict) {
+            $data = (object)$data;
+        } else {
+            $data = json_encode($data);
+        }
+
+        if ($options->verify !== null && is_callable($options->verify)) {
+            $data = call_user_func($options->verify, $data);
+        }
+
+        if ($options->inflate) {
+            if (is_object($data)) {
+                $data = json_encode($data);
+            }
+
+            $data = gzinflate($data);
         }
 
         return $data;

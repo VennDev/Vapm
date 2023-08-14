@@ -47,7 +47,7 @@ use const SOCK_STREAM;
 use const SOL_TCP;
 
 /**
- * This is version 1.0.0-ALPHA8 of Express
+ * This is version 1.0.0-ALPHA9 of Express
  */
 interface ExpressInterface {
 
@@ -57,16 +57,7 @@ interface ExpressInterface {
      *
      * This is a built-in middleware function in Express. It parses incoming requests with JSON payloads and is based on body-parser.
      */
-    public function json(
-        array $options = [
-            'inflate' => true,
-            'strict' => true,
-            'limit' => '100kb',
-            'type' => 'application/json',
-            'verify' => null,
-            'reviver' => null,
-        ]
-    ) : callable;
+    public function json(array $options = ['enable' => true]) : callable;
 
     /**
      * @param array<string, mixed> $options
@@ -74,21 +65,7 @@ interface ExpressInterface {
      *
      * This is a built-in middleware function in Express. It parses incoming requests with urlencoded payloads and is based on body-parser.
      */
-    public function static(
-        array $options = [
-            'maxAge' => 0,
-            'immutable' => false,
-            'redirect' => true,
-            'index' => 'index.html',
-            'extensions' => false,
-            'setHeaders' => null,
-            'fallthrough' => true,
-            'cacheControl' => true,
-            'dotfiles' => 'ignore',
-            'etag' => true,
-            'lastModified' => true
-        ]
-    ) : callable;
+    public function static(array $options = ['enable' => true]) : callable;
 
     /**
      * @return string
@@ -178,6 +155,14 @@ interface ExpressInterface {
     public function put(string $path, mixed ...$args) : void;
 
     /**
+     * @param string $path
+     * @param callable ...$args
+     *
+     * This method will create a route with method ALL
+     */
+    public function all(string $path, mixed ...$args) : void;
+
+    /**
      * @param string|callable ...$args
      */
     public function use(string|callable ...$args) : void;
@@ -201,8 +186,29 @@ final class Express implements ExpressInterface {
      * @var array<string, array<string, mixed>>
      */
     private array $options = [
-        'static' => [],
-        'json' => []
+        'static' => [
+            'maxAge' => 0,
+            'immutable' => false,
+            'redirect' => true,
+            'index' => 'index.html',
+            'extensions' => false,
+            'setHeaders' => null,
+            'fallthrough' => true,
+            'cacheControl' => true,
+            'dotfiles' => 'ignore',
+            'etag' => true,
+            'lastModified' => true,
+            'enable' => false,
+        ],
+        'json' => [
+            'inflate' => true,
+            'strict' => true,
+            'limit' => 100000,
+            'type' => 'application/json',
+            'verify' => null,
+            'reviver' => null,
+            'enable' => false,
+        ]
     ];
 
     /**
@@ -228,37 +234,14 @@ final class Express implements ExpressInterface {
     /**
      * @param array<string, mixed> $options
      */
-    public function json(
-        array $options = [
-            'inflate' => true,
-            'strict' => true,
-            'limit' => '100kb',
-            'type' => 'application/json',
-            'verify' => null,
-            'reviver' => null,
-        ]
-    ) : callable {
+    public function json(array $options = ['enable' => true]) : callable {
         return fn() => $this->options['json'] = array_merge($this->options['json'], $options);
     }
 
     /**
      * @param array<string, mixed> $options
      */
-    public function static(
-        array $options = [
-            'maxAge' => 0,
-            'immutable' => false,
-            'redirect' => true,
-            'index' => 'index.html',
-            'extensions' => false,
-            'setHeaders' => null,
-            'fallthrough' => true,
-            'cacheControl' => true,
-            'dotfiles' => 'ignore',
-            'etag' => true,
-            'lastModified' => true
-        ]
-    ) : callable {
+    public function static(array $options = ['enable' => true]) : callable {
         return fn() => $this->options['static'] = array_merge($this->options['static'], $options);
     }
 
@@ -343,6 +326,11 @@ final class Express implements ExpressInterface {
         if ($route !== null) self::$routes[$path] = $route;
     }
 
+    public function all(string $path, mixed ...$args) : void {
+        $route = $this->toRoute(Method::ALL, $path, ...$args);
+        if ($route !== null) self::$routes[$path] = $route;
+    }
+
     public function use(string|callable ...$args) : void {
         if (is_callable($args[0])) {
             self::$middlewares['*'][] = $args[0];
@@ -411,7 +399,7 @@ final class Express implements ExpressInterface {
             $callback = $route->getCallback();
             $methodRequire = $route->getMethod();
 
-            if ($methodRequire === $method || $methodRequire === 'ALL') {
+            if ($methodRequire === $method || $methodRequire === Method::ALL) {
                 [$request, $response] = $this->getCallbackFromRequest($client, self::$path, $dataClient, $method, $args);
                 Async::await(call_user_func($callback, $request, $response));
             }
