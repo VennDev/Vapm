@@ -44,6 +44,9 @@ use function json_encode;
 use function str_replace;
 use function get_called_class;
 use const PHP_BINARY;
+use const PHP_EOL;
+use const STDIN;
+use const STDOUT;
 
 interface ThreadInterface {
 
