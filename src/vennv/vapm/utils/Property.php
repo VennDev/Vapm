@@ -24,19 +24,18 @@ declare(strict_types = 1);
 namespace vennv\vapm\utils;
 
 use Exception;
-use stdClass;
 use function property_exists;
 
 trait Property {
 
     /**
-     * @param stdClass $data
+     * @param mixed $data
      * @param array<string, mixed> $options
      * @return object
      */
-    public function update(stdClass $data, array $options) : object {
+    public function update(mixed $data, array $options) : object {
         foreach ($options as $key => $value) {
-            if (property_exists($data, $key)) {
+            if ($data instanceof $this && property_exists($data, $key)) {
                 try {
                     $data->{$key} = $value;
                 } catch (Exception $e) {
