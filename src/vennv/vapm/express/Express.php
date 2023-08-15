@@ -221,7 +221,10 @@ final class Express implements ExpressInterface {
     private function getCallbackUpdateOptions(string $name, array $options) : callable {
         return function () use ($name, $options) {
             $last = $this->options[$name];
-            $this->options[$name] = $last->update($last, $options);
+
+            if ($last instanceof JsonData || $last instanceof StaticData) {
+                $this->options[$name] = $last->update($last, $options);
+            }
         };
     }
 
@@ -240,7 +243,7 @@ final class Express implements ExpressInterface {
     }
 
     /**
-     * @return array<string, JsonData|StaticData|null>
+     * @return array<string, mixed>
      */
     public function getOptions() : array {
         return $this->options;
