@@ -28,6 +28,7 @@ use vennv\vapm\http\Protocol;
 use vennv\vapm\http\Status;
 use vennv\vapm\utils\Utils;
 use Socket;
+use RuntimeException;
 use function explode;
 use function str_replace;
 use function in_array;
@@ -172,7 +173,13 @@ final class Request implements RequestInterface {
     }
 
     private function getOptions() : JsonData {
-        return $this->express->getOptions()['json'];
+        $result = $this->express->getOptions()['json'];
+
+        if (!$result instanceof JsonData) {
+            throw new RuntimeException('Invalid json options');
+        }
+
+        return $result;
     }
 
     /**

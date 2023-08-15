@@ -23,6 +23,7 @@ declare(strict_types = 1);
 
 namespace vennv\vapm\utils;
 
+use Exception;
 use function property_exists;
 
 trait Property {
@@ -35,7 +36,11 @@ trait Property {
     public function update(object $data, array $options) : object {
         foreach ($options as $key => $value) {
             if (property_exists($data, $key)) {
-                $data->{$key} = $value;
+                try {
+                    $data->{$key} = $value;
+                } catch (Exception $e) {
+                    continue;
+                }
             }
         }
 
