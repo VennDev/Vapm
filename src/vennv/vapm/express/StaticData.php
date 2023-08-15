@@ -34,7 +34,7 @@ final class StaticData {
     public bool $etag = true;
 
     /**
-     * @var array<string>
+     * @var array<string> $extensions
      */
     public array $extensions = [];
 
