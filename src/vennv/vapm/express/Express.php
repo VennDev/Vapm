@@ -323,11 +323,7 @@ final class Express implements ExpressInterface {
             $dotFiles = array_merge($dotFiles, TypeData::DOT_FILES_MORE);
         }
 
-        /**
-         * @var string $dotFile
-         * @var string $type
-         */
-        array_map(function ($dotFile, $type) use ($path) : void {
+        array_map(function (string $dotFile, string $type) use ($path) : void {
             /** @var string $file */
             foreach (Utils::getAllByDotFile($path, $dotFile) as $file) {
                 $replacePath = str_replace([$path, '\\'], ['', '/'], $file);
