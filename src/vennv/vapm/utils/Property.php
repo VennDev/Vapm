@@ -32,32 +32,32 @@ use function property_exists;
 trait Property {
 
     /**
-     * @param mixed $data
+     * @param StaticData|JsonData $data
      * @param array<string, mixed> $options
      * @param bool $forced
      * @return JsonData|StaticData
      * @throws Exception
      */
-    public function update(mixed $data, array $options, bool $forced = true) : JsonData|StaticData {
-        if ($data instanceof StaticData || $data instanceof JsonData) {
-            foreach ($options as $key => $value) {
-                try {
-                    if (property_exists($data, $key)) {
-                        $data->$key = $value;
-                    }
-                } catch (Exception $e) {
-                    if (!$forced) {
-                        throw $e;
-                    }
-
-                    continue;
+    public function update(StaticData|JsonData $data, array $options, bool $forced = true) : JsonData|StaticData {
+        /**
+         * @var string $key
+         * @var mixed $value
+         */
+        foreach ($options as $key => $value) {
+            try {
+                if (property_exists($data, $key)) {
+                    $data->{$key} = $value;
                 }
-            }
+            } catch (Exception $e) {
+                if (!$forced) {
+                    throw $e;
+                }
 
-            return $data;
-        } else {
-            throw new Exception('Invalid data type provided.');
+                continue;
+            }
         }
+
+        return $data;
     }
 
 }
