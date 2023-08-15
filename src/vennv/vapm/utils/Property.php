@@ -44,16 +44,14 @@ trait Property {
          * @var mixed $value
          */
         foreach ($options as $key => $value) {
-            try {
-                if (property_exists($data, $key)) {
+            if (property_exists($data, $key)) {
+                try {
                     $data->{$key} = $value;
+                } catch (Exception $e) {
+                    if (!$forced) {
+                        throw $e;
+                    }
                 }
-            } catch (Exception $e) {
-                if (!$forced) {
-                    throw $e;
-                }
-
-                continue;
             }
         }
 
