@@ -23,22 +23,25 @@ declare(strict_types = 1);
 
 namespace vennv\vapm\utils;
 
+use vennv\vapm\express\JsonData;
+use vennv\vapm\express\StaticData;
 use Exception;
 use function property_exists;
 
+// This is trait for JsonData|StaticData class
 trait Property {
 
     /**
-     * @param mixed $data
+     * @param StaticData|JsonData $data
      * @param array<string, mixed> $options
      * @param bool $forced
-     * @return mixed
+     * @return StaticData|JsonData
      */
-    public function update(mixed $data, array $options, bool $forced = true) : mixed {
+    public function update(StaticData|JsonData $data, array $options, bool $forced = true) : StaticData|JsonData {
         foreach ($options as $key => $value) {
             try {
-                if ((is_object($data) || is_string($data)) && property_exists($data, $key)) {
-                    $data->{$key} = $value;
+                if (property_exists($data, $key)) {
+                    $data->$key = $value;
                 }
             } catch (Exception $e) {
                 if (!$forced) {
