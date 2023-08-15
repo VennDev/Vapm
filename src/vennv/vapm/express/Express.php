@@ -221,6 +221,11 @@ final class Express implements ExpressInterface {
     private function getCallbackUpdateOptions(string $name, array $options) : callable {
         return function () use ($name, $options) {
             $last = $this->options[$name];
+
+            if ($last === null) {
+                $last = new JsonData();
+            }
+
             $this->options[$name] = $last->update($last, $options);
         };
     }

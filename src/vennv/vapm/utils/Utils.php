@@ -23,6 +23,7 @@ declare(strict_types = 1);
 
 namespace vennv\vapm\utils;
 
+use vennv\vapm\Error;
 use Closure;
 use Generator;
 use RecursiveDirectoryIterator;
@@ -30,11 +31,15 @@ use RecursiveIteratorIterator;
 use ReflectionException;
 use ReflectionFunction;
 use SplFileInfo;
-use vennv\vapm\Error;
 use function preg_match;
 use function file;
 use function implode;
 use function array_slice;
+use function is_string;
+use function strlen;
+use function is_object;
+use function is_array;
+use function serialize;
 
 interface UtilsInterface {
 

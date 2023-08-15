@@ -110,7 +110,7 @@ interface ResponseInterface {
 
 final class Response implements ResponseInterface {
 
-    private Express $express;
+    protected Express $express;
 
     private Socket $client;
 
@@ -140,10 +140,6 @@ final class Response implements ResponseInterface {
         $this->method = $method;
         $this->path = $path;
         $this->args = $args;
-    }
-
-    private function getExpress() : Express {
-        return $this->express;
     }
 
     public function getClient() : Socket {
