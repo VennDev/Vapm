@@ -30,7 +30,6 @@ use vennv\vapm\http\Status;
 use Socket;
 use Throwable;
 use Exception;
-use DOMDocument;
 use function socket_write;
 use function implode;
 use function is_array;
@@ -38,6 +37,9 @@ use function str_replace;
 use function json_encode;
 use function mime_content_type;
 use function pathinfo;
+use function ob_start;
+use function ob_end_clean;
+use function file_get_contents;
 use const PATHINFO_EXTENSION;
 
 interface ResponseInterface {
@@ -138,6 +140,10 @@ final class Response implements ResponseInterface {
         $this->method = $method;
         $this->path = $path;
         $this->args = $args;
+    }
+
+    private function getExpress() : Express {
+        return $this->express;
     }
 
     public function getClient() : Socket {

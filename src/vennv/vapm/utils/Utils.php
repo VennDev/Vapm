@@ -77,11 +77,11 @@ interface UtilsInterface {
     public static function removeComments(string $text) : null|string|array;
 
     /**
-     * @param string|object|array<int|float|string, mixed> $data
+     * @param mixed $data
      *
      * Get bytes of a string or object or array
      */
-    public static function getBytes(string|object|array $data) : int;
+    public static function getBytes(mixed $data) : int;
 
 }
 
@@ -172,11 +172,11 @@ final class Utils implements UtilsInterface {
     }
 
     /**
-     * @param string|object|array<int|float|string, mixed> $data
+     * @param mixed $data
      *
      * Get bytes of a string or object or array
      */
-    public static function getBytes(string|object|array $data) : int {
+    public static function getBytes(mixed $data) : int {
         if (is_string($data)) {
             return strlen($data);
         }

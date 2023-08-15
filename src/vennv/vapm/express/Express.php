@@ -29,9 +29,9 @@ use vennv\vapm\Error;
 use vennv\vapm\http\Method;
 use vennv\vapm\http\TypeData;
 use vennv\vapm\System;
+use vennv\vapm\utils\Utils;
 use Throwable;
 use Socket;
-use vennv\vapm\utils\Utils;
 use function socket_accept;
 use function socket_bind;
 use function socket_create;
@@ -45,6 +45,8 @@ use function is_callable;
 use function array_slice;
 use function count;
 use function call_user_func;
+use function array_map;
+use function array_keys;
 use const AF_INET;
 use const SOCK_STREAM;
 use const SOL_TCP;
@@ -238,7 +240,7 @@ final class Express implements ExpressInterface {
     }
 
     /**
-     * @return array<string, array<string, mixed>>
+     * @return array<string, JsonData|StaticData|null>
      */
     public function getOptions() : array {
         return $this->options;
@@ -262,6 +264,7 @@ final class Express implements ExpressInterface {
 
     public function setPath(string $path) : void {
         array_map(function ($dotFile, $type) use ($path) {
+            /** @var string $file */
             foreach (Utils::getAllByDotFile($path, $dotFile) as $file) {
                 $replacePath = str_replace([$path, '\\'], ['', '/'], $file);
 

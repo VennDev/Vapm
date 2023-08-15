@@ -25,7 +25,7 @@ namespace vennv\vapm\utils;
 
 trait Property {
 
-    public static function update(object $data, array $options) : object {
+    public function update(object $data, array $options) : object {
         foreach ($options as $key => $value) {
             if (property_exists($data, $key)) {
                 $data->{$key} = $value;
