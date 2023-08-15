@@ -32,6 +32,10 @@ use function explode;
 use function str_replace;
 use function in_array;
 use function count;
+use function call_user_func;
+use function is_callable;
+use function json_encode;
+use function gzinflate;
 
 interface RequestInterface {
 
@@ -196,6 +200,7 @@ final class Request implements RequestInterface {
         }
 
         $options = $this->getOptions();
+
         if (Utils::getBytes($data) > $options->limit) {
             return Error::PAYLOAD_TOO_LARGE;
         }
