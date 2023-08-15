@@ -4,8 +4,3 @@ parameters:
       - src\vennv
    checkGenericClassInNonGenericObjectType: false
    treatPhpDocTypesAsCertain: false
-   ignoreErrors:
-      - '#Variable property access on PhpParser\\Node\.#'
-      -
-	message: '#Dynamic call to static method#'
-	path: src\vennv\vapm\utils\Property.php
