@@ -31,16 +31,21 @@ trait Property {
     /**
      * @param mixed $data
      * @param array<string, mixed> $options
+     * @param bool $forced
      * @return object
      */
-    public function update(mixed $data, array $options) : object {
+    public function update(mixed $data, array $options, bool $forced = true) : object {
         foreach ($options as $key => $value) {
-            if ($data instanceof $this && property_exists($data, $key)) {
-                try {
+            try {
+                if (property_exists($data, $key)) {
                     $data->{$key} = $value;
-                } catch (Exception $e) {
-                    continue;
                 }
+            } catch (Exception $e) {
+                if (!$forced) {
+                    throw $e;
+                }
+
+                continue;
             }
         }
 
