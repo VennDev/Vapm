@@ -219,7 +219,7 @@ final class Express implements ExpressInterface {
      * @param array<string, mixed> $options
      */
     private function getCallbackUpdateOptions(string $name, array $options) : callable {
-        return function () use ($name, $options) {
+        return function () use ($name, $options) : void {
             $last = $this->options[$name];
 
             if ($last instanceof JsonData || $last instanceof StaticData) {
@@ -266,7 +266,7 @@ final class Express implements ExpressInterface {
     }
 
     public function setPath(string $path) : void {
-        array_map(function ($dotFile, $type) use ($path) {
+        array_map(function ($dotFile, $type) use ($path) : void {
             /** @var string $file */
             foreach (Utils::getAllByDotFile($path, $dotFile) as $file) {
                 $replacePath = str_replace([$path, '\\'], ['', '/'], $file);
