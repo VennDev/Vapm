@@ -233,12 +233,14 @@ final class Express implements ExpressInterface {
      * @param array<string, mixed> $options
      */
     private function getCallbackUpdateOptions(string $name, array $options) : callable {
-        return function () use ($name, $options) : void {
+        return function ($request, $response, $next) use ($name, $options) : mixed {
             $last = $this->options[$name];
 
             if ($last instanceof JsonData || $last instanceof StaticData) {
                 $this->options[$name] = $last->update($last, $options);
             }
+
+            return $next();
         };
     }
 
@@ -302,13 +304,13 @@ final class Express implements ExpressInterface {
     public function setPath(string $path) : void {
         self::$path = $path;
 
-        if ($this->getOptionsStatic()->dotfiles !== 'ignore') {
-            return;
-        }
-
         $dotFiles = TypeData::DOT_FILES_IGNORE;
 
         $options = $this->getOptionsStatic();
+
+        if ($options->dotfiles === 'deny') {
+            return;
+        }
 
         foreach ($options->extensions as $extension) {
             // check have . in extension
