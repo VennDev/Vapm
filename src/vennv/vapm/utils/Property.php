@@ -44,7 +44,7 @@ trait Property {
          */
         foreach ($options as $key => $value) {
             if (property_exists($data, $key)) {
-                $data->{$key} = $value;
+                $data->{$key} = $value; /* @phpstan-ignore-line */
             }
         }
 
