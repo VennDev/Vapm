@@ -37,7 +37,7 @@ trait Property {
     public function update(mixed $data, array $options, bool $forced = true) : object {
         foreach ($options as $key => $value) {
             try {
-                if (property_exists($data, $key)) {
+                if ((is_object($data) || is_string($data)) && property_exists($data, $key)) {
                     $data->{$key} = $value;
                 }
             } catch (Exception $e) {
