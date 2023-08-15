@@ -33,6 +33,9 @@ final class StaticData {
 
     public bool $etag = true;
 
+    /**
+     * @var array<string>
+     */
     public array $extensions = [];
 
     public bool $fallthrough = true;
