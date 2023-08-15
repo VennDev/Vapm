@@ -32,9 +32,9 @@ trait Property {
      * @param mixed $data
      * @param array<string, mixed> $options
      * @param bool $forced
-     * @return object
+     * @return mixed
      */
-    public function update(mixed $data, array $options, bool $forced = true) : object {
+    public function update(mixed $data, array $options, bool $forced = true) : mixed {
         foreach ($options as $key => $value) {
             try {
                 if ((is_object($data) || is_string($data)) && property_exists($data, $key)) {
