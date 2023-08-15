@@ -296,7 +296,7 @@ final class Express implements ExpressInterface {
         return !$this->enable;
     }
 
-    private function toRoute(string $method, string $path, mixed ...$args) : ?Routes {
+    private function createRoute(string $method, string $path, mixed ...$args) : void {
         $lastArg = $args[count($args) - 1];
 
         if (is_callable($lastArg)) {
@@ -306,37 +306,37 @@ final class Express implements ExpressInterface {
             $callback = fn() => $lastArg;
         }
 
+        $canDo = true;
         foreach ($args as $arg) {
             if (is_callable($arg)) {
                 call_user_func($arg);
             }
 
             if (is_bool($arg) && $arg === false) {
-                return null;
+                $canDo = false;
             }
         }
 
-        return new Routes($method, $path, $callback);
+        if ($canDo) {
+            $route = new Routes($method, $path, $callback);
+            self::$routes[$path] = $route;
+        }
     }
 
     public function get(string $path, mixed ...$args) : void {
-        $route = $this->toRoute(Method::GET, $path, ...$args);
-        if ($route !== null) self::$routes[$path] = $route;
+        $this->createRoute(Method::GET, $path, ...$args);
     }
 
     public function post(string $path, mixed ...$args) : void {
-        $route = $this->toRoute(Method::POST, $path, ...$args);
-        if ($route !== null) self::$routes[$path] = $route;
+        $this->createRoute(Method::POST, $path, ...$args);
     }
 
     public function put(string $path, mixed ...$args) : void {
-        $route = $this->toRoute(Method::PUT, $path, ...$args);
-        if ($route !== null) self::$routes[$path] = $route;
+        $this->createRoute(Method::PUT, $path, ...$args);
     }
 
     public function all(string $path, mixed ...$args) : void {
-        $route = $this->toRoute(Method::ALL, $path, ...$args);
-        if ($route !== null) self::$routes[$path] = $route;
+        $this->createRoute(Method::ALL, $path, ...$args);
     }
 
     public function use(string|callable ...$args) : void {
