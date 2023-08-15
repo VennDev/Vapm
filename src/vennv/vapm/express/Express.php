@@ -505,8 +505,22 @@ final class Express implements ExpressInterface {
         }
 
         socket_set_option($socket, SOL_SOCKET, SO_REUSEADDR, 1);
-        socket_bind($socket, self::$address, $port);
-        socket_listen($socket, 1);
+
+        $tryConnect = socket_connect($socket, self::$address, $port);
+        if ($tryConnect === true) {
+            throw new RuntimeException(Error::ERROR_TO_CONNECT_SOCKET);
+        }
+
+        $bind = socket_bind($socket, self::$address, $port);
+        if ($bind === false) {
+            throw new RuntimeException(socket_strerror(socket_last_error($socket)));
+        }
+
+        $listen = socket_listen($socket, 1);
+        if ($listen === false) {
+            throw new RuntimeException(socket_strerror(socket_last_error($socket)));
+        }
+
         socket_set_nonblock($socket);
 
         $this->socket = $socket;
