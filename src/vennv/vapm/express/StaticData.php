@@ -52,4 +52,6 @@ final class StaticData {
 
     public mixed $setHeaders = null;
 
+    public bool $enable = false;
+
 }

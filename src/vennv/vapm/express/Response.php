@@ -183,19 +183,22 @@ final class Response implements ResponseInterface {
         $status = $this->status;
         $statusName = Status::getStatusName($status);
 
-        if ($this->express->getOptionsStatic()->immutable) {
-            $options[] = 'Cache-Control: immutable';
-        }
+        $optionsStatic = $this->express->getOptionsStatic();
+        if ($optionsStatic->enable) {
+            if ($optionsStatic->immutable) {
+                $optionsStatic[] = 'Cache-Control: immutable';
+            }
 
-        if ($this->express->getOptionsStatic()->lastModified) {
-            $options[] = 'Last-Modified: ' . gmdate('D, d M Y H:i:s', time()) . ' GMT';
-        }
+            if ($optionsStatic->lastModified) {
+                $optionsStatic[] = 'Last-Modified: ' . gmdate('D, d M Y H:i:s', time()) . ' GMT';
+            }
 
-        if ($this->express->getOptionsStatic()->etag) {
-            $options[] = 'ETag: ' . md5($this->path);
-        }
+            if ($optionsStatic->etag) {
+                $optionsStatic[] = 'ETag: ' . md5($this->path);
+            }
 
-        $options[] = 'Cache-Control: max-age=' . $this->express->getOptionsStatic()->maxAge;
+            $optionsStatic[] = 'Cache-Control: max-age=' . $optionsStatic->maxAge;
+        }
 
         $data = "$protocol $status $statusName\r\n" . implode("\r\n", $options) . "\r\n\r\n";
 
