@@ -102,7 +102,7 @@ final class Request implements RequestInterface {
         $this->args = $args;
         $this->body = $dataClient;
 
-        if ($this->getOptions()->enable === true) {
+        if ($this->express->getOptionsJson()->enable) {
             $this->body = $this->toJson();
         }
     }
@@ -172,16 +172,6 @@ final class Request implements RequestInterface {
         return null;
     }
 
-    private function getOptions() : JsonData {
-        $result = $this->express->getOptions()['json'];
-
-        if (!$result instanceof JsonData) {
-            throw new RuntimeException('Invalid json options');
-        }
-
-        return $result;
-    }
-
     /**
      * @return string|object
      */
@@ -206,7 +196,7 @@ final class Request implements RequestInterface {
             }
         }
 
-        $options = $this->getOptions();
+        $options = $this->express->getOptionsJson();
 
         if (Utils::getBytes($data) > $options->limit) {
             return Error::PAYLOAD_TOO_LARGE;

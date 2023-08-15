@@ -25,6 +25,8 @@ namespace vennv\vapm\http;
 
 final class TypeData {
 
+    public const ALL = "*/*";
+
     public const JSON = "application/json";
 
     public const XML = "application/xml";
@@ -140,7 +142,7 @@ final class TypeData {
      *
      * This is the list of all types of files that can be loaded
      */
-    public const DOT_FILES_TO_LOAD = [
+    public const DOT_FILES_IGNORE = [
         '.css' => self::CSS,
         '.csv' => self::CSV,
         '.rtf' => self::RTF,
@@ -149,7 +151,6 @@ final class TypeData {
         '.wmlc' => self::WMLC,
         '.wmls' => self::WMLS,
         '.wmlsc' => self::WMLSC,
-        '.xhtml' => self::WAP5,
         '.woff' => self::WOFF,
         '.woff2' => self::WOFF2,
         '.ttf' => self::TTF,
@@ -163,6 +164,14 @@ final class TypeData {
         '.jpg' => self::JPG,
         '.jpeg' => self::JPG,
         '.png' => self::PNG,
+        '.json' => self::JSON,
+        '.txt' => self::TEXT
+    ];
+
+    // This is the list of all types of files that will support more by Dot files Ignore
+    public const DOT_FILES_MORE = [
+        '.js' => self::JS,
+        '.html' => self::HTML,
         '.webm' => self::WEBM,
         '.ogg' => self::OGG,
         '.ogv' => self::OGV,
@@ -184,9 +193,7 @@ final class TypeData {
         '.xlsx' => self::XLSX,
         '.ppt' => self::PPT,
         '.pptx' => self::PPTX,
-        '.xml' => self::XML,
-        '.json' => self::JSON,
-        '.txt' => self::TEXT
+        '.xml' => self::XML
     ];
 
 }

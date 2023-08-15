@@ -183,6 +183,20 @@ final class Response implements ResponseInterface {
         $status = $this->status;
         $statusName = Status::getStatusName($status);
 
+        if ($this->express->getOptionsStatic()->immutable) {
+            $options[] = 'Cache-Control: immutable';
+        }
+
+        if ($this->express->getOptionsStatic()->lastModified) {
+            $options[] = 'Last-Modified: ' . gmdate('D, d M Y H:i:s', time()) . ' GMT';
+        }
+
+        if ($this->express->getOptionsStatic()->etag) {
+            $options[] = 'ETag: ' . md5($this->path);
+        }
+
+        $options[] = 'Cache-Control: max-age=' . $this->express->getOptionsStatic()->maxAge;
+
         $data = "$protocol $status $statusName\r\n" . implode("\r\n", $options) . "\r\n\r\n";
 
         socket_write($this->client, $data);

@@ -73,6 +73,20 @@ interface ExpressInterface {
     public function static(array $options = ['enable' => true]) : callable;
 
     /**
+     * @return JsonData
+     *
+     * This method will return the json data of the server
+     */
+    public function getOptionsJson() : JsonData;
+
+    /**
+     * @return StaticData
+     *
+     * This method will return the static data of the server
+     */
+    public function getOptionsStatic() : StaticData;
+
+    /**
      * @return string
      *
      * This method will return the address of the server
@@ -245,8 +259,28 @@ final class Express implements ExpressInterface {
     /**
      * @return array<string, mixed>
      */
-    public function getOptions() : array {
+    private function getOptions() : array {
         return $this->options;
+    }
+
+    public function getOptionsJson() : JsonData {
+        $result = $this->getOptions()['json'];
+
+        if (!$result instanceof JsonData) {
+            throw new RuntimeException('Invalid json options');
+        }
+
+        return $result;
+    }
+
+    public function getOptionsStatic() : StaticData {
+        $result = $this->getOptions()['static'];
+
+        if (!$result instanceof StaticData) {
+            throw new RuntimeException('Invalid static options');
+        }
+
+        return $result;
     }
 
     public function getAddresses() : string {
@@ -266,6 +300,29 @@ final class Express implements ExpressInterface {
     }
 
     public function setPath(string $path) : void {
+        self::$path = $path;
+
+        if ($this->getOptionsStatic()->dotfiles !== 'ignore') {
+            return;
+        }
+
+        $dotFiles = TypeData::DOT_FILES_IGNORE;
+
+        $options = $this->getOptionsStatic();
+
+        foreach ($options->extensions as $extension) {
+            // check have . in extension
+            if (!str_contains($extension, '.')) {
+                $extension = '.' . $extension;
+            }
+
+            $dotFiles[$extension] = TypeData::ALL;
+        }
+
+        if ($options->dotfiles === 'allow') {
+            $dotFiles = array_merge($dotFiles, TypeData::DOT_FILES_MORE);
+        }
+
         array_map(function ($dotFile, $type) use ($path) : void {
             /** @var string $file */
             foreach (Utils::getAllByDotFile($path, $dotFile) as $file) {
@@ -275,9 +332,7 @@ final class Express implements ExpressInterface {
                     $res->render($replacePath, true, ['Content-Type: ' . $type]);
                 });
             }
-        }, array_keys(TypeData::DOT_FILES_TO_LOAD), TypeData::DOT_FILES_TO_LOAD);
-
-        self::$path = $path;
+        }, array_keys($dotFiles), $dotFiles);
     }
 
     public function enable() : void {
@@ -422,6 +477,12 @@ final class Express implements ExpressInterface {
      * @return bool
      */
     private function processMiddlewares(callable $callback, Request $request, Response $response, bool &$canNext) : bool {
+        if (!$this->getOptionsStatic()->fallthrough) {
+            if (!file_exists($this->path())) {
+                return false;
+            }
+        }
+
         $dataCallBack = call_user_func($callback, $request, $response, fn() => self::NEXT);
 
         if ($dataCallBack !== self::NEXT) {

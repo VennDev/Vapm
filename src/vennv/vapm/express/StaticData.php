@@ -33,7 +33,7 @@ final class StaticData {
 
     public bool $etag = true;
 
-    public mixed $extensions = false;
+    public array $extensions = [];
 
     public bool $fallthrough = true;
 
