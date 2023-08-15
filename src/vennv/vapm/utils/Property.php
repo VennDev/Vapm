@@ -36,11 +36,7 @@ trait Property {
     public function update(object $data, array $options) : object {
         foreach ($options as $key => $value) {
             if (property_exists($data, $key)) {
-                try {
-                    $data->{$key} = $value;
-                } catch (Exception $e) {
-                    continue;
-                }
+                $data->$key = $value;
             }
         }
 
