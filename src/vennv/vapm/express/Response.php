@@ -64,11 +64,17 @@ interface ResponseInterface {
     /**
      * @param string $path
      * @param bool $usePath
+     * @param bool $justActive
      * @param array<int|float|string, mixed> $options
      * @return AsyncInterface
      * @throws Throwable
      */
-    public function render(string $path, bool $usePath = true, array $options = ['Content-Type: text/html']) : AsyncInterface;
+    public function render(string $path, bool $usePath = true, bool $justActive = false, array $options = ['Content-Type: text/html']) : AsyncInterface;
+
+    /**
+     * @throws Throwable
+     */
+    public function active(string $path, array $options = ['Content-Type: text/html']) : AsyncInterface;
 
     /**
      * @throws Throwable
@@ -176,9 +182,10 @@ final class Response implements ResponseInterface {
     }
 
     /**
+     * @param string $path
      * @param array<int|float|string, mixed> $options
      */
-    private function buildHeader(array $options = ['Content-Type: text/html']) : void {
+    private function buildHeader(string $path, array $options = ['Content-Type: text/html']) : void {
         $protocol = $this->protocol;
         $status = $this->status;
         $statusName = Status::getStatusName($status);
@@ -200,6 +207,15 @@ final class Response implements ResponseInterface {
             $options[] = 'Cache-Control: max-age=' . $optionsStatic->maxAge;
         }
 
+        if ($status === Status::OK) {
+            $options[] = 'Content-Type: ' . mime_content_type($this->path);
+        }
+
+        if ($status === Status::FOUND) {
+            $options[] = 'Location: http://' . $this->express->getAddresses() . ':' . $this->express->getPort() . $path;
+            $options[] = 'Connection: close';
+        }
+
         $data = "$protocol $status $statusName\r\n" . implode("\r\n", $options) . "\r\n\r\n";
 
         socket_write($this->client, $data);
@@ -208,14 +224,20 @@ final class Response implements ResponseInterface {
     /**
      * @param string $path
      * @param bool $usePath
+     * @param bool $justActive
      * @param array<int|float|string, mixed> $options
      * @return AsyncInterface
      * @throws Throwable
      */
-    public function render(string $path, bool $usePath = true, array $options = ['Content-Type: text/html']) : AsyncInterface {
-        $this->buildHeader($options);
+    public function render(
+        string $path,
+        bool   $usePath = true,
+        bool   $justActive = false,
+        array  $options = ['Content-Type: text/html']
+    ) : AsyncInterface {
+        if (!$justActive) $this->buildHeader($path, $options);
 
-        return new Async(function () use ($path, $usePath) : void {
+        return new Async(function () use ($path, $usePath, $justActive) : void {
             ob_start();
 
             if ($usePath) {
@@ -237,14 +259,14 @@ final class Response implements ResponseInterface {
                     /** @var string $data */
                     $data = Async::await($value);
 
-                    socket_write($this->client, $data);
+                    if (!$justActive) socket_write($this->client, $data);
                 }
             } else {
                 if (!is_string($body)) {
                     throw new Exception('Body must be string');
                 }
 
-                socket_write($this->client, $body);
+                if (!$justActive) socket_write($this->client, $body);
             }
 
             ob_end_clean();
@@ -254,9 +276,16 @@ final class Response implements ResponseInterface {
     /**
      * @throws Throwable
      */
+    public function active(string $path, array $options = ['Content-Type: text/html']) : AsyncInterface {
+        return $this->render($path, true, true, $options);
+    }
+
+    /**
+     * @throws Throwable
+     */
     public function redirect(string $path, int $status = Status::FOUND) : AsyncInterface {
         $this->status = $status;
-        return $this->render($path);
+        return $this->render($path, false);
     }
 
     /**
@@ -279,7 +308,7 @@ final class Response implements ResponseInterface {
             throw new Exception('JSON encode error');
         }
 
-        return $this->render($encode, false, ['Content-Type: application/json']);
+        return $this->render($encode, false, false, ['Content-Type: application/json']);
     }
 
     /**
@@ -287,7 +316,7 @@ final class Response implements ResponseInterface {
      */
     public function download(string $path, int $status = Status::OK) : AsyncInterface {
         $this->status = $status;
-        return $this->render($path, true, ['Content-Type: application/octet-stream']);
+        return $this->render($path, true, false, ['Content-Type: application/octet-stream']);
     }
 
     /**
@@ -295,7 +324,7 @@ final class Response implements ResponseInterface {
      */
     public function file(string $path, int $status = Status::OK) : AsyncInterface {
         $this->status = $status;
-        return $this->render($path, true, ['Content-Type: ' . mime_content_type($path)]);
+        return $this->render($path, true, false, ['Content-Type: ' . mime_content_type($path)]);
     }
 
     /**
@@ -303,7 +332,7 @@ final class Response implements ResponseInterface {
      */
     public function image(string $path, int $status = Status::OK) : AsyncInterface {
         $this->status = $status;
-        return $this->render($path, true, ['Content-Type: image/' . pathinfo($path, PATHINFO_EXTENSION)]);
+        return $this->render($path, true, false, ['Content-Type: image/' . pathinfo($path, PATHINFO_EXTENSION)]);
     }
 
     /**
@@ -311,7 +340,7 @@ final class Response implements ResponseInterface {
      */
     public function video(string $path, int $status = Status::OK) : AsyncInterface {
         $this->status = $status;
-        return $this->render($path, true, ['Content-Type: video/' . pathinfo($path, PATHINFO_EXTENSION)]);
+        return $this->render($path, true, false, ['Content-Type: video/' . pathinfo($path, PATHINFO_EXTENSION)]);
     }
 
 }

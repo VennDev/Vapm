@@ -101,6 +101,13 @@ interface ExpressInterface {
     public function setAddresses(string $address) : void;
 
     /**
+     * @return int
+     *
+     * This method will return the port of the server
+     */
+    public function getPort() : int;
+
+    /**
      * @return Socket|null
      *
      * This method will return the socket of the server
@@ -220,6 +227,8 @@ final class Express implements ExpressInterface {
 
     private static string $address = '127.0.0.1';
 
+    private static int $port = 3000;
+
     private bool $enable = true;
 
     private ?Socket $socket = null;
@@ -293,6 +302,10 @@ final class Express implements ExpressInterface {
         self::$address = $address;
     }
 
+    public function getPort() : int {
+        return self::$port;
+    }
+
     public function getSockets() : ?Socket {
         return $this->socket;
     }
@@ -331,7 +344,7 @@ final class Express implements ExpressInterface {
                 $replacePath = str_replace([$path, '\\'], ['', '/'], $file);
 
                 $this->get($replacePath, function ($req, $res) use ($replacePath, $type) {
-                    $res->render($replacePath, true, ['Content-Type: ' . $type]);
+                    $res->render($replacePath, true, false, ['Content-Type: ' . $type]);
                 });
             }
         }, array_keys($dotFiles), $dotFiles);
@@ -498,6 +511,8 @@ final class Express implements ExpressInterface {
      * @throws Throwable
      */
     public function listen(int $port, callable $callback) : void {
+        self::$port = $port;
+
         $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 
         if ($socket === false) {
