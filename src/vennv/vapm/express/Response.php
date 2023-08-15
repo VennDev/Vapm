@@ -74,7 +74,7 @@ interface ResponseInterface {
     /**
      * @throws Throwable
      */
-    public function active(string $path, array $options = ['Content-Type: text/html']) : AsyncInterface;
+    public function active(string $path) : AsyncInterface;
 
     /**
      * @throws Throwable
@@ -276,8 +276,8 @@ final class Response implements ResponseInterface {
     /**
      * @throws Throwable
      */
-    public function active(string $path, array $options = ['Content-Type: text/html']) : AsyncInterface {
-        return $this->render($path, true, true, $options);
+    public function active(string $path) : AsyncInterface {
+        return $this->render($path, true, true);
     }
 
     /**
