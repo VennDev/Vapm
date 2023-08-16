@@ -537,7 +537,7 @@ final class Express implements ExpressInterface {
     /**
      * @param string $path
      * @param array<int, string> $samplePaths
-     * @return array<int, string>|null
+     * @return array<int|string, string>|null
      */
     private function processChildPath(string $path, array $samplePaths) : ?array {
         if (!isset(self::$routes[$path])) return null;
@@ -548,7 +548,7 @@ final class Express implements ExpressInterface {
 
         $lastIndex = end($samplePaths);
         if ($lastIndex === false) {
-            $lastIndex = 0;
+            $lastIndex = [];
         }
 
         $lastPath = str_replace($path, '', $lastIndex);
