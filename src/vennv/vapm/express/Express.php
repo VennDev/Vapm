@@ -548,7 +548,7 @@ final class Express implements ExpressInterface {
 
         $lastIndex = end($samplePaths);
         if ($lastIndex === false) {
-            $lastIndex = count($samplePaths) - 1;
+            $lastIndex = 0;
         }
 
         $lastPath = str_replace($path, '', $lastIndex);
@@ -568,7 +568,7 @@ final class Express implements ExpressInterface {
      * @param Socket $client
      * @param string $data
      * @param string $method
-     * @param array<int, string> $finalRequest
+     * @param array<int|string, mixed> $finalRequest
      * @return Async
      * @throws Throwable
      */
