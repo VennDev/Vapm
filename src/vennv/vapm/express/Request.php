@@ -238,11 +238,12 @@ final class Request implements RequestInterface {
      * @return string|object
      */
     private function bodyToJson() : string|object {
+        $status = (string)Status::getStatusName($this->status);
         $data = [
             'method' => $this->method,
             'path' => $this->path,
             'protocol' => $this->protocol,
-            'status' => $this->status,
+            'status' => $status,
             'args' => $this->args
         ];
 
@@ -270,6 +271,9 @@ final class Request implements RequestInterface {
             }
         }
 
+        /**
+         * @var array<int, string>|string $data
+         */
         $encoding = mb_convert_encoding($data, 'UTF-8');
 
         if (!$options->strict) {
@@ -293,7 +297,9 @@ final class Request implements RequestInterface {
                 $data = json_encode($data);
             }
 
-            $data = gzinflate($data);
+            if (is_string($data)) {
+                $data = gzinflate($data);
+            }
         }
 
         return $data;
