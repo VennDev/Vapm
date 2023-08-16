@@ -45,7 +45,7 @@ final class Routes {
      * @param string $method
      * @param string $path
      * @param callable $callback
-     * @param array $params
+     * @param array<int|float|string, mixed> $params
      */
     public function __construct(string $method, string $path, callable $callback, array $params = []) {
         $this->method = $method;

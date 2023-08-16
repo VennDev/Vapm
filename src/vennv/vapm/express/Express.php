@@ -627,16 +627,16 @@ final class Express implements ExpressInterface {
 
                             unset($realPaths[0]); // Remove first element
 
-                            /** @var string $realPath */
-                            foreach ($realPaths as $realPath) {
-                                if (isset(self::$routes[$realPath]) && $canNext) {
-                                    $route = self::$routes[$realPath];
+                            /** @var string $samplePath */
+                            foreach ($realPaths as $samplePath) {
+                                if (isset(self::$routes[$samplePath]) && $canNext) {
+                                    $route = self::$routes[$samplePath];
 
                                     if (!$route->isRouteSpecial()) {
                                         continue;
                                     }
 
-                                    $lastPath = str_replace($realPath, '', end($realPaths));
+                                    $lastPath = str_replace($samplePath, '', end($realPaths));
                                     $params = explode('/', $lastPath);
 
                                     $resultParams = [];
