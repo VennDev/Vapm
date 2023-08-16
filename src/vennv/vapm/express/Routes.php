@@ -34,6 +34,9 @@ final class Routes {
 
     private mixed $callback;
 
+    /**
+     * @var array<int|float|string, mixed> $params
+     */
     private array $params = [];
 
     private bool $isRouteSpecial = false;
@@ -81,7 +84,7 @@ final class Routes {
     }
 
     /**
-     * @return array
+     * @return array<int|float|string, mixed>
      */
     public function getParams() : array {
         return $this->params;

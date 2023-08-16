@@ -211,9 +211,10 @@ final class Utils implements UtilsInterface {
         $temp = '';
 
         foreach ($parts as $part) {
-            if (!empty($temp)) {
+            if ($temp !== '') {
                 $temp .= '/';
             }
+
             $temp .= $part;
             $result[] = '/' . $temp;
         }

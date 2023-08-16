@@ -604,7 +604,11 @@ final class Express implements ExpressInterface {
                             Async::await($this->processRoute(self::$routes[$path], $client, $data, $method, $finalRequest));
                         } else {
                             $realPath = parse_url($path, PHP_URL_PATH);
-                            $realPaths = Utils::splitStringBySlash($realPath);
+                            if (is_string($realPath)) {
+                                $realPaths = Utils::splitStringBySlash($realPath);
+                            } else {
+                                $realPaths = [];
+                            }
 
                             $queriesResult = [];
                             $queries = parse_url($path, PHP_URL_QUERY);
@@ -623,6 +627,7 @@ final class Express implements ExpressInterface {
 
                             unset($realPaths[0]); // Remove first element
 
+                            /** @var string $realPath */
                             foreach ($realPaths as $realPath) {
                                 if (isset(self::$routes[$realPath]) && $canNext) {
                                     $route = self::$routes[$realPath];
