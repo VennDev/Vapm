@@ -535,6 +535,93 @@ final class Express implements ExpressInterface {
     }
 
     /**
+     * @param string $path
+     * @param array<int, string> $samplePaths
+     * @return array<int, string>|null
+     */
+    private function processChildPath(string $path, array $samplePaths) : ?array {
+        if (!isset(self::$routes[$path])) return null;
+
+        $route = self::$routes[$path];
+
+        if (!$route->isRouteSpecial()) return null;
+
+        $lastIndex = end($samplePaths);
+        if ($lastIndex === false) {
+            $lastIndex = count($samplePaths) - 1;
+        }
+
+        $lastPath = str_replace($path, '', $lastIndex);
+        $params = explode('/', $lastPath);
+
+        $resultParams = [];
+        foreach ($route->getParams() as $key => $param) {
+            $resultParams[$param] = $params[$key];
+        }
+
+        return $resultParams;
+    }
+
+    /**
+     * @param string $path
+     * @param bool $canNext
+     * @param Socket $client
+     * @param string $data
+     * @param string $method
+     * @param array<int, string> $finalRequest
+     * @return Async
+     * @throws Throwable
+     */
+    private function processPath(string $path, bool $canNext, Socket $client, string $data, string $method, array $finalRequest) : Async {
+        return new Async(function () use ($path, $canNext, $client, $data, $method, $finalRequest) : void {
+            $realPath = parse_url($path, PHP_URL_PATH);
+            if (is_string($realPath)) {
+                $realPaths = Utils::splitStringBySlash($realPath);
+            } else {
+                $realPaths = [];
+            }
+
+            $queriesResult = [];
+            $queries = parse_url($path, PHP_URL_QUERY);
+
+            if (is_string($queries)) {
+                $explode = explode('&', $queries);
+
+                foreach ($explode as $query) {
+                    $explodeQuery = explode('=', $query);
+
+                    if (count($explodeQuery) === 2) {
+                        $queriesResult[$explodeQuery[0]] = $explodeQuery[1];
+                    }
+                }
+            }
+
+            unset($realPaths[0]); // Remove first element
+
+            /** @var string $samplePath */
+            foreach ($realPaths as $samplePath) {
+                if (isset(self::$routes[$samplePath]) && $canNext) {
+                    $route = self::$routes[$samplePath];
+
+                    $resultParams = $this->processChildPath($samplePath, $realPaths);
+
+                    if ($resultParams === null) {
+                        continue;
+                    }
+
+                    if (count($resultParams) < count($route->getParams())) {
+                        // If the number of parameters is less than the number of parameters required by the route, continue
+                        continue;
+                    }
+
+                    Async::await($this->processRoute($route, $client, $data, $method, $finalRequest, $resultParams, $queriesResult));
+                    break;
+                }
+            }
+        });
+    }
+
+    /**
      * @throws Throwable
      */
     public function listen(int $port, callable $callback) : void {
@@ -603,56 +690,7 @@ final class Express implements ExpressInterface {
                         if (isset(self::$routes[$path]) && $canNext) {
                             Async::await($this->processRoute(self::$routes[$path], $client, $data, $method, $finalRequest));
                         } else {
-                            $realPath = parse_url($path, PHP_URL_PATH);
-                            if (is_string($realPath)) {
-                                $realPaths = Utils::splitStringBySlash($realPath);
-                            } else {
-                                $realPaths = [];
-                            }
-
-                            $queriesResult = [];
-                            $queries = parse_url($path, PHP_URL_QUERY);
-
-                            if (is_string($queries)) {
-                                $explode = explode('&', $queries);
-
-                                foreach ($explode as $query) {
-                                    $explodeQuery = explode('=', $query);
-
-                                    if (count($explodeQuery) === 2) {
-                                        $queriesResult[$explodeQuery[0]] = $explodeQuery[1];
-                                    }
-                                }
-                            }
-
-                            unset($realPaths[0]); // Remove first element
-
-                            /** @var string $samplePath */
-                            foreach ($realPaths as $samplePath) {
-                                if (isset(self::$routes[$samplePath]) && $canNext) {
-                                    $route = self::$routes[$samplePath];
-
-                                    if (!$route->isRouteSpecial()) {
-                                        continue;
-                                    }
-
-                                    $lastPath = str_replace($samplePath, '', end($realPaths));
-                                    $params = explode('/', $lastPath);
-
-                                    $resultParams = [];
-                                    foreach ($route->getParams() as $key => $param) {
-                                        $resultParams[$param] = $params[$key];
-                                    }
-
-                                    if (count($resultParams) < count($route->getParams())) {
-                                        // If the number of parameters is less than the number of parameters required by the route, continue
-                                        continue;
-                                    }
-
-                                    Async::await($this->processRoute($route, $client, $data, $method, $finalRequest, $resultParams, $queriesResult));
-                                    break;
-                                }
-                            }
+                            Async::await($this->processPath($path, $canNext, $client, $data, $method, $finalRequest));
                         }
                     }
 
