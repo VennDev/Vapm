@@ -44,17 +44,28 @@ use function is_bool;
 use function is_callable;
 use function array_slice;
 use function count;
+use function end;
 use function call_user_func;
 use function array_map;
 use function array_keys;
+use function parse_url;
 use const AF_INET;
 use const SOCK_STREAM;
 use const SOL_TCP;
+use const PHP_URL_PATH;
+use const PHP_URL_QUERY;
 
 /**
- * This is version 1.0.0-ALPHA10 of Express
+ * This is version 1.0.0-ALPHA11 of Express
  */
 interface ExpressInterface {
+
+    /**
+     * @return string
+     *
+     * This method will return the url of the server
+     */
+    public function getUrl() : string;
 
     /**
      * @param array<string, mixed> $options
@@ -236,6 +247,10 @@ final class Express implements ExpressInterface {
     public function __construct() {
         $this->options['static'] = new StaticData();
         $this->options['json'] = new JsonData();
+    }
+
+    public function getUrl() : string {
+        return self::$address . ':' . self::$port;
     }
 
     /**
@@ -472,8 +487,13 @@ final class Express implements ExpressInterface {
         array  $params = [],
         array  $queries = []
     ) : array {
-        $request = new Request($this, $client, $path, $dataClient, $method, $args, $params, $queries);
-        $response = new Response($this, $client, $path, $method, $args);
+        $response = new Response(
+            $this, $client, $path, $method, $args
+        );
+
+        $request = new Request(
+            $response, $this, $client, $path, $dataClient, $method, $args, $params, $queries
+        );
 
         return [$request, $response];
     }

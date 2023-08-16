@@ -33,6 +33,8 @@ use Exception;
 use function socket_write;
 use function implode;
 use function is_array;
+use function is_string;
+use function array_merge;
 use function str_replace;
 use function json_encode;
 use function mime_content_type;
@@ -40,6 +42,11 @@ use function pathinfo;
 use function ob_start;
 use function ob_end_clean;
 use function file_get_contents;
+use function gmdate;
+use function time;
+use function is_dir;
+use function stat;
+use function md5;
 use const PATHINFO_EXTENSION;
 
 interface ResponseInterface {
@@ -60,6 +67,13 @@ interface ResponseInterface {
      * @return array<int|float|string, mixed>
      */
     public function getArgs() : array;
+
+    /**
+     * @param string $key
+     * @param mixed $value
+     * @return void;
+     */
+    public function setHeader(string $key, string $value) : void;
 
     /**
      * @param string $path
@@ -134,13 +148,24 @@ final class Response implements ResponseInterface {
     private array $args;
 
     /**
+     * @var array<int, string>
+     */
+    private array $headers = [];
+
+    /**
      * @param Express $express
      * @param Socket $client
      * @param string $path
      * @param string $method
      * @param array<int|float|string, mixed> $args
      */
-    public function __construct(Express $express, Socket $client, string $path, string $method = '', array $args = []) {
+    public function __construct(
+        Express $express,
+        Socket  $client,
+        string  $path,
+        string  $method = '',
+        array   $args = []
+    ) {
         $this->express = $express;
         $this->client = $client;
         $this->method = $method;
@@ -189,36 +214,58 @@ final class Response implements ResponseInterface {
         $protocol = $this->protocol;
         $status = $this->status;
         $statusName = Status::getStatusName($status);
-
         $optionsStatic = $this->express->getOptionsStatic();
+
+        $hasDirect = false;
         if ($optionsStatic->enable) {
+            $file = $this->express->path() . $path;
+
+            if (is_callable($optionsStatic->setHeaders)) {
+                call_user_func($optionsStatic->setHeaders, $this, $path, stat($file));
+            }
+
             if ($optionsStatic->immutable) {
                 $options[] = 'Cache-Control: immutable';
             }
 
             if ($optionsStatic->lastModified) {
-                $options[] = 'Last-Modified: ' . gmdate('D, d M Y H:i:s', time()) . ' GMT';
+                $date = gmdate('D, d M Y H:i:s', time());
+                $options[] = 'Last-Modified: ' . $date . ' GMT';
             }
 
             if ($optionsStatic->etag) {
-                $options[] = 'ETag: ' . md5($this->path);
+                $md5 = md5($this->path);
+                $options[] = 'ETag: ' . $md5;
             }
 
             $options[] = 'Cache-Control: max-age=' . $optionsStatic->maxAge;
+
+            if ($optionsStatic->redirect && is_dir($file)) {
+                $options[] = 'Location: ' . $this->express->getUrl() . '/';
+                $options[] = 'Connection: close';
+                $hasDirect = true;
+            }
+        }
+
+        if ($status === Status::FOUND && !$hasDirect) {
+            $options[] = 'Location: ' . $this->express->getUrl() . $path;
+            $options[] = 'Connection: close';
         }
 
         if ($status === Status::OK) {
-            $options[] = 'Content-Type: ' . mime_content_type($this->path);
+            $mime = mime_content_type($this->path);
+            $options[] = 'Content-Type: ' . $mime;
         }
 
-        if ($status === Status::FOUND) {
-            $options[] = 'Location: http://' . $this->express->getAddresses() . ':' . $this->express->getPort() . $path;
-            $options[] = 'Connection: close';
-        }
+        $options = array_merge($options, $this->headers);
 
         $data = "$protocol $status $statusName\r\n" . implode("\r\n", $options) . "\r\n\r\n";
 
         socket_write($this->client, $data);
+    }
+
+    public function setHeader(string $key, string $value) : void {
+        $this->headers[] = $key . ': ' . $value;
     }
 
     /**

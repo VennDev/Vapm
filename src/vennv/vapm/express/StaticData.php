@@ -42,8 +42,6 @@ final class StaticData {
 
     public bool $immutable = false;
 
-    public mixed $index = 'index.html';
-
     public bool $lastModified = true;
 
     public int|float $maxAge = 0;

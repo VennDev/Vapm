@@ -25,6 +25,7 @@ namespace vennv\vapm\express;
 
 use RuntimeException;
 use function is_callable;
+use function count;
 
 final class Routes {
 

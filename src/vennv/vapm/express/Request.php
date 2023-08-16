@@ -28,7 +28,6 @@ use vennv\vapm\http\Protocol;
 use vennv\vapm\http\Status;
 use vennv\vapm\utils\Utils;
 use Socket;
-use RuntimeException;
 use function explode;
 use function str_replace;
 use function in_array;
@@ -37,29 +36,65 @@ use function call_user_func;
 use function is_callable;
 use function json_encode;
 use function gzinflate;
+use function mb_convert_encoding;
 
 interface RequestInterface {
 
+    /**
+     * @return Socket
+     *
+     * This method returns the client socket
+     */
     public function getClient() : Socket;
 
+    /**
+     * @return string
+     *
+     * This method returns the request method
+     */
     public function getMethod() : string;
 
+    /**
+     * @return string
+     *
+     * This method returns the request path
+     */
     public function getPath() : string;
 
+    /**
+     * @return string
+     *
+     * This method returns the request protocol
+     */
     public function getProtocol() : string;
 
+    /**
+     * @return int
+     *
+     * This method returns the request status
+     */
     public function getStatus() : int;
 
     /**
      * @return array<int|float|string, mixed>
+     *
+     * This method returns the request arguments
      */
     public function getArgs() : array;
 
+    /**
+     * @param string ...$types
+     * @return bool
+     *
+     * This method checks if the request accepts the type
+     */
     public function accepts(string ...$types) : bool;
 
 }
 
 final class Request implements RequestInterface {
+
+    private Response $response;
 
     private Express $express;
 
@@ -96,6 +131,7 @@ final class Request implements RequestInterface {
     public string|array|object $query;
 
     /**
+     * @param Response $response
      * @param Express $express
      * @param Socket $client
      * @param string $path
@@ -106,6 +142,7 @@ final class Request implements RequestInterface {
      * @param array<int|float|string, mixed> $query
      */
     public function __construct(
+        Response $response,
         Express $express,
         Socket  $client,
         string  $path,
@@ -115,6 +152,7 @@ final class Request implements RequestInterface {
         array   $params = [],
         array   $query = []
     ) {
+        $this->response = $response;
         $this->express = $express;
         $this->client = $client;
         $this->path = $path;
@@ -239,7 +277,7 @@ final class Request implements RequestInterface {
         }
 
         if ($options->verify !== null && is_callable($options->verify)) {
-            $data = call_user_func($options->verify, $data);
+            call_user_func($options->verify, $this, $this->response, $data, mb_convert_encoding($data, 'UTF-8'));
         }
 
         if ($options->inflate) {
