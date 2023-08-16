@@ -5,7 +5,7 @@
 
 # Version
 - Parallel/Concurrent: `1.8.0` - Includes: ```async await, promise, coroutines, threads, ...```
-- Express: `1.0.0-ALPHA10` - This is package like JavaScript. The near-completion methods total are: `70%` - Example: [Click](https://github.com/VennDev/VapmExpressExample)
+- Express: `1.0.0-ALPHA11` - This is package like JavaScript. The near-completion methods total are: `80%` - Example: [Click](https://github.com/VennDev/VapmExpressExample)
 
 # Next update?
 - Simply add some other asynchronous features so that this library is as similar to Javascript & Kotlin as possible.
