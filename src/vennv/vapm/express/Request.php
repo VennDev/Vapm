@@ -297,9 +297,7 @@ final class Request implements RequestInterface {
                 $data = (string)json_encode($data);
             }
 
-            if (is_string($data)) {
-                $data = (string)gzinflate($data);
-            }
+            $data = (string)gzinflate($data);
         }
 
         return $data;
