@@ -279,7 +279,7 @@ final class Request implements RequestInterface {
         if (!$options->strict) {
             $data = (object)$data;
         } else {
-            $data = json_encode($data);
+            $data = (string)json_encode($data);
         }
 
         if ($options->verify !== null && is_callable($options->verify)) {
@@ -294,11 +294,11 @@ final class Request implements RequestInterface {
 
         if ($options->inflate) {
             if (is_object($data)) {
-                $data = json_encode($data);
+                $data = (string)json_encode($data);
             }
 
             if (is_string($data)) {
-                $data = gzinflate($data);
+                $data = (string)gzinflate($data);
             }
         }
 
