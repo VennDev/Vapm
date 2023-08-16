@@ -557,7 +557,7 @@ final class Express implements ExpressInterface {
             $params = explode('/', $lastPath);
         } elseif (is_array($lastPath)) {
             foreach ($lastPath as $key => $value) {
-                $params[$key] = explode('/', $value);
+                $params[] = explode('/', $value);
             }
         }
 
