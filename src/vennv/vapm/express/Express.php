@@ -551,8 +551,15 @@ final class Express implements ExpressInterface {
             $lastIndex = [];
         }
 
+        $params = [];
         $lastPath = str_replace($path, '', $lastIndex);
-        $params = explode('/', $lastPath);
+        if (is_string($lastPath)) {
+            $params = explode('/', $lastPath);
+        } elseif (is_array($lastPath)) {
+            foreach ($lastPath as $key => $value) {
+                $params[$key] = explode('/', $value);
+            }
+        }
 
         $resultParams = [];
         foreach ($route->getParams() as $key => $param) {
