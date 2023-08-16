@@ -58,7 +58,7 @@ interface UtilsInterface {
     /**
      * Get all Dot files in a directory
      */
-    public static function getAllByDotFile(string $path, string $dotFile) : Generator ;
+    public static function getAllByDotFile(string $path, string $dotFile) : Generator;
 
     /**
      * @return array<int, string>|string
@@ -87,6 +87,13 @@ interface UtilsInterface {
      * Get bytes of a string or object or array
      */
     public static function getBytes(mixed $data) : int;
+
+    /**
+     * @return array<int, string>
+     *
+     * Split a string by slash
+     */
+    public static function splitStringBySlash(string $string) : array;
 
 }
 
@@ -191,6 +198,27 @@ final class Utils implements UtilsInterface {
         }
 
         return 0;
+    }
+
+    /**
+     * @return array<int, string>
+     *
+     * Split a string by slash
+     */
+    public static function splitStringBySlash(string $string) : array {
+        $parts = explode('/', $string);
+        $result = [];
+        $temp = '';
+
+        foreach ($parts as $part) {
+            if (!empty($temp)) {
+                $temp .= '/';
+            }
+            $temp .= $part;
+            $result[] = '/' . $temp;
+        }
+
+        return $result;
     }
 
 }

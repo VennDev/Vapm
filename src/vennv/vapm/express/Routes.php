@@ -34,15 +34,25 @@ final class Routes {
 
     private mixed $callback;
 
+    private array $params = [];
+
+    private bool $isRouteSpecial = false;
+
     /**
      * @param string $method
      * @param string $path
      * @param callable $callback
+     * @param array $params
      */
-    public function __construct(string $method, string $path, callable $callback) {
+    public function __construct(string $method, string $path, callable $callback, array $params = []) {
         $this->method = $method;
         $this->path = $path;
         $this->callback = $callback;
+        $this->params = $params;
+
+        if (count($params) > 0) {
+            $this->isRouteSpecial = true;
+        }
     }
 
     /**
@@ -68,6 +78,20 @@ final class Routes {
         }
 
         return $this->callback;
+    }
+
+    /**
+     * @return array
+     */
+    public function getParams() : array {
+        return $this->params;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isRouteSpecial() : bool {
+        return $this->isRouteSpecial;
     }
 
 }

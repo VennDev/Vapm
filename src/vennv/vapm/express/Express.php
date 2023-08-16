@@ -387,8 +387,13 @@ final class Express implements ExpressInterface {
             }
         }
 
+        $params = explode('/:', $path);
+        $path = $params[0];
+
+        unset($params[0]);
+
         if ($canDo) {
-            $route = new Routes($method, $path, $callback);
+            $route = new Routes($method, $path, $callback, $params);
             self::$routes[$path] = $route;
         }
     }
@@ -454,10 +459,20 @@ final class Express implements ExpressInterface {
      * @param string $dataClient
      * @param string $method
      * @param array<int|float|string, mixed> $args
+     * @param array<int|float|string, mixed> $params
+     * @param array<int|float|string, mixed> $queries
      * @return array<int, Request|Response>
      */
-    private function getCallbackFromRequest(Socket $client, string $path, string $dataClient, string $method, array $args = []) : array {
-        $request = new Request($this, $client, $path, $dataClient, $method, $args);
+    private function getCallbackFromRequest(
+        Socket $client,
+        string $path,
+        string $dataClient,
+        string $method,
+        array  $args = [],
+        array  $params = [],
+        array  $queries = []
+    ) : array {
+        $request = new Request($this, $client, $path, $dataClient, $method, $args, $params, $queries);
         $response = new Response($this, $client, $path, $method, $args);
 
         return [$request, $response];
@@ -469,16 +484,28 @@ final class Express implements ExpressInterface {
      * @param string $dataClient
      * @param string $method
      * @param array<int|float|string, mixed> $args
+     * @param array<int|float|string, mixed> $params
+     * @param array<int|float|string, mixed> $queries
      * @return Async
      * @throws Throwable
      */
-    private function processRoute(Routes $route, Socket $client, string $dataClient, string $method, array $args = []) : Async {
-        return new Async(function () use ($route, $client, $dataClient, $method, $args) : void {
+    private function processRoute(
+        Routes $route,
+        Socket $client,
+        string $dataClient,
+        string $method,
+        array  $args = [],
+        array  $params = [],
+        array  $queries = []
+    ) : Async {
+        return new Async(function () use (
+            $route, $client, $dataClient, $method, $args, $params, $queries
+        ) : void {
             $callback = $route->getCallback();
             $methodRequire = $route->getMethod();
 
             if ($methodRequire === $method || $methodRequire === Method::ALL) {
-                [$request, $response] = $this->getCallbackFromRequest($client, self::$path, $dataClient, $method, $args);
+                [$request, $response] = $this->getCallbackFromRequest($client, self::$path, $dataClient, $method, $args, $params, $queries);
                 Async::await(call_user_func($callback, $request, $response));
             }
         });
@@ -575,6 +602,52 @@ final class Express implements ExpressInterface {
 
                         if (isset(self::$routes[$path]) && $canNext) {
                             Async::await($this->processRoute(self::$routes[$path], $client, $data, $method, $finalRequest));
+                        } else {
+                            $realPath = parse_url($path, PHP_URL_PATH);
+                            $realPaths = Utils::splitStringBySlash($realPath);
+
+                            $queriesResult = [];
+                            $queries = parse_url($path, PHP_URL_QUERY);
+
+                            if (is_string($queries)) {
+                                $explode = explode('&', $queries);
+
+                                foreach ($explode as $query) {
+                                    $explodeQuery = explode('=', $query);
+
+                                    if (count($explodeQuery) === 2) {
+                                        $queriesResult[$explodeQuery[0]] = $explodeQuery[1];
+                                    }
+                                }
+                            }
+
+                            unset($realPaths[0]); // Remove first element
+
+                            foreach ($realPaths as $realPath) {
+                                if (isset(self::$routes[$realPath]) && $canNext) {
+                                    $route = self::$routes[$realPath];
+
+                                    if (!$route->isRouteSpecial()) {
+                                        continue;
+                                    }
+
+                                    $lastPath = str_replace($realPath, '', end($realPaths));
+                                    $params = explode('/', $lastPath);
+
+                                    $resultParams = [];
+                                    foreach ($route->getParams() as $key => $param) {
+                                        $resultParams[$param] = $params[$key];
+                                    }
+
+                                    if (count($resultParams) < count($route->getParams())) {
+                                        // If the number of parameters is less than the number of parameters required by the route, continue
+                                        continue;
+                                    }
+
+                                    Async::await($this->processRoute($route, $client, $data, $method, $finalRequest, $resultParams, $queriesResult));
+                                    break;
+                                }
+                            }
                         }
                     }
 

@@ -86,24 +86,48 @@ final class Request implements RequestInterface {
     public string|array|object $body;
 
     /**
+     * @var string|array<int|float|string, mixed>|object
+     */
+    public string|array|object $params;
+
+    /**
+     * @var string|array<int|float|string, mixed>|object
+     */
+    public string|array|object $query;
+
+    /**
      * @param Express $express
      * @param Socket $client
      * @param string $path
      * @param string $dataClient
      * @param string $method
      * @param array<int|float|string, mixed> $args
+     * @param array<int|float|string, mixed> $params
+     * @param array<int|float|string, mixed> $query
      */
-    public function __construct(Express $express, Socket $client, string $path, string $dataClient, string $method = '', array $args = []) {
+    public function __construct(
+        Express $express,
+        Socket  $client,
+        string  $path,
+        string  $dataClient,
+        string  $method = '',
+        array   $args = [],
+        array   $params = [],
+        array   $query = []
+    ) {
         $this->express = $express;
         $this->client = $client;
         $this->path = $path;
         $this->dataClient = $dataClient;
         $this->method = $method;
         $this->args = $args;
+        $this->params = $params;
         $this->body = $dataClient;
 
         if ($this->express->getOptionsJson()->enable) {
-            $this->body = $this->toJson();
+            $this->params = (object) $params;
+            $this->query = (object) $query;
+            $this->body = $this->bodyToJson();
         }
     }
 
@@ -175,7 +199,7 @@ final class Request implements RequestInterface {
     /**
      * @return string|object
      */
-    private function toJson() : string|object {
+    private function bodyToJson() : string|object {
         $data = [
             'method' => $this->method,
             'path' => $this->path,
