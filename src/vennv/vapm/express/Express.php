@@ -250,7 +250,7 @@ final class Express implements ExpressInterface {
     }
 
     public function getUrl() : string {
-        return self::$address . ':' . self::$port;
+        return 'http://' . self::$address . ':' . self::$port;
     }
 
     /**
