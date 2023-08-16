@@ -143,14 +143,14 @@ final class Request implements RequestInterface {
      */
     public function __construct(
         Response $response,
-        Express $express,
-        Socket  $client,
-        string  $path,
-        string  $dataClient,
-        string  $method = '',
-        array   $args = [],
-        array   $params = [],
-        array   $query = []
+        Express  $express,
+        Socket   $client,
+        string   $path,
+        string   $dataClient,
+        string   $method = '',
+        array    $args = [],
+        array    $params = [],
+        array    $query = []
     ) {
         $this->response = $response;
         $this->express = $express;
@@ -163,8 +163,8 @@ final class Request implements RequestInterface {
         $this->body = $dataClient;
 
         if ($this->express->getOptionsJson()->enable) {
-            $this->params = (object) $params;
-            $this->query = (object) $query;
+            $this->params = (object)$params;
+            $this->query = (object)$query;
             $this->body = $this->bodyToJson();
         }
     }
@@ -270,6 +270,8 @@ final class Request implements RequestInterface {
             }
         }
 
+        $encoding = mb_convert_encoding($data, 'UTF-8');
+
         if (!$options->strict) {
             $data = (object)$data;
         } else {
@@ -277,7 +279,13 @@ final class Request implements RequestInterface {
         }
 
         if ($options->verify !== null && is_callable($options->verify)) {
-            call_user_func($options->verify, $this, $this->response, $data, mb_convert_encoding($data, 'UTF-8'));
+            call_user_func(
+                $options->verify,
+                $this,
+                $this->response,
+                $data,
+                $encoding
+            );
         }
 
         if ($options->inflate) {

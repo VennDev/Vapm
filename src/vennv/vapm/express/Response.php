@@ -70,7 +70,7 @@ interface ResponseInterface {
 
     /**
      * @param string $key
-     * @param mixed $value
+     * @param string $value
      * @return void;
      */
     public function setHeader(string $key, string $value) : void;
@@ -264,6 +264,10 @@ final class Response implements ResponseInterface {
         socket_write($this->client, $data);
     }
 
+    /**
+     * @param string $key
+     * @param string $value
+     */
     public function setHeader(string $key, string $value) : void {
         $this->headers[] = $key . ': ' . $value;
     }
