@@ -368,6 +368,10 @@ class Express extends Router implements ExpressInterface {
             $path = $args[0];
             $param = $args[1];
 
+            if (!is_string($path)) {
+                throw new RuntimeException('Invalid path');
+            }
+
             if (!isset(self::$middlewares[$path])) {
                 self::$middlewares[$path] = [];
             }
@@ -620,6 +624,10 @@ class Express extends Router implements ExpressInterface {
         ) : void {
             $canNext = true;
             foreach (self::$middlewares['*'] as $middleware) {
+                if (!is_callable($middleware)) {
+                    continue;
+                }
+
                 $this->processMiddlewares($middleware, $request, $response, $canNext);
             }
 
