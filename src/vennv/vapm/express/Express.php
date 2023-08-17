@@ -36,21 +36,24 @@ use vennv\vapm\http\TypeData;
 use vennv\vapm\utils\Utils;
 use vennv\vapm\System;
 use RuntimeException;
+use Generator;
 use Throwable;
 use Socket;
-use function call_user_func;
-use function count;
 use function end;
+use function count;
 use function explode;
-use function is_callable;
 use function parse_url;
+use function is_callable;
 use function socket_accept;
+use function call_user_func;
 use function socket_bind;
 use function socket_create;
 use function socket_listen;
 use function socket_read;
 use function socket_set_nonblock;
 use function socket_set_option;
+use function socket_strerror;
+use function iterator_to_array;
 use const AF_INET;
 use const PHP_URL_PATH;
 use const PHP_URL_QUERY;
@@ -497,36 +500,47 @@ class Express extends Router implements ExpressInterface {
      * @param array<int|float|string, Route> $routes
      * @param string $path
      * @param array<int, string> $samplePaths
-     * @return array<int|string, array<int, string>|string>|null
+     * @return Generator
      */
-    private function processChildPath(array $routes, string $path, array $samplePaths) : ?array {
-        if (!isset($routes[$path])) return null;
-
+    private function processChildPath(array $routes, string $path, array $samplePaths) : Generator {
         $route = $routes[$path];
 
-        if (!$route->isRouteSpecial()) return null;
+        if (isset($routes[$path]) && $route->isRouteSpecial()) {
+            $lastIndex = end($samplePaths);
+            if ($lastIndex === false) {
+                $lastIndex = [];
+            }
 
-        $lastIndex = end($samplePaths);
-        if ($lastIndex === false) {
-            $lastIndex = [];
-        }
+            $params = [];
+            $lastPath = str_replace($path, '', $lastIndex);
+            if (is_string($lastPath)) {
+                $params = explode('/', $lastPath);
+            } else {
+                foreach ($lastPath as $key => $value) {
+                    $params[$key] = explode('/', $value);
+                }
+            }
 
-        $params = [];
-        $lastPath = str_replace($path, '', $lastIndex);
-        if (is_string($lastPath)) {
-            $params = explode('/', $lastPath);
-        } else {
-            foreach ($lastPath as $key => $value) {
-                $params[$key] = explode('/', $value);
+            foreach ($route->getParams() as $key => $param) {
+                yield $param => $params[$key];
             }
         }
+    }
 
-        $resultParams = [];
-        foreach ($route->getParams() as $key => $param) {
-            $resultParams[$param] = $params[$key];
+    private function processQueries(string $path) : Generator {
+        $queries = parse_url($path, PHP_URL_QUERY);
+
+        if (is_string($queries)) {
+            $explode = explode('&', $queries);
+
+            foreach ($explode as $query) {
+                $explodeQuery = explode('=', $query);
+
+                if (count($explodeQuery) === 2) {
+                    yield $explodeQuery[0] => $explodeQuery[1];
+                }
+            }
         }
-
-        return $resultParams;
     }
 
     /**
@@ -559,20 +573,8 @@ class Express extends Router implements ExpressInterface {
                 $realPaths = [];
             }
 
-            $queriesResult = [];
-            $queries = parse_url($path, PHP_URL_QUERY);
-
-            if (is_string($queries)) {
-                $explode = explode('&', $queries);
-
-                foreach ($explode as $query) {
-                    $explodeQuery = explode('=', $query);
-
-                    if (count($explodeQuery) === 2) {
-                        $queriesResult[$explodeQuery[0]] = $explodeQuery[1];
-                    }
-                }
-            }
+            /** @var array<int|float|string, mixed> $queriesResult */
+            $queriesResult = iterator_to_array($this->processQueries($path));
 
             unset($realPaths[0]); // Remove first element
 
@@ -581,9 +583,10 @@ class Express extends Router implements ExpressInterface {
                 if (isset($routes[$samplePath]) && $canNext) {
                     $route = $routes[$samplePath];
 
-                    $resultParams = $this->processChildPath($routes, $samplePath, $realPaths);
+                    /** @var array<int|float|string, mixed> $resultParams */
+                    $resultParams = iterator_to_array($this->processChildPath($routes, $samplePath, $realPaths));
 
-                    if ($resultParams === null) {
+                    if (empty($resultParams)) {
                         continue;
                     }
 
