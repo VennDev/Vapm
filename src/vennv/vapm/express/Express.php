@@ -557,7 +557,7 @@ class Express extends Router implements ExpressInterface {
      * @throws Throwable
      */
     private function processPath(
-        array $routes,
+        array  $routes,
         string $path,
         bool   $canNext,
         Socket $client,
@@ -649,17 +649,20 @@ class Express extends Router implements ExpressInterface {
             }
 
             $realPaths = Utils::splitStringBySlash($path);
-            $realPath = $realPaths[0];
-            if (isset(self::$middlewares[$realPath])) {
-                foreach (self::$middlewares[$realPath] as $router) {
-                    if ($router instanceof Router) {
-                        foreach ($router->routes as $childRouter) {
+            unset($realPaths[0]); // Remove first element
 
-                            $childPath = str_replace($realPath, '/', $path);
-                            if ($childRouter->getPath() === $childPath) {
-                                Async::await($this->processRoute($childRouter, $client, $data, $method, $finalRequest));
-                            } else {
-                                Async::await($this->processPath($router->routes, $path, $canNext, $client, $data, $method, $finalRequest));
+            foreach ($realPaths as $realPath) {
+                if (isset(self::$middlewares[$realPath])) {
+                    foreach (self::$middlewares[$realPath] as $router) {
+                        if ($router instanceof Router) {
+                            foreach ($router->routes as $childRouter) {
+
+                                $childPath = str_replace($realPath, '', $path);
+                                if ($childRouter->getPath() === $childPath) {
+                                    Async::await($this->processRoute($childRouter, $client, $data, $method, $finalRequest));
+                                } else {
+                                    Async::await($this->processPath($router->routes, $path, $canNext, $client, $data, $method, $finalRequest));
+                                }
                             }
                         }
                     }
