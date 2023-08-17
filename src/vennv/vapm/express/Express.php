@@ -567,7 +567,7 @@ class Express extends Router implements ExpressInterface {
     ) : Async {
         return new Async(function () use (
             $routes, $path, $canNext, $client, $data, $method, $finalRequest
-        ) : void {
+        ) : bool {
             $realPath = parse_url($path, PHP_URL_PATH);
             if (is_string($realPath)) {
                 $realPaths = Utils::splitStringBySlash($realPath);
@@ -598,9 +598,11 @@ class Express extends Router implements ExpressInterface {
                     }
 
                     Async::await($this->processRoute($route, $client, $data, $method, $finalRequest, $resultParams, $queriesResult));
-                    break;
+                    return true;
                 }
             }
+
+            return false;
         });
     }
 
@@ -661,8 +663,10 @@ class Express extends Router implements ExpressInterface {
                                 if ($childRouter->getPath() === $childPath) {
                                     Async::await($this->processRoute($childRouter, $client, $data, $method, $finalRequest));
                                 } else {
-                                    Async::await($this->processPath($router->routes, $path, $canNext, $client, $data, $method, $finalRequest));
+                                    Async::await($this->processPath($router->routes, $childPath, $canNext, $client, $data, $method, $finalRequest));
                                 }
+
+                                break;
                             }
                         }
                     }
