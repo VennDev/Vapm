@@ -505,25 +505,27 @@ class Express extends Router implements ExpressInterface {
     private function processChildPath(array $routes, string $path, array $samplePaths) : Generator {
         $route = $routes[$path];
 
-        if (isset($routes[$path]) && $route->isRouteSpecial()) {
-            $lastIndex = end($samplePaths);
-            if ($lastIndex === false) {
-                $lastIndex = [];
-            }
+        if (!isset($routes[$path]) && !$route->isRouteSpecial()) {
+            yield 'null' => null;
+        }
 
-            $params = [];
-            $lastPath = str_replace($path, '', $lastIndex);
-            if (is_string($lastPath)) {
-                $params = explode('/', $lastPath);
-            } else {
-                foreach ($lastPath as $key => $value) {
-                    $params[$key] = explode('/', $value);
-                }
-            }
+        $lastIndex = end($samplePaths);
+        if ($lastIndex === false) {
+            $lastIndex = [];
+        }
 
-            foreach ($route->getParams() as $key => $param) {
-                yield $param => $params[$key];
+        $params = [];
+        $lastPath = str_replace($path, '', $lastIndex);
+        if (is_string($lastPath)) {
+            $params = explode('/', $lastPath);
+        } else {
+            foreach ($lastPath as $key => $value) {
+                $params[$key] = explode('/', $value);
             }
+        }
+
+        foreach ($route->getParams() as $key => $param) {
+            yield $param => $params[$key];
         }
     }
 
@@ -586,7 +588,7 @@ class Express extends Router implements ExpressInterface {
                     /** @var array<int|float|string, mixed> $resultParams */
                     $resultParams = iterator_to_array($this->processChildPath($routes, $samplePath, $realPaths));
 
-                    if (empty($resultParams)) {
+                    if (isset($resultParams['null'])) {
                         continue;
                     }
 
