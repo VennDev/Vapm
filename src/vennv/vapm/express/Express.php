@@ -525,6 +525,10 @@ class Express extends Router implements ExpressInterface {
         }
 
         foreach ($route->getParams() as $key => $param) {
+            if (!isset($params[$key])) {
+                continue;
+            }
+
             yield $param => $params[$key];
         }
     }
