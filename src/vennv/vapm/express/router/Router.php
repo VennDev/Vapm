@@ -48,6 +48,10 @@ use function array_merge;
 use function str_replace;
 use function explode;
 use function count;
+use function end;
+use function parse_url;
+use function iterator_to_array;
+use const PHP_URL_PATH;
 
 interface RouterInterface {
 
@@ -377,10 +381,6 @@ class Router implements RouterInterface {
      * @param Request $request
      * @param Response $response
      * @param bool $canNext
-     * @param Socket $client
-     * @param string $data
-     * @param string $method
-     * @param array<int|string, mixed> $finalRequest
      * @return Async
      * @throws Throwable
      */
@@ -389,14 +389,10 @@ class Router implements RouterInterface {
         string   $path,
         Request  $request,
         Response $response,
-        bool     &$canNext,
-        Socket   $client,
-        string   $data,
-        string   $method,
-        array    $finalRequest
+        bool     &$canNext
     ) : Async {
         return new Async(function () use (
-            $express, $path, $request, $response, &$canNext, $client, $data, $method, $finalRequest
+            $express, $path, $request, $response, &$canNext
         ) : void {
             foreach ($this->middlewares['*'] as $middleware) {
                 if (!is_callable($middleware)) {
@@ -510,7 +506,7 @@ class Router implements RouterInterface {
         ) : void {
             $canNext = true;
 
-            Async::await($this->processMiddlewares($express, $path, $request, $response, $canNext, $client, $data, $method, $finalRequest));
+            Async::await($this->processMiddlewares($express, $path, $request, $response, $canNext));
 
             $realPaths = Utils::splitStringBySlash($path);
             unset($realPaths[0]); // Remove first element

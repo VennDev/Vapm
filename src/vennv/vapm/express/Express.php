@@ -52,7 +52,7 @@ use const SOCK_STREAM;
 use const SOL_TCP;
 
 /**
- * This is version 1.0.0-ALPHA11 of Express
+ * This is version 1.0.0-ALPHA13 of Express
  */
 interface ExpressInterface {
 
