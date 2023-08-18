@@ -254,7 +254,12 @@ final class Response implements ResponseInterface {
         }
 
         if ($status === Status::OK) {
-            $mime = mime_content_type($this->path);
+            if (is_dir($this->path)) {
+                $mime = mime_content_type($this->path);
+            } else {
+                $mime = 'text/html';
+            }
+
             $options[] = 'Content-Type: ' . $mime;
         }
 

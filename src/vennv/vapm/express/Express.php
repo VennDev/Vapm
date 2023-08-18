@@ -43,7 +43,6 @@ use function end;
 use function count;
 use function explode;
 use function parse_url;
-use function is_callable;
 use function socket_accept;
 use function call_user_func;
 use function socket_bind;
@@ -94,20 +93,6 @@ interface ExpressInterface {
      * This is a built-in middleware function in Express. It parses incoming requests with urlencoded payloads and is based on body-parser.
      */
     public function static(array $options = ['enable' => true]) : callable;
-
-    /**
-     * @return JsonData
-     *
-     * This method will return the json data of the server
-     */
-    public function getOptionsJson() : JsonData;
-
-    /**
-     * @return StaticData
-     *
-     * This method will return the static data of the server
-     */
-    public function getOptionsStatic() : StaticData;
 
     /**
      * @return string
@@ -180,11 +165,6 @@ interface ExpressInterface {
     public function disabled() : bool;
 
     /**
-     * @param string|callable|Router ...$args
-     */
-    public function use(string|callable|Router ...$args) : void;
-
-    /**
      * @throws Throwable
      *
      * This method will start the server
@@ -197,20 +177,6 @@ class Express extends Router implements ExpressInterface {
 
     public const LENGTH_BUFFER = 1024; // The length of the buffer to read the data
 
-    public const NEXT = 'next';
-
-    /**
-     * @var array<string, mixed>
-     */
-    private array $options = [];
-
-    /**
-     * @var array<string|float|int, array<string|float|int, callable|Router>>
-     */
-    private static array $middlewares = ['*' => []];
-
-    private static string $path = '';
-
     private static string $address = '127.0.0.1';
 
     private static int $port = 3000;
@@ -220,8 +186,7 @@ class Express extends Router implements ExpressInterface {
     private ?Socket $socket = null;
 
     public function __construct() {
-        $this->options['static'] = new StaticData();
-        $this->options['json'] = new JsonData();
+        parent::__construct();
     }
 
     public function getUrl() : string {
@@ -261,33 +226,6 @@ class Express extends Router implements ExpressInterface {
         return $this->getCallbackUpdateOptions('static', $options);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    private function getOptions() : array {
-        return $this->options;
-    }
-
-    public function getOptionsJson() : JsonData {
-        $result = $this->getOptions()['json'];
-
-        if (!$result instanceof JsonData) {
-            throw new RuntimeException('Invalid json options');
-        }
-
-        return $result;
-    }
-
-    public function getOptionsStatic() : StaticData {
-        $result = $this->getOptions()['static'];
-
-        if (!$result instanceof StaticData) {
-            throw new RuntimeException('Invalid static options');
-        }
-
-        return $result;
-    }
-
     public function getAddresses() : string {
         return self::$address;
     }
@@ -304,12 +242,8 @@ class Express extends Router implements ExpressInterface {
         return $this->socket;
     }
 
-    public function path() : string {
-        return self::$path;
-    }
-
     public function setPath(string $path) : void {
-        self::$path = $path;
+        $this->path = $path;
 
         $dotFiles = TypeData::DOT_FILES_IGNORE;
 
@@ -362,27 +296,6 @@ class Express extends Router implements ExpressInterface {
 
     public function disabled() : bool {
         return !$this->enable;
-    }
-
-    public function use(string|callable|Router ...$args) : void {
-        if (is_callable($args[0])) {
-            self::$middlewares['*'][] = $args[0];
-        } else {
-            $path = $args[0];
-            $param = $args[1];
-
-            if (!is_string($path)) {
-                throw new RuntimeException('Invalid path');
-            }
-
-            if (!isset(self::$middlewares[$path])) {
-                self::$middlewares[$path] = [];
-            }
-
-            if (is_callable($param) || $param instanceof Router) {
-                self::$middlewares[$path][] = $param;
-            }
-        }
     }
 
     /**
@@ -465,35 +378,12 @@ class Express extends Router implements ExpressInterface {
 
             if ($methodRequire === $method || $methodRequire === Method::ALL) {
                 [$request, $response] = $this->getCallbackFromRequest(
-                    $client, self::$path, $dataClient, $method, $args, $params, $queries
+                    $client, $this->path, $dataClient, $method, $args, $params, $queries
                 );
 
                 Async::await(call_user_func($callback, $request, $response));
             }
         });
-    }
-
-    /**
-     * @param callable $callback
-     * @param Request $request
-     * @param Response $response
-     * @param bool $canNext
-     * @return bool
-     */
-    private function processMiddlewares(callable $callback, Request $request, Response $response, bool &$canNext) : bool {
-        if (!$this->getOptionsStatic()->fallthrough) {
-            if (!file_exists($this->path())) {
-                return false;
-            }
-        }
-
-        $dataCallBack = call_user_func($callback, $request, $response, fn() => self::NEXT);
-
-        if ($dataCallBack !== self::NEXT) {
-            return $canNext = false;
-        }
-
-        return true;
     }
 
     /**
@@ -634,36 +524,21 @@ class Express extends Router implements ExpressInterface {
             $path, $request, $response, $client, $data, $method, $finalRequest
         ) : void {
             $canNext = true;
-            foreach (self::$middlewares['*'] as $middleware) {
-                if (!is_callable($middleware)) {
-                    continue;
-                }
 
-                $this->processMiddlewares($middleware, $request, $response, $canNext);
-            }
-
-            if (isset(self::$middlewares[$path])) {
-                foreach (self::$middlewares[$path] as $middleware) {
-                    if (!$middleware instanceof Router) {
-                        $result = $this->processMiddlewares($middleware, $request, $response, $canNext);
-
-                        if (!$result) {
-                            break;
-                        }
-                    }
-                }
-            }
+            Async::await($this->processMiddlewares($path, $request, $response, $canNext));
 
             $realPaths = Utils::splitStringBySlash($path);
             unset($realPaths[0]); // Remove first element
 
             foreach ($realPaths as $realPath) {
-                if (isset(self::$middlewares[$realPath])) {
-                    foreach (self::$middlewares[$realPath] as $router) {
+                if (isset($this->middlewares[$realPath])) {
+                    foreach ($this->middlewares[$realPath] as $router) {
                         if ($router instanceof Router) {
                             foreach ($router->routes as $childRouter) {
-
                                 $childPath = str_replace($realPath, '', $path);
+
+                                Async::await($router->processMiddlewares($childPath, $request, $response, $canNext));
+
                                 if ($childRouter->getPath() === $childPath) {
                                     Async::await($this->processRoute($childRouter, $client, $data, $method, $finalRequest));
                                 } else {
