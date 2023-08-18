@@ -125,6 +125,7 @@ class Router implements RouterInterface {
     protected string $path = '';
 
     /**
+     * @param array<string, mixed> $options
      * @throws Exception
      */
     public function __construct(array $options = []) {
