@@ -376,7 +376,6 @@ class Router implements RouterInterface {
     }
 
     /**
-     * @param Express $express
      * @param string $path
      * @param Request $request
      * @param Response $response
@@ -385,14 +384,13 @@ class Router implements RouterInterface {
      * @throws Throwable
      */
     private function processMiddlewares(
-        Express  $express,
         string   $path,
         Request  $request,
         Response $response,
         bool     &$canNext
     ) : Async {
         return new Async(function () use (
-            $express, $path, $request, $response, &$canNext
+            $path, $request, $response, &$canNext
         ) : void {
             foreach ($this->middlewares['*'] as $middleware) {
                 if (!is_callable($middleware)) {
@@ -506,7 +504,7 @@ class Router implements RouterInterface {
         ) : void {
             $canNext = true;
 
-            Async::await($this->processMiddlewares($express, $path, $request, $response, $canNext));
+            Async::await($this->processMiddlewares($path, $request, $response, $canNext));
 
             $realPaths = Utils::splitStringBySlash($path);
             unset($realPaths[0]); // Remove first element
