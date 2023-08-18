@@ -95,6 +95,13 @@ interface UtilsInterface {
      */
     public static function splitStringBySlash(string $string) : array;
 
+    /**
+     * @return false|string
+     *
+     * Replace path
+     */
+    public static function replacePath(string $path, string $segment) : false|string;
+
 }
 
 final class Utils implements UtilsInterface {
@@ -220,6 +227,20 @@ final class Utils implements UtilsInterface {
         }
 
         return $result;
+    }
+
+    /**
+     * @return false|string
+     *
+     * Replace path
+     */
+    public static function replacePath(string $path, string $segment) : false|string {
+        $pos = strpos($path, $segment);
+        if ($pos === false) {
+            return false;
+        }
+
+        return substr($path, $pos + strlen($segment));
     }
 
 }

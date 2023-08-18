@@ -46,6 +46,9 @@ use function is_bool;
 use function strtolower;
 use function array_merge;
 use function str_replace;
+use function strpos;
+use function strlen;
+use function substr;
 use function explode;
 use function count;
 use function end;
@@ -513,7 +516,11 @@ class Router implements RouterInterface {
                 if (isset($this->middlewares[$realPath])) {
                     foreach ($this->middlewares[$realPath] as $router) {
                         if ($router instanceof Router) {
-                            $childPath = str_replace($realPath, '', $path);
+                            $childPath = Utils::replacePath($path, $realPath);
+                            if ($childPath === false) {
+                                continue;
+                            }
+
                             Async::await($router->processWorks($express, $childPath, $request, $response, $client, $data, $method, $finalRequest));
                         }
                     }
