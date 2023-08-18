@@ -37,6 +37,8 @@ use function implode;
 use function array_slice;
 use function is_string;
 use function strlen;
+use function strpos;
+use function substr;
 use function is_object;
 use function is_array;
 use function serialize;
