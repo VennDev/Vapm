@@ -23,8 +23,6 @@ declare(strict_types = 1);
 
 namespace vennv\vapm\express\router;
 
-use Generator;
-use Socket;
 use vennv\vapm\Async;
 use vennv\vapm\express\data\JsonData;
 use vennv\vapm\express\data\RouterData;
@@ -33,10 +31,12 @@ use vennv\vapm\express\Express;
 use vennv\vapm\express\handlers\Request;
 use vennv\vapm\express\handlers\Response;
 use vennv\vapm\http\Method;
+use vennv\vapm\utils\Utils;
 use RuntimeException;
 use Throwable;
 use Exception;
-use vennv\vapm\utils\Utils;
+use Generator;
+use Socket;
 use function array_slice;
 use function call_user_func;
 use function file_exists;
