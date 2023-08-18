@@ -29,20 +29,15 @@ use vennv\vapm\express\data\JsonData;
 use vennv\vapm\express\data\StaticData;
 use vennv\vapm\express\handlers\Request;
 use vennv\vapm\express\handlers\Response;
-use vennv\vapm\express\router\Route;
 use vennv\vapm\express\router\Router;
-use vennv\vapm\http\Method;
 use vennv\vapm\http\TypeData;
 use vennv\vapm\utils\Utils;
 use vennv\vapm\System;
 use RuntimeException;
-use Generator;
 use Throwable;
 use Socket;
-use function end;
 use function count;
 use function explode;
-use function parse_url;
 use function socket_accept;
 use function call_user_func;
 use function socket_bind;
@@ -52,10 +47,7 @@ use function socket_read;
 use function socket_set_nonblock;
 use function socket_set_option;
 use function socket_strerror;
-use function iterator_to_array;
 use const AF_INET;
-use const PHP_URL_PATH;
-use const PHP_URL_QUERY;
 use const SOCK_STREAM;
 use const SOL_TCP;
 
@@ -321,246 +313,6 @@ class Express extends Router implements ExpressInterface {
     }
 
     /**
-     * @param Socket $client
-     * @param string $path
-     * @param string $dataClient
-     * @param string $method
-     * @param array<int|float|string, mixed> $args
-     * @param array<int|float|string, mixed> $params
-     * @param array<int|float|string, mixed> $queries
-     * @return array<int, Request|Response>
-     */
-    private function getCallbackFromRequest(
-        Socket $client,
-        string $path,
-        string $dataClient,
-        string $method,
-        array  $args = [],
-        array  $params = [],
-        array  $queries = []
-    ) : array {
-        $response = new Response(
-            $this, $client, $path, $method, $args
-        );
-
-        $request = new Request(
-            $response, $this, $client, $path, $dataClient, $method, $args, $params, $queries
-        );
-
-        return [$request, $response];
-    }
-
-    /**
-     * @param Route $route
-     * @param Socket $client
-     * @param string $dataClient
-     * @param string $method
-     * @param array<int|float|string, mixed> $args
-     * @param array<int|float|string, mixed> $params
-     * @param array<int|float|string, mixed> $queries
-     * @return Async
-     * @throws Throwable
-     */
-    private function processRoute(
-        Route  $route,
-        Socket $client,
-        string $dataClient,
-        string $method,
-        array  $args = [],
-        array  $params = [],
-        array  $queries = []
-    ) : Async {
-        return new Async(function () use (
-            $route, $client, $dataClient, $method, $args, $params, $queries
-        ) : void {
-            $callback = $route->getCallback();
-            $methodRequire = $route->getMethod();
-
-            if ($methodRequire === $method || $methodRequire === Method::ALL) {
-                [$request, $response] = $this->getCallbackFromRequest(
-                    $client, $this->path, $dataClient, $method, $args, $params, $queries
-                );
-
-                Async::await(call_user_func($callback, $request, $response));
-            }
-        });
-    }
-
-    /**
-     * @param array<int|float|string, Route> $routes
-     * @param string $path
-     * @param array<int, string> $samplePaths
-     * @return Generator
-     */
-    private function processChildPath(array $routes, string $path, array $samplePaths) : Generator {
-        $route = $routes[$path];
-
-        if (!isset($routes[$path]) && !$route->isRouteSpecial()) {
-            yield 'null' => null;
-        }
-
-        $lastIndex = end($samplePaths);
-        if ($lastIndex === false) {
-            $lastIndex = [];
-        }
-
-        $params = [];
-        $lastPath = str_replace($path, '', $lastIndex);
-        if (is_string($lastPath)) {
-            $params = explode('/', $lastPath);
-        } else {
-            foreach ($lastPath as $key => $value) {
-                $params[$key] = explode('/', $value);
-            }
-        }
-
-        foreach ($route->getParams() as $key => $param) {
-            if (!isset($params[$key])) {
-                continue;
-            }
-
-            yield $param => $params[$key];
-        }
-    }
-
-    private function processQueries(string $path) : Generator {
-        $queries = parse_url($path, PHP_URL_QUERY);
-
-        if (is_string($queries)) {
-            $explode = explode('&', $queries);
-
-            foreach ($explode as $query) {
-                $explodeQuery = explode('=', $query);
-
-                if (count($explodeQuery) === 2) {
-                    yield $explodeQuery[0] => $explodeQuery[1];
-                }
-            }
-        }
-    }
-
-    /**
-     * @param array<int|float|string, Route> $routes
-     * @param string $path
-     * @param bool $canNext
-     * @param Socket $client
-     * @param string $data
-     * @param string $method
-     * @param array<int|string, mixed> $finalRequest
-     * @return Async
-     * @throws Throwable
-     */
-    private function processPath(
-        array  $routes,
-        string $path,
-        bool   $canNext,
-        Socket $client,
-        string $data,
-        string $method,
-        array  $finalRequest
-    ) : Async {
-        return new Async(function () use (
-            $routes, $path, $canNext, $client, $data, $method, $finalRequest
-        ) : bool {
-            $realPath = parse_url($path, PHP_URL_PATH);
-            if (is_string($realPath)) {
-                $realPaths = Utils::splitStringBySlash($realPath);
-            } else {
-                $realPaths = [];
-            }
-
-            /** @var array<int|float|string, mixed> $queriesResult */
-            $queriesResult = iterator_to_array($this->processQueries($path));
-
-            unset($realPaths[0]); // Remove first element
-
-            /** @var string $samplePath */
-            foreach ($realPaths as $samplePath) {
-                if (isset($routes[$samplePath]) && $canNext) {
-                    $route = $routes[$samplePath];
-
-                    /** @var array<int|float|string, mixed> $resultParams */
-                    $resultParams = iterator_to_array($this->processChildPath($routes, $samplePath, $realPaths));
-
-                    if (isset($resultParams['null'])) {
-                        continue;
-                    }
-
-                    if (count($resultParams) < count($route->getParams())) {
-                        // If the number of parameters is less than the number of parameters required by the route, continue
-                        continue;
-                    }
-
-                    Async::await($this->processRoute($route, $client, $data, $method, $finalRequest, $resultParams, $queriesResult));
-                    return true;
-                }
-            }
-
-            return false;
-        });
-    }
-
-    /**
-     * @param string $path
-     * @param Request $request
-     * @param Response $response
-     * @param Socket $client
-     * @param string $data
-     * @param string $method
-     * @param array<int|float|string, mixed> $finalRequest
-     * @return Async
-     * @throws Throwable
-     */
-    private function processWorks(
-        string   $path,
-        Request  $request,
-        Response $response,
-        Socket   $client,
-        string   $data,
-        string   $method,
-        array    $finalRequest
-    ) : Async {
-        return new Async(function () use (
-            $path, $request, $response, $client, $data, $method, $finalRequest
-        ) : void {
-            $canNext = true;
-
-            Async::await($this->processMiddlewares($path, $request, $response, $canNext));
-
-            $realPaths = Utils::splitStringBySlash($path);
-            unset($realPaths[0]); // Remove first element
-
-            foreach ($realPaths as $realPath) {
-                if (isset($this->middlewares[$realPath])) {
-                    foreach ($this->middlewares[$realPath] as $router) {
-                        if ($router instanceof Router) {
-                            foreach ($router->routes as $childRouter) {
-                                $childPath = str_replace($realPath, '', $path);
-
-                                Async::await($router->processMiddlewares($childPath, $request, $response, $canNext));
-
-                                if ($childRouter->getPath() === $childPath) {
-                                    Async::await($this->processRoute($childRouter, $client, $data, $method, $finalRequest));
-                                } else {
-                                    Async::await($this->processPath($router->routes, $childPath, $canNext, $client, $data, $method, $finalRequest));
-                                }
-
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (isset($this->routes[$path]) && $canNext) {
-                Async::await($this->processRoute($this->routes[$path], $client, $data, $method, $finalRequest));
-            } else {
-                Async::await($this->processPath($this->routes, $path, $canNext, $client, $data, $method, $finalRequest));
-            }
-        });
-    }
-
-    /**
      * @throws Throwable
      */
     public function listen(int $port, callable $callback) : void {
@@ -609,9 +361,9 @@ class Express extends Router implements ExpressInterface {
                          * @var Request $request
                          * @var Response $response
                          */
-                        [$request, $response] = $this->getCallbackFromRequest($client, $path, $data, $method, $finalRequest);
+                        [$request, $response] = $this->getCallbackFromRequest($this, $client, $path, $data, $method, $finalRequest);
 
-                        Async::await($this->processWorks($path, $request, $response, $client, $data, $method, $finalRequest));
+                        Async::await($this->processWorks($this, $path, $request, $response, $client, $data, $method, $finalRequest));
                     }
 
                     socket_close($client);
