@@ -91,11 +91,11 @@ interface UtilsInterface {
     public static function getBytes(mixed $data) : int;
 
     /**
-     * @return array<int, string>
+     * @return Generator
      *
      * Split a string by slash
      */
-    public static function splitStringBySlash(string $string) : array;
+    public static function splitStringBySlash(string $string) : Generator;
 
     /**
      * @return false|string
@@ -103,6 +103,13 @@ interface UtilsInterface {
      * Replace path
      */
     public static function replacePath(string $path, string $segment) : false|string;
+
+    /**
+     * @return array<int, string>|string|null
+     *
+     * Replace advanced
+     */
+    public static function replaceAdvanced(string $text, string $search, string $replace) : array|string|null;
 
 }
 
@@ -210,25 +217,19 @@ final class Utils implements UtilsInterface {
     }
 
     /**
-     * @return array<int, string>
+     * @return Generator
      *
      * Split a string by slash
      */
-    public static function splitStringBySlash(string $string) : array {
+    public static function splitStringBySlash(string $string) : Generator {
         $parts = explode('/', $string);
-        $result = [];
-        $temp = '';
 
-        foreach ($parts as $part) {
-            if ($temp !== '') {
-                $temp .= '/';
+        foreach ($parts as $value) {
+            $path = '/' . $value;
+            if ($path !== '/') {
+                yield $path;
             }
-
-            $temp .= $part;
-            $result[] = '/' . $temp;
         }
-
-        return $result;
     }
 
     /**
@@ -243,6 +244,15 @@ final class Utils implements UtilsInterface {
         }
 
         return substr($path, $pos + strlen($segment));
+    }
+
+    /**
+     * @return array<int, string>|string|null
+     *
+     * Replace advanced
+     */
+    public static function replaceAdvanced(string $text, string $search, string $replace) : array|string|null {
+        return preg_replace('/(?<!-)(' . $search . ')(?!d)/', $replace, $text);
     }
 
 }

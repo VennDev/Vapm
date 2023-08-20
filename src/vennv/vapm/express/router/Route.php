@@ -38,7 +38,7 @@ final class Route {
     /**
      * @var array<int|float|string, mixed> $params
      */
-    private array $params = [];
+    private array $params;
 
     private bool $isRouteSpecial = false; // This route is special, it is link route with params
 

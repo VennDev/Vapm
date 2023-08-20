@@ -65,11 +65,6 @@ interface ResponseInterface {
     public function status(int $status) : ResponseInterface;
 
     /**
-     * @return array<int|float|string, mixed>
-     */
-    public function getArgs() : array;
-
-    /**
      * @param string $key
      * @param string $value
      * @return void;
@@ -144,34 +139,34 @@ final class Response implements ResponseInterface {
     private int $status = Status::OK;
 
     /**
-     * @var array<int|float|string, mixed>
-     */
-    private array $args;
-
-    /**
      * @var array<int, string>
      */
     private array $headers = [];
+
+    /**
+     * @var array<int|float|string, mixed>
+     */
+    private array $params;
 
     /**
      * @param Express $express
      * @param Socket $client
      * @param string $path
      * @param string $method
-     * @param array<int|float|string, mixed> $args
+     * @param array<int|float|string, mixed> $params
      */
     public function __construct(
         Express $express,
         Socket  $client,
         string  $path,
         string  $method = '',
-        array   $args = []
+        array   $params = []
     ) {
         $this->express = $express;
         $this->client = $client;
         $this->method = $method;
         $this->path = $path;
-        $this->args = $args;
+        $this->params = $params;
     }
 
     public function getClient() : Socket {
@@ -198,13 +193,6 @@ final class Response implements ResponseInterface {
         $this->status = $status;
 
         return $this;
-    }
-
-    /**
-     * @return array<int|float|string, mixed>
-     */
-    public function getArgs() : array {
-        return $this->args;
     }
 
     /**
@@ -303,7 +291,7 @@ final class Response implements ResponseInterface {
                 $function = str_replace(['/', '.php'], '', $path);
 
                 if (function_exists($function)) {
-                    $body = Async::await($function($this->args));
+                    $body = Async::await($function($this->params));
                 } else {
                     $body = file_get_contents($this->path . $path);
                 }

@@ -77,11 +77,18 @@ interface RequestInterface {
     public function getStatus() : int;
 
     /**
-     * @return array<int|float|string, mixed>
+     * @return array|object
      *
-     * This method returns the request arguments
+     * This method returns the request params
      */
-    public function getArgs() : array;
+    public function getParams() : array|object;
+
+    /**
+     * @return array|object
+     *
+     * This method returns the request queries
+     */
+    public function getQueries() : array|object;
 
     /**
      * @param string ...$types
@@ -112,24 +119,19 @@ final class Request implements RequestInterface {
     private int $status = Status::OK;
 
     /**
-     * @var array<int|float|string, mixed>
+     * @var array<int|float|string, mixed>|string $body
      */
-    private array $args;
+    public array|string $body;
 
     /**
-     * @var string|array<int|float|string, mixed>|object
+     * @var array<int|float|string, mixed> $params
      */
-    public string|array|object $body;
+    public array $params;
 
     /**
-     * @var string|array<int|float|string, mixed>|object
+     * @var array<int|float|string, mixed> $queries
      */
-    public string|array|object $params;
-
-    /**
-     * @var string|array<int|float|string, mixed>|object
-     */
-    public string|array|object $query;
+    public array $queries;
 
     /**
      * @param Response $response
@@ -138,9 +140,8 @@ final class Request implements RequestInterface {
      * @param string $path
      * @param string $dataClient
      * @param string $method
-     * @param array<int|float|string, mixed> $args
      * @param array<int|float|string, mixed> $params
-     * @param array<int|float|string, mixed> $query
+     * @param array<int|float|string, mixed> $queries
      */
     public function __construct(
         Response $response,
@@ -149,9 +150,8 @@ final class Request implements RequestInterface {
         string   $path,
         string   $dataClient,
         string   $method = '',
-        array    $args = [],
         array    $params = [],
-        array    $query = []
+        array    $queries = []
     ) {
         $this->response = $response;
         $this->express = $express;
@@ -159,15 +159,9 @@ final class Request implements RequestInterface {
         $this->path = $path;
         $this->dataClient = $dataClient;
         $this->method = $method;
-        $this->args = $args;
         $this->params = $params;
+        $this->queries = $queries;
         $this->body = $dataClient;
-
-        if ($this->express->getOptionsJson()->enable) {
-            $this->params = (object)$params;
-            $this->query = (object)$query;
-            $this->body = $this->bodyToJson();
-        }
     }
 
     public function getClient() : Socket {
@@ -190,11 +184,20 @@ final class Request implements RequestInterface {
         return $this->status;
     }
 
-    /**
-     * @return array<int|float|string, mixed>
-     */
-    public function getArgs() : array {
-        return $this->args;
+    public function getParams() : array|object {
+        if ($this->express->getOptionsJson()->enable) {
+            return json_decode(json_encode($this->params));
+        } else {
+            return $this->params;
+        }
+    }
+
+    public function getQueries() : array|object {
+        if ($this->express->getOptionsJson()->enable) {
+            return json_decode(json_encode($this->queries));
+        } else {
+            return $this->queries;
+        }
     }
 
     public function accepts(string ...$types) : bool {
@@ -244,8 +247,7 @@ final class Request implements RequestInterface {
             'method' => $this->method,
             'path' => $this->path,
             'protocol' => $this->protocol,
-            'status' => $status,
-            'args' => $this->args
+            'status' => $status
         ];
 
         $headers = explode("\r\n", $this->dataClient);

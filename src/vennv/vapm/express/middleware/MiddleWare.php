@@ -21,16 +21,25 @@
 
 declare(strict_types = 1);
 
-namespace vennv\vapm\express\data;
+namespace vennv\vapm\express\middleware;
 
-use vennv\vapm\utils\Property;
+final class MiddleWare {
 
-final class RouterData {
+    public string $path;
 
-    use Property;
+    public mixed $callback;
 
-    public bool $caseSensitive = false;
+    public array $params;
 
-    public bool $strict = false;
+    /**
+     * @param string $path
+     * @param callable $callback
+     * @param array<int|float|string, mixed> $params
+     */
+    public function __construct(string $path, callable $callback, array $params = []) {
+        $this->path = $path;
+        $this->callback = $callback;
+        $this->params = $params;
+    }
 
 }
