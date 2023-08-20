@@ -2,11 +2,10 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-use vennv\vapm\CoroutineGen;
-use vennv\vapm\Deferred;
+use vennv\vapm\simultaneous\CoroutineGen;
+use vennv\vapm\System;
 
-$time = microtime(true);
-
+System::time();
 CoroutineGen::runBlocking(
     function() : Generator {
         yield from CoroutineGen::delay(3000);
@@ -42,4 +41,4 @@ CoroutineGen::runBlocking(
         var_dump("H");
     }
 );
-var_dump(microtime(true) - $time);
+System::timeEnd();

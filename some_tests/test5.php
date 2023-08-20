@@ -2,7 +2,7 @@
 
 require 'vendor/autoload.php';
 
-use vennv\vapm\Thread;
+use vennv\vapm\simultaneous\Thread;
 
 class TestThread extends Thread {
 

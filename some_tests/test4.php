@@ -4,9 +4,6 @@ require 'vendor/autoload.php';
 
 include "test5.php";
 
-use vennv\vapm\Async;
-use vennv\vapm\System;
-
 $class = new TestThread();
 $class->start()->then(function ($data) {
     echo "Thread finished: " . implode(", ", $data) . "\n";
@@ -17,5 +14,3 @@ $class->start()->then(function ($data) {
 });
 
 var_dump(11);
-
-System::runSingleEventLoop();

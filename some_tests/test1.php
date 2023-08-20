@@ -2,33 +2,54 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-use vennv\vapm\Async;
-use vennv\vapm\Promise;
+use vennv\vapm\simultaneous\Promise;
 use vennv\vapm\System;
 
-function request($type) {
-    return new Promise(function ($resolve, $reject) use ($type) {
-        System::setTimeout(function () use ($resolve, $reject, $type) {
-            $type === 'success' ? $resolve('success') : $reject('error');
+function testPromise1() : Promise {
+    return new Promise(function ($resolve, $reject) {
+        System::setTimeout(function () use ($resolve) {
+            $resolve("A");
         }, 1000);
     });
 }
 
-function getData() {
-    new Async(function () {
-        [$data, $error] = Async::await(handleRequest(request('success')));
-        if ($error) {
-            echo $error;
-        } else {
-            echo $data;
-        }
+function testPromise2() : Promise {
+    return new Promise(function ($resolve, $reject) {
+        System::setTimeout(function () use ($resolve) {
+            $resolve("B");
+        }, 1000);
     });
 }
 
-function handleRequest(Promise $promise) {
-    return $promise->then(fn($data) => [$data, null])->catch(fn($error) => [null, $error]);
+function testPromise3() : Promise {
+    return new Promise(function ($resolve, $reject) {
+        System::setTimeout(function () use ($resolve) {
+            $resolve("C");
+        }, 1000);
+    });
 }
 
-getData();
+function testPromise4() : Promise {
+    return new Promise(function ($resolve, $reject) {
+        System::setTimeout(function () use ($resolve) {
+            $resolve("D");
+        }, 1000);
+    });
+}
 
-System::runSingleEventLoop();
+testPromise1()->then(function ($value) {
+    var_dump($value);
+    return testPromise2();
+})->then(function ($value) {
+    var_dump($value);
+    return testPromise3();
+})->then(function ($value) {
+    var_dump($value);
+    return testPromise4();
+})->then(function ($value) {
+    var_dump($value);
+})->catch(function ($value) {
+    var_dump($value);
+})->finally(function() {
+    var_dump("Complete!");
+});

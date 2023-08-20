@@ -2,9 +2,9 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-use vennv\vapm\CoroutineGen;
-use vennv\vapm\CoroutineScope;
-use vennv\vapm\Dispatchers;
+use vennv\vapm\simultaneous\CoroutineGen;
+use vennv\vapm\simultaneous\CoroutineScope;
+use vennv\vapm\simultaneous\Dispatchers;
 
 $scope = new CoroutineScope(Dispatchers::IO);
 
@@ -19,5 +19,3 @@ $scope->launch(function () {
 });
 
 CoroutineGen::runBlocking($scope);
-
-\vennv\vapm\System::runSingleEventLoop();
