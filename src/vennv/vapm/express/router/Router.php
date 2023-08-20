@@ -23,7 +23,6 @@ declare(strict_types = 1);
 
 namespace vennv\vapm\express\router;
 
-use vennv\vapm\Async;
 use vennv\vapm\express\data\JsonData;
 use vennv\vapm\express\data\RouterData;
 use vennv\vapm\express\data\StaticData;
@@ -32,6 +31,7 @@ use vennv\vapm\express\handlers\Request;
 use vennv\vapm\express\handlers\Response;
 use vennv\vapm\express\middleware\MiddleWare;
 use vennv\vapm\http\Method;
+use vennv\vapm\simultaneous\Async;
 use vennv\vapm\utils\Utils;
 use RuntimeException;
 use Throwable;

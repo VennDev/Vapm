@@ -23,14 +23,14 @@ declare(strict_types = 1);
 
 namespace vennv\vapm\express\handlers;
 
-use vennv\vapm\Async;
-use vennv\vapm\AsyncInterface;
 use vennv\vapm\express\Express;
 use vennv\vapm\http\Protocol;
 use vennv\vapm\http\Status;
 use Socket;
 use Throwable;
 use Exception;
+use vennv\vapm\simultaneous\Async;
+use vennv\vapm\simultaneous\AsyncInterface;
 use function socket_write;
 use function implode;
 use function is_array;
@@ -271,7 +271,7 @@ final class Response implements ResponseInterface {
      * @param bool $usePath
      * @param bool $justActive
      * @param array<int|float|string, mixed> $options
-     * @return AsyncInterface
+     * @return Async
      * @throws Throwable
      */
     public function render(
@@ -279,7 +279,7 @@ final class Response implements ResponseInterface {
         bool   $usePath = true,
         bool   $justActive = false,
         array  $options = ['Content-Type: text/html']
-    ) : AsyncInterface {
+    ) : Async {
         if (!$justActive) $this->buildHeader($path, $options);
 
         return new Async(function () use ($path, $usePath, $justActive) : void {
