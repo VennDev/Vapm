@@ -272,11 +272,15 @@ class Router implements RouterInterface {
         $childPaths = iterator_to_array(Utils::splitStringBySlash($path));
         $params = array_map(
             /**
-             * @param int $index
-             * @param string $path
+             * @param int|string $index
+             * @param mixed $path
              * @return string|null
              */
-            function (int $index, string $path) use ($middleWare, &$requireA, &$requireB, &$countParams) : ?string {
+            function (int|string $index, mixed $path) use ($middleWare, &$requireA, &$requireB, &$countParams) : ?string {
+                if (!is_string($path) || !is_int($index)) {
+                    return null;
+                }
+
                 $requireC = $this->path != $path && $middleWare->path != $path;
 
                 if ($this->path == $path) $requireA = true;
