@@ -23,15 +23,15 @@ declare(strict_types = 1);
 
 namespace vennv\vapm\express\router;
 
+use vennv\vapm\express\Express;
 use vennv\vapm\express\data\JsonData;
 use vennv\vapm\express\data\RouterData;
 use vennv\vapm\express\data\StaticData;
-use vennv\vapm\express\Express;
 use vennv\vapm\express\handlers\Request;
 use vennv\vapm\express\handlers\Response;
 use vennv\vapm\express\middleware\MiddleWare;
-use vennv\vapm\http\Method;
 use vennv\vapm\simultaneous\Async;
+use vennv\vapm\http\Method;
 use vennv\vapm\utils\Utils;
 use RuntimeException;
 use Throwable;
@@ -39,7 +39,10 @@ use Exception;
 use Generator;
 use Socket;
 use function array_slice;
-use function array_search;
+use function array_map;
+use function array_merge;
+use function array_keys;
+use function array_filter;
 use function call_user_func;
 use function file_exists;
 use function is_callable;
@@ -264,14 +267,33 @@ class Router implements RouterInterface {
     }
 
     private function processRequest(MiddleWare|Route $middleWare, string $path, Request $request) : void {
+        $requireA = $requireB = false;
+        $countParams = count($middleWare->params);
         $childPaths = iterator_to_array(Utils::splitStringBySlash($path));
-        $indexPath = array_search($middleWare->path, $childPaths, true);
-        if (count($middleWare->params) > 0 && $indexPath !== false && !is_string($indexPath)) {
-            for ($i = 1; $i <= count($middleWare->params); $i++) {
-                $index = $middleWare->params[$i];
-                $value = $childPaths[$indexPath + $i] ?? null;
+        $params = array_map(function ($index, $path) use ($middleWare, &$requireA, &$requireB, &$countParams) {
+            $requireC = $this->path != $path && $middleWare->path != $path;
 
-                $request->params[$index] = !is_array($value) && !is_string($value) ? null : str_replace('/', '', $value);
+            if ($this->path == $path) $requireA = true;
+
+            if ($middleWare->path == $path) $requireB = true;
+
+            if ($requireA && $requireB && $requireC && $countParams > 0) {
+                $countParams--;
+                return str_replace('/', '', $path);
+            }
+
+            return null;
+        }, array_keys($childPaths), $childPaths);
+
+        $params = array_filter($params, fn($value) => $value !== null);
+
+        if (!$this->routerData->mergeParams) {
+            $request->params = [];
+        }
+
+        foreach ($params as $value) {
+            foreach ($middleWare->params as $param) {
+                $request->params[$param] = $value;
             }
         }
     }
@@ -381,13 +403,13 @@ class Router implements RouterInterface {
      * @throws Throwable
      */
     private function processMiddlewares(
-        string   &$path,
+        string   $path,
         Request  &$request,
         Response &$response,
         bool     &$canNext
     ) : Async {
         return new Async(function () use (
-            &$path, &$request, &$response, &$canNext
+            $path, &$request, &$response, &$canNext
         ) : void {
             foreach ($this->middlewares['*'] as $middleware) {
                 $this->processMiddleware($path, $middleware, $request, $response, $canNext);
@@ -442,7 +464,7 @@ class Router implements RouterInterface {
      */
     public function processWorks(
         Express  $express,
-        string   &$path,
+        string   $path,
         Request  &$request,
         Response &$response,
         Socket   $client,
@@ -451,7 +473,7 @@ class Router implements RouterInterface {
         array    $finalRequest
     ) : Async {
         return new Async(function () use (
-            $express, &$path, &$request, &$response, $client, $data, $method, $finalRequest
+            $express, $path, &$request, &$response, $client, $data, $method, $finalRequest
         ) : void {
             $queries = iterator_to_array($this->processQueries($path));
             $path = parse_url($path, PHP_URL_PATH);
@@ -540,6 +562,7 @@ class Router implements RouterInterface {
                 }
 
                 if ($param instanceof Router) {
+                    $param->path = $path;
                     $this->middlewares[$path][] = $param;
                 }
 

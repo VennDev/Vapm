@@ -23,17 +23,18 @@ declare(strict_types = 1);
 
 namespace vennv\vapm\express;
 
+use vennv\vapm\System;
 use vennv\vapm\express\data\JsonData;
 use vennv\vapm\express\data\StaticData;
 use vennv\vapm\express\handlers\Request;
 use vennv\vapm\express\handlers\Response;
 use vennv\vapm\express\router\Router;
-use vennv\vapm\http\TypeData;
 use vennv\vapm\simultaneous\Async;
 use vennv\vapm\simultaneous\Error;
-use vennv\vapm\System;
+use vennv\vapm\http\TypeData;
 use vennv\vapm\utils\Utils;
 use RuntimeException;
+use Exception;
 use Socket;
 use Throwable;
 use function call_user_func;
@@ -52,7 +53,7 @@ use const SOCK_STREAM;
 use const SOL_TCP;
 
 /**
- * This is version 1.0.0-ALPHA14 of Express
+ * This is version 1.0.0-ALPHA15 of Express
  * This is version still in development, so it is not recommended to use it in production
  */
 interface ExpressInterface {
@@ -186,8 +187,11 @@ class Express extends Router implements ExpressInterface {
         return 'http://' . self::$address . ':' . self::$port;
     }
 
-    public function router() : Router {
-        return new Router();
+    /**
+     * @throws Exception
+     */
+    public function router(array $options = []) : Router {
+        return new Router($options);
     }
 
     /**

@@ -31,6 +31,6 @@ final class RouterData {
 
     public bool $caseSensitive = false;
 
-    public bool $strict = false;
+    public bool $mergeParams = false;
 
 }

@@ -23,12 +23,12 @@ declare(strict_types = 1);
 
 namespace vennv\vapm\express\handlers;
 
-use Socket;
 use vennv\vapm\express\Express;
 use vennv\vapm\http\Protocol;
 use vennv\vapm\http\Status;
 use vennv\vapm\simultaneous\Error;
 use vennv\vapm\utils\Utils;
+use Socket;
 use function call_user_func;
 use function count;
 use function explode;
