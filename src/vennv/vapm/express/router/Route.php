@@ -29,18 +29,18 @@ use function is_callable;
 
 final class Route {
 
-    private string $method;
+    public string $method;
 
-    private string $path;
+    public string $path;
 
-    private mixed $callback;
+    public mixed $callback;
 
     /**
      * @var array<int|float|string, mixed> $params
      */
-    private array $params;
+    public array $params;
 
-    private bool $isRouteSpecial = false; // This route is special, it is link route with params
+    public bool $isRouteSpecial = false; // This route is special, it is link route with params
 
     /**
      * @param string $method

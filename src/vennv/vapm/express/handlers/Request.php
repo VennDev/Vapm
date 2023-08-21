@@ -77,14 +77,14 @@ interface RequestInterface {
     public function getStatus() : int;
 
     /**
-     * @return array|object
+     * @return array<int|float|string, mixed>|object
      *
      * This method returns the request params
      */
     public function getParams() : array|object;
 
     /**
-     * @return array|object
+     * @return array<int|float|string, mixed>|object
      *
      * This method returns the request queries
      */
@@ -184,20 +184,34 @@ final class Request implements RequestInterface {
         return $this->status;
     }
 
-    public function getParams() : array|object {
-        if ($this->express->getOptionsJson()->enable) {
-            return json_decode(json_encode($this->params));
+    /**
+     * @return array<int|float|string, mixed>|object
+     */
+    private function encodeArray(array $array) : array|object {
+        $encode = json_encode($array);
+        if ($this->express->getOptionsJson()->enable && $encode !== false) {
+            return json_decode($encode);
         } else {
             return $this->params;
         }
     }
 
+    /**
+     * @return array<int|float|string, mixed>|object
+     *
+     * This method returns the request params
+     */
+    public function getParams() : array|object {
+        return $this->encodeArray($this->params);
+    }
+
+    /**
+     * @return array<int|float|string, mixed>|object
+     *
+     * This method returns the request params
+     */
     public function getQueries() : array|object {
-        if ($this->express->getOptionsJson()->enable) {
-            return json_decode(json_encode($this->queries));
-        } else {
-            return $this->queries;
-        }
+        return $this->encodeArray($this->queries);
     }
 
     public function accepts(string ...$types) : bool {

@@ -29,6 +29,9 @@ final class MiddleWare {
 
     public mixed $callback;
 
+    /**
+     * @var array<int|float|string, mixed> $params
+     */
     public array $params;
 
     /**

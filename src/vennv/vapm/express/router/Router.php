@@ -153,6 +153,11 @@ class Router implements RouterInterface {
         $this->routerData = $update;
     }
 
+    /**
+     * @param string $path
+     * @param mixed ...$args
+     * @return array<int, mixed>
+     */
     private function getResults(string $path, mixed ...$args) : array {
         $options = $this->routerData;
 
@@ -252,6 +257,19 @@ class Router implements RouterInterface {
         }
     }
 
+    private function processRequest(MiddleWare|Route $middleWare, string $path, Request $request) : void {
+        $childPaths = iterator_to_array(Utils::splitStringBySlash($path));
+        $indexPath = array_search($middleWare->path, $childPaths);
+        if (count($middleWare->params) > 0 && $indexPath !== false && !is_string($indexPath)) {
+            for ($i = 1; $i <= count($middleWare->params); $i++) {
+                $index = $middleWare->params[$i];
+                $value = $childPaths[$indexPath + $i] ?? null;
+
+                $request->params[$index] = $value === null ? null : str_replace('/', '', $value);
+            }
+        }
+    }
+
     /**
      * @param string $path
      * @param mixed $middleWare
@@ -271,16 +289,7 @@ class Router implements RouterInterface {
             }
         }
 
-        $childPaths = iterator_to_array(Utils::splitStringBySlash($path));
-        $indexPath = array_search($middleWare->path, $childPaths);
-        if (count($middleWare->params) > 0 && $indexPath !== false && !is_string($indexPath)) {
-            for ($i = 1; $i <= count($middleWare->params); $i++) {
-                $index = $middleWare->params[$i];
-                $value = $childPaths[$indexPath + $i] ?? null;
-
-                $request->params[$index] = $value === null ? null : str_replace('/', '', $value);
-            }
-        }
+        $this->processRequest($middleWare, $path, $request);
 
         $dataCallBack = call_user_func($middleWare->callback, $request, $response, fn() => self::NEXT);
 
@@ -351,26 +360,9 @@ class Router implements RouterInterface {
             $callback = $route->getCallback();
             $methodRequire = $route->getMethod();
 
-            $pathRemake = Utils::replacePath($path, $route->getPath());
-            if ($pathRemake !== false) {
-                $path = $pathRemake;
-            }
-
             $request->queries = array_merge($request->queries, $queries);
 
-            $childPaths = iterator_to_array(Utils::splitStringBySlash($path));
-            $indexPath = array_search($route->getPath(), $childPaths);
-
-            if (count($route->getParams()) > 0 && $indexPath !== false && !is_string($indexPath)) {
-                for ($i = 0; $i <= count($route->getParams()); $i++) {
-                    if (isset($route->getParams()[$i + 1])) {
-                        $index = $route->getParams()[$i + 1];
-                        $value = $childPaths[$indexPath + $i] ?? null;
-
-                        $request->params[$index] = $value === null ? null : str_replace('/', '', $value);
-                    }
-                }
-            }
+            $this->processRequest($route, $path, $request);
 
             if ($methodRequire === $method || $methodRequire === Method::ALL) {
                 Async::await(call_user_func($callback, $request, $response));
