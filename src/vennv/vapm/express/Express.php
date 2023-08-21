@@ -23,9 +23,6 @@ declare(strict_types = 1);
 
 namespace vennv\vapm\express;
 
-use RuntimeException;
-use Socket;
-use Throwable;
 use vennv\vapm\express\data\JsonData;
 use vennv\vapm\express\data\StaticData;
 use vennv\vapm\express\handlers\Request;
@@ -36,6 +33,9 @@ use vennv\vapm\simultaneous\Async;
 use vennv\vapm\simultaneous\Error;
 use vennv\vapm\System;
 use vennv\vapm\utils\Utils;
+use RuntimeException;
+use Socket;
+use Throwable;
 use function call_user_func;
 use function count;
 use function explode;

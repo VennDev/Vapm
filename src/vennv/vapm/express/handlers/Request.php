@@ -91,6 +91,11 @@ interface RequestInterface {
     public function getQueries() : mixed;
 
     /**
+     * @return string|object
+     */
+    public function getBody() : string|object;
+
+    /**
      * @param string ...$types
      * @return bool
      *
@@ -256,7 +261,7 @@ final class Request implements RequestInterface {
     /**
      * @return string|object
      */
-    private function bodyToJson() : string|object {
+    public function getBody() : string|object {
         $status = (string)Status::getStatusName($this->status);
         $data = [
             'method' => $this->method,
