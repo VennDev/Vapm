@@ -19,64 +19,31 @@
  * GNU General Public License for more details.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace vennv\vapm\simultaneous;
 
 use Closure;
-use ReflectionException;
 use SplQueue;
 use Generator;
 use Throwable;
+use ReflectionException;
+use vennv\api\simultaneous\CoroutineGenInterface;
+
 use function call_user_func;
 
-interface CoroutineGenInterface {
-
-    /**
-     * @param mixed ...$coroutines
-     * @return void
-     *
-     * This is a blocking function that runs all the coroutines passed to it.
-     */
-    public static function runBlocking(mixed ...$coroutines) : void;
-
-    /**
-     * @param callable $callback
-     * @param int $times
-     * @return Closure
-     *
-     * This is a generator that runs a callback function a specified amount of times.
-     */
-    public static function repeat(callable $callback, int $times) : Closure;
-
-    /**
-     * @param int $milliseconds
-     * @return Generator
-     *
-     * This is a generator that yields for a specified amount of milliseconds.
-     */
-    public static function delay(int $milliseconds) : Generator;
-
-    /**
-     * @param mixed ...$callback
-     * @return CoroutineScope
-     *
-     * This is a generator that runs a callback function.
-     */
-    public static function launch(mixed ...$callback) : CoroutineScope;
-
-}
-
-final class CoroutineGen implements CoroutineGenInterface {
-
+final class CoroutineGen implements CoroutineGenInterface
+{
     protected static ?SplQueue $taskQueue = null;
 
     /**
-     * @throws Throwable
      * @param mixed ...$coroutines
+     *
      * @return void
+     * @throws Throwable
      */
-    public static function runBlocking(mixed ...$coroutines) : void {
+    public static function runBlocking(mixed ...$coroutines): void
+    {
         foreach ($coroutines as $coroutine) {
             if (is_callable($coroutine)) {
                 $coroutine = call_user_func($coroutine);
@@ -94,12 +61,63 @@ final class CoroutineGen implements CoroutineGenInterface {
         self::run();
     }
 
+    private static function schedule(ChildCoroutine|CoroutineScope $childCoroutine): void
+    {
+        if (self::$taskQueue === null) {
+            self::$taskQueue = new SplQueue();
+        }
+
+        self::$taskQueue->enqueue($childCoroutine);
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Throwable
+     */
+    private static function run(): void
+    {
+        if (is_null(self::$taskQueue)) return;
+
+        while (!self::$taskQueue->isEmpty()) {
+            $coroutine = self::$taskQueue->dequeue();
+
+            if ($coroutine instanceof ChildCoroutine) {
+                $coroutine->run();
+
+                if (!$coroutine->isFinished()) {
+                    self::schedule($coroutine);
+                }
+            }
+
+            if ($coroutine instanceof CoroutineScope) {
+                $coroutine->run();
+
+                if (!$coroutine->isFinished()) {
+                    self::schedule($coroutine);
+                }
+            }
+        }
+    }
+
+    public static function repeat(callable $callback, int $times): Closure
+    {
+        for ($i = 0; $i <= $times; $i++) {
+            if (call_user_func($callback) instanceof Generator) {
+                $callback = self::processCoroutine($callback);
+            }
+        }
+
+        return fn() => null;
+    }
+
     /**
      * @param mixed ...$coroutines
+     *
      * @return Closure
      */
-    private static function processCoroutine(mixed ...$coroutines) : Closure {
-        return function () use ($coroutines) : void {
+    private static function processCoroutine(mixed ...$coroutines): Closure
+    {
+        return function () use ($coroutines): void {
             foreach ($coroutines as $coroutine) {
                 if ($coroutine instanceof CoroutineScope) {
                     self::schedule($coroutine);
@@ -118,17 +136,8 @@ final class CoroutineGen implements CoroutineGenInterface {
         };
     }
 
-    public static function repeat(callable $callback, int $times) : Closure {
-        for ($i = 0; $i <= $times; $i++) {
-            if (call_user_func($callback) instanceof Generator) {
-                $callback = self::processCoroutine($callback);
-            }
-        }
-
-        return fn() => null;
-    }
-
-    public static function delay(int $milliseconds) : Generator {
+    public static function delay(int $milliseconds): Generator
+    {
         for ($i = 0; $i < GeneratorManager::calculateSeconds($milliseconds); $i++) {
             yield;
         }
@@ -138,47 +147,12 @@ final class CoroutineGen implements CoroutineGenInterface {
      * @throws ReflectionException
      * @throws Throwable
      */
-    public static function launch(mixed ...$callback) : CoroutineScope {
+    public static function launch(mixed ...$callback): CoroutineScope
+    {
         $coroutine = new CoroutineScope();
         $coroutine->launch(...$callback);
 
         return $coroutine;
-    }
-
-    private static function schedule(ChildCoroutine|CoroutineScope $childCoroutine) : void {
-        if (self::$taskQueue === null) {
-            self::$taskQueue = new SplQueue();
-        }
-
-        self::$taskQueue->enqueue($childCoroutine);
-    }
-
-    /**
-     * @throws ReflectionException
-     * @throws Throwable
-     */
-    private static function run() : void {
-        if (self::$taskQueue !== null) {
-            while (!self::$taskQueue->isEmpty()) {
-                $coroutine = self::$taskQueue->dequeue();
-
-                if ($coroutine instanceof ChildCoroutine) {
-                    $coroutine->run();
-
-                    if (!$coroutine->isFinished()) {
-                        self::schedule($coroutine);
-                    }
-                }
-
-                if ($coroutine instanceof CoroutineScope) {
-                    $coroutine->run();
-
-                    if (!$coroutine->isFinished()) {
-                        self::schedule($coroutine);
-                    }
-                }
-            }
-        }
     }
 
 }

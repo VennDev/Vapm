@@ -19,36 +19,25 @@
  * GNU General Public License for more details.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace vennv\vapm\simultaneous;
 
 use Fiber;
 use Throwable;
+use vennv\api\simultaneous\FiberManagerInterface;
+
 use function is_null;
 
-interface FiberManagerInterface {
-
-    /**
-     * @throws Throwable
-     *
-     * This is a function that waits for the current fiber to finish.
-     */
-    public static function wait() : void;
-
-}
-
-final class FiberManager implements FiberManagerInterface {
-
+final class FiberManager implements FiberManagerInterface
+{
     /**
      * @throws Throwable
      */
-    public static function wait() : void {
-        $fiber = Fiber::getCurrent();
+    public static function wait(): void
+    {
+        if (is_null(Fiber::getCurrent())) return;
 
-        if (!is_null($fiber)) {
-            Fiber::suspend();
-        }
+        Fiber::suspend();
     }
-
 }

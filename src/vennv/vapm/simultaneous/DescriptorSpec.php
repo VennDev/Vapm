@@ -19,52 +19,51 @@
  * GNU General Public License for more details.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace vennv\vapm\simultaneous;
 
-final class DescriptorSpec {
-
+final class DescriptorSpec
+{
     public const BASIC = [
         0 => ['pipe', 'r'],
         1 => ['pipe', 'w'],
-        2 => ['pipe', 'w']
+        2 => ['pipe', 'w'],
     ];
 
     public const IGNORE_STDIN = [
         0 => ['file', '/dev/null', 'r'],
         1 => ['pipe', 'w'],
-        2 => ['pipe', 'w']
+        2 => ['pipe', 'w'],
     ];
 
     public const IGNORE_STDOUT = [
         0 => ['pipe', 'r'],
         1 => ['file', '/dev/null', 'w'],
-        2 => ['pipe', 'w']
+        2 => ['pipe', 'w'],
     ];
 
     public const IGNORE_STDERR = [
         0 => ['pipe', 'r'],
         1 => ['pipe', 'w'],
-        2 => ['file', '/dev/null', 'w']
+        2 => ['file', '/dev/null', 'w'],
     ];
 
     public const IGNORE_STDOUT_AND_STDERR = [
         0 => ['pipe', 'r'],
         1 => ['file', '/dev/null', 'w'],
-        2 => ['file', '/dev/null', 'w']
+        2 => ['file', '/dev/null', 'w'],
     ];
 
     public const IGNORE_STDIN_AND_STDERR = [
         0 => ['file', '/dev/null', 'r'],
         1 => ['pipe', 'w'],
-        2 => ['file', '/dev/null', 'w']
+        2 => ['file', '/dev/null', 'w'],
     ];
 
     public const IGNORE_STDIN_AND_STDOUT = [
         0 => ['file', '/dev/null', 'r'],
         1 => ['file', '/dev/null', 'w'],
-        2 => ['pipe', 'w']
+        2 => ['pipe', 'w'],
     ];
-
 }

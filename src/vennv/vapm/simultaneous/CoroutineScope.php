@@ -19,56 +19,21 @@
  * GNU General Public License for more details.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace vennv\vapm\simultaneous;
 
-use Generator;
-use ReflectionException;
 use SplQueue;
+use Generator;
 use Throwable;
-use function call_user_func;
+use ReflectionException;
+use vennv\api\simultaneous\CoroutineScopeInterface;
+
 use function is_callable;
+use function call_user_func;
 
-interface CoroutineScopeInterface {
-
-    /**
-     * @return bool
-     *
-     * This function checks if the coroutine has finished.
-     */
-    public function isFinished() : bool;
-
-    /**
-     * @return bool
-     *
-     * This function checks if the coroutine has been cancelled.
-     */
-    public function isCancelled() : bool;
-
-    /**
-     * This function cancels the coroutine.
-     */
-    public function cancel() : void;
-
-    /**
-     * @param mixed ...$callbacks
-     * @throws ReflectionException
-     * @throws Throwable
-     *
-     * This function launches a coroutine.
-     */
-    public function launch(mixed ...$callbacks) : void;
-
-    /**
-     * This function runs the coroutine.
-     */
-    public function run() : void;
-
-}
-
-final class CoroutineScope implements CoroutineScopeInterface {
-
+final class CoroutineScope implements CoroutineScopeInterface
+{
     protected static ?SplQueue $taskQueue = null;
 
     protected static bool $cancelled = false;
@@ -77,19 +42,18 @@ final class CoroutineScope implements CoroutineScopeInterface {
 
     protected static string $dispatcher;
 
-    public function __construct(string $dispatcher = Dispatchers::DEFAULT) {
+    public function __construct(string $dispatcher = Dispatchers::DEFAULT)
+    {
         self::$dispatcher = $dispatcher;
     }
 
-    public function isFinished() : bool {
-        return self::$finished;
-    }
-
-    public function isCancelled() : bool {
+    public function isCancelled(): bool
+    {
         return self::$cancelled;
     }
 
-    public function cancel() : void {
+    public function cancel(): void
+    {
         self::$cancelled = true;
     }
 
@@ -97,7 +61,8 @@ final class CoroutineScope implements CoroutineScopeInterface {
      * @throws ReflectionException
      * @throws Throwable
      */
-    public function launch(mixed ...$callbacks) : void {
+    public function launch(mixed ...$callbacks): void
+    {
         foreach ($callbacks as $callback) {
             if ($callback instanceof CoroutineScope) {
                 self::schedule($callback);
@@ -120,11 +85,21 @@ final class CoroutineScope implements CoroutineScopeInterface {
         }
     }
 
+    private static function schedule(ChildCoroutine|CoroutineScope $childCoroutine): void
+    {
+        if (self::$taskQueue === null) {
+            self::$taskQueue = new SplQueue();
+        }
+
+        self::$taskQueue->enqueue($childCoroutine);
+    }
+
     /**
      * @throws ReflectionException
      * @throws Throwable
      */
-    public function run() : void {
+    public function run(): void
+    {
         if (self::$taskQueue !== null && !self::$taskQueue->isEmpty() && self::$cancelled === false) {
             $coroutine = self::$taskQueue->dequeue();
 
@@ -148,12 +123,8 @@ final class CoroutineScope implements CoroutineScopeInterface {
         }
     }
 
-    private static function schedule(ChildCoroutine|CoroutineScope $childCoroutine) : void {
-        if (self::$taskQueue === null) {
-            self::$taskQueue = new SplQueue();
-        }
-
-        self::$taskQueue->enqueue($childCoroutine);
+    public function isFinished(): bool
+    {
+        return self::$finished;
     }
-
 }

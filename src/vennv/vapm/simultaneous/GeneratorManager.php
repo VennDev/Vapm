@@ -23,20 +23,7 @@ declare(strict_types = 1);
 
 namespace vennv\vapm\simultaneous;
 
-interface GeneratorManagerInterface {
-
-    /**
-     * @param int $milliseconds
-     * @return int
-     *
-     * This is a function that calculates the seconds from milliseconds for Generator vapm.
-     * For example, if you run a function with multiple yields, this calculates the time spent on each of them in seconds.
-     */
-    public static function calculateSeconds(int $milliseconds) : int;
-
-}
-
-final class GeneratorManager implements GeneratorManagerInterface {
+final class GeneratorManager implements \vennv\api\simultaneous\GeneratorManagerInterface {
 
     public static function calculateSeconds(int $milliseconds) : int {
         return ($milliseconds * 1000) + ($milliseconds * 550);

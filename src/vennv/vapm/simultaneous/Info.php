@@ -19,12 +19,12 @@
  * GNU General Public License for more details.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace vennv\vapm\simultaneous;
 
-class Info {
-
+class Info
+{
     public const VERSION = "1.8.0";
 
     public const AUTHOR = "VennV";
@@ -32,5 +32,4 @@ class Info {
     public const LICENSE = "GPL-2.0";
 
     public const GITHUB = "https://github.com/VennDev";
-
 }

@@ -19,12 +19,12 @@
  * GNU General Public License for more details.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace vennv\vapm\http;
 
-final class TypeData {
-
+final class TypeData
+{
     public const ALL = "*/*";
 
     public const JSON = "application/json";
@@ -165,7 +165,7 @@ final class TypeData {
         '.jpeg' => self::JPG,
         '.png' => self::PNG,
         '.json' => self::JSON,
-        '.txt' => self::TEXT
+        '.txt' => self::TEXT,
     ];
 
     // This is the list of all types of files that will support more by Dot files Ignore
@@ -193,7 +193,7 @@ final class TypeData {
         '.xlsx' => self::XLSX,
         '.ppt' => self::PPT,
         '.pptx' => self::PPTX,
-        '.xml' => self::XML
+        '.xml' => self::XML,
     ];
 
 }

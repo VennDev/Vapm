@@ -19,124 +19,50 @@
  * GNU General Public License for more details.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace vennv\vapm\express\handlers;
 
-use vennv\vapm\express\Express;
-use vennv\vapm\http\Protocol;
-use vennv\vapm\http\Status;
-use vennv\vapm\simultaneous\Error;
-use vennv\vapm\utils\Utils;
 use Socket;
-use function call_user_func;
+use vennv\vapm\http\Status;
+use vennv\vapm\utils\Utils;
+use vennv\vapm\http\Protocol;
+use vennv\vapm\express\Express;
+use vennv\vapm\enums\ErrorMessage;
+use vennv\api\express\handlers\RequestInterface;
 use function count;
 use function explode;
-use function gzinflate;
 use function in_array;
+use function gzinflate;
 use function is_callable;
 use function json_encode;
-use function mb_convert_encoding;
 use function str_replace;
+use function call_user_func;
+use function mb_convert_encoding;
 
-interface RequestInterface {
-
-    /**
-     * @return Socket
-     *
-     * This method returns the client socket
-     */
-    public function getClient() : Socket;
-
-    /**
-     * @return string
-     *
-     * This method returns the request method
-     */
-    public function getMethod() : string;
-
-    /**
-     * @return string
-     *
-     * This method returns the request path
-     */
-    public function getPath() : string;
-
-    /**
-     * @return string
-     *
-     * This method returns the request protocol
-     */
-    public function getProtocol() : string;
-
-    /**
-     * @return int
-     *
-     * This method returns the request status
-     */
-    public function getStatus() : int;
-
-    /**
-     * @return mixed
-     *
-     * This method returns the request params
-     */
-    public function getParams() : mixed;
-
-    /**
-     * @return mixed
-     *
-     * This method returns the request queries
-     */
-    public function getQueries() : mixed;
-
-    /**
-     * @return string|object
-     */
-    public function getBody() : string|object;
-
-    /**
-     * @param string ...$types
-     * @return bool
-     *
-     * This method checks if the request accepts the type
-     */
-    public function accepts(string ...$types) : bool;
-
-}
-
-final class Request implements RequestInterface {
-
-    private Response $response;
-
-    private Express $express;
-
-    private Socket $client;
-
-    private string $method;
-
-    private string $path;
-
-    private string $dataClient;
-
-    private string $protocol = Protocol::HTTP_1_1;
-
-    private int $status = Status::OK;
+final class Request implements RequestInterface
+{
 
     /**
      * @var array<int|float|string, mixed>|string $body
      */
     public array|string $body;
-
     /**
      * @var array<int|float|string, mixed> $params
      */
     public array $params;
-
     /**
      * @var array<int|float|string, mixed> $queries
      */
     public array $queries;
+    private Response $response;
+    private Express $express;
+    private Socket $client;
+    private string $method;
+    private string $path;
+    private string $dataClient;
+    private string $protocol = Protocol::HTTP_1_1;
+    private Status $status = Status::OK;
 
     /**
      * @param Response $response
@@ -157,7 +83,8 @@ final class Request implements RequestInterface {
         string   $method = '',
         array    $params = [],
         array    $queries = []
-    ) {
+    )
+    {
         $this->response = $response;
         $this->express = $express;
         $this->client = $client;
@@ -169,58 +96,69 @@ final class Request implements RequestInterface {
         $this->body = $dataClient;
     }
 
-    public function getClient() : Socket {
+    public function getClient(): Socket
+    {
         return $this->client;
     }
 
-    public function getMethod() : string {
+    public function getMethod(): string
+    {
         return $this->method;
     }
 
-    public function getPath() : string {
+    public function getPath(): string
+    {
         return $this->path;
     }
 
-    public function getProtocol() : string {
+    public function getProtocol(): string
+    {
         return $this->protocol;
     }
 
-    public function getStatus() : int {
+    public function getStatus(): Status
+    {
         return $this->status;
     }
 
     /**
-     * @param array<int|float|string, mixed> $array
-     * @return mixed
-     */
-    private function encodeArray(array $array) : mixed {
-        $encode = json_encode($array);
-        if ($this->express->getOptionsJson()->enable && $encode !== false) {
-            return json_decode($encode);
-        } else {
-            return $this->params;
-        }
-    }
-
-    /**
      * @return mixed
      *
      * This method returns the request params
      */
-    public function getParams() : mixed {
+    public function getParams(): mixed
+    {
         return $this->encodeArray($this->params);
     }
 
     /**
+     * @param array<int|float|string, mixed> $array
+     *
+     * @return mixed
+     */
+    private function encodeArray(array $array): mixed
+    {
+        $encode = json_encode($array);
+
+        if ($this->express->getOptionsJson()->enable && $encode !== false) {
+            return json_decode($encode);
+        }
+
+        return $this->params;
+    }
+
+    /**
      * @return mixed
      *
      * This method returns the request params
      */
-    public function getQueries() : mixed {
+    public function getQueries(): mixed
+    {
         return $this->encodeArray($this->queries);
     }
 
-    public function accepts(string ...$types) : bool {
+    public function accepts(string ...$types): bool
+    {
         $accept = $this->getAccepts();
 
         if ($accept === null) {
@@ -240,18 +178,19 @@ final class Request implements RequestInterface {
         return false;
     }
 
-    private function getAccepts() : ?string {
+    private function getAccepts(): ?string
+    {
         $headers = explode("\r\n", $this->dataClient);
 
         foreach ($headers as $header) {
             $header = explode(':', $header);
 
-            if (count($header) === 2) {
-                [$key, $value] = $header;
+            if (count($header) != 2) continue;
 
-                if ($key === 'Accept') {
-                    return $value;
-                }
+            [$key, $value] = $header;
+
+            if ($key === 'Accept') {
+                return $value;
             }
         }
 
@@ -261,13 +200,13 @@ final class Request implements RequestInterface {
     /**
      * @return string|object
      */
-    public function getBody() : string|object {
-        $status = (string)Status::getStatusName($this->status);
+    public function getBody(): string|object
+    {
         $data = [
             'method' => $this->method,
             'path' => $this->path,
             'protocol' => $this->protocol,
-            'status' => $status
+            'status' => $this->status->name,
         ];
 
         $headers = explode("\r\n", $this->dataClient);
@@ -275,17 +214,17 @@ final class Request implements RequestInterface {
         foreach ($headers as $header) {
             $header = explode(':', $header);
 
-            if (count($header) === 2) {
-                [$key, $value] = $header;
+            if (count($header) != 2) continue;
 
-                $data[$key] = $value;
-            }
+            [$key, $value] = $header;
+
+            $data[$key] = $value;
         }
 
         $options = $this->express->getOptionsJson();
 
         if (Utils::getBytes($data) > $options->limit) {
-            return Error::PAYLOAD_TOO_LARGE;
+            return ErrorMessage::PAYLOAD_TOO_LARGE->value;
         }
 
         if ($options->reviver !== null && is_callable($options->reviver)) {
@@ -299,11 +238,7 @@ final class Request implements RequestInterface {
          */
         $encoding = mb_convert_encoding($data, 'UTF-8');
 
-        if (!$options->strict) {
-            $data = (object)$data;
-        } else {
-            $data = (string)json_encode($data);
-        }
+        $data = !$options->strict ? (object) $data : (string) json_encode($data);
 
         if ($options->verify !== null && is_callable($options->verify)) {
             call_user_func(
@@ -315,15 +250,12 @@ final class Request implements RequestInterface {
             );
         }
 
-        if ($options->inflate) {
-            if (is_object($data)) {
-                $data = (string)json_encode($data);
-            }
+        if ($options->inflate) return $data;
 
-            $data = (string)gzinflate($data);
+        if (is_object($data)) {
+            $data = (string) json_encode($data);
         }
 
-        return $data;
+        return (string) gzinflate($data);
     }
-
 }

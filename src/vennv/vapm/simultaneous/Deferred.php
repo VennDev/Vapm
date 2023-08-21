@@ -19,67 +19,33 @@
  * GNU General Public License for more details.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace vennv\vapm\simultaneous;
 
 use Generator;
+use vennv\vapm\enums\ErrorMessage;
+use vennv\api\simultaneous\DeferredInterface;
 
-interface DeferredInterface {
-
-    /**
-     * This method is used to get the result of the deferred.
-     */
-    public function await() : Generator;
-
-    /**
-     * @param DeferredInterface ...$deferreds
-     * @return Generator
-     *
-     * This method is used to get the result of the deferred.
-     */
-    public static function awaitAll(DeferredInterface ...$deferreds) : Generator;
-
-    /**
-     * This method is used to get the child coroutine of the deferred.
-     */
-    public function getChildCoroutine() : ChildCoroutine;
-
-    /**
-     * This method is used to get the result of the deferred.
-     */
-    public function getComplete() : mixed;
-
-}
-
-final class Deferred implements DeferredInterface {
-
+final class Deferred implements DeferredInterface
+{
     protected mixed $return = null;
 
     protected ChildCoroutine $childCoroutine;
 
-    public function __construct(callable $callback) {
+    public function __construct(callable $callback)
+    {
         $generator = call_user_func($callback);
 
-        if ($generator instanceof Generator) {
-            $this->childCoroutine = new ChildCoroutine($generator);
-        } else {
-            throw new DeferredException(Error::DEFERRED_CALLBACK_MUST_RETURN_GENERATOR);
-        }
-    }
-
-    public function await() : Generator {
-        while (!$this->childCoroutine->isFinished()) {
-            $this->childCoroutine->run();
-            yield;
+        if (!($generator instanceof Generator)) {
+            throw new DeferredException(ErrorMessage::DEFERRED_CALLBACK_MUST_RETURN_GENERATOR->value);
         }
 
-        $this->return = $this->childCoroutine->getReturn();
-
-        return $this->return;
+        $this->childCoroutine = new ChildCoroutine($generator);
     }
 
-    public static function awaitAll(DeferredInterface ...$deferreds) : Generator {
+    public static function awaitAll(DeferredInterface ...$deferreds): Generator
+    {
         $result = [];
 
         while (count($result) <= count($deferreds)) {
@@ -100,11 +66,25 @@ final class Deferred implements DeferredInterface {
         return $result;
     }
 
-    public function getChildCoroutine() : ChildCoroutine {
+    public function getChildCoroutine(): ChildCoroutine
+    {
         return $this->childCoroutine;
     }
 
-    public function getComplete() : mixed {
+    public function await(): Generator
+    {
+        while (!$this->childCoroutine->isFinished()) {
+            $this->childCoroutine->run();
+            yield;
+        }
+
+        $this->return = $this->childCoroutine->getReturn();
+
+        return $this->return;
+    }
+
+    public function getComplete(): mixed
+    {
         return $this->return;
     }
 

@@ -19,58 +19,43 @@
  * GNU General Public License for more details.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace vennv\vapm\simultaneous;
 
-interface InternetRequestResultInterface {
+use vennv\api\simultaneous\InternetRequestResultInterface;
 
-    /**
-     * @return string[][]
-     */
-    public function getHeaders() : array;
-
-    public function getBody() : string;
-
-    public function getCode() : int;
-
-}
-
-final class InternetRequestResult implements InternetRequestResultInterface {
-
-    /**
-     * @var string[][] $headers
-     */
-    private array $headers;
-
-    private string $body;
-
-    private int $code;
-
+/**
+ * @property string[][] $headers
+ */
+final class InternetRequestResult implements InternetRequestResultInterface
+{
     /**
      * @param string[][] $headers
      * @param string $body
      * @param int $code
      */
-    public function __construct(array $headers, string $body, int $code) {
-        $this->headers = $headers;
-        $this->body = $body;
-        $this->code = $code;
-    }
+    public function __construct(
+        private readonly array  $headers,
+        private readonly string $body,
+        private readonly int    $code
+    ) {}
 
     /**
      * @return string[][]
      */
-    public function getHeaders() : array {
+    public function getHeaders(): array
+    {
         return $this->headers;
     }
 
-    public function getBody() : string {
+    public function getBody(): string
+    {
         return $this->body;
     }
 
-    public function getCode() : int {
+    public function getCode(): int
+    {
         return $this->code;
     }
-
 }

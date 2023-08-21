@@ -19,140 +19,129 @@
  * GNU General Public License for more details.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace vennv\vapm\http;
 
-use ReflectionClass;
+enum Status: int
+{
+    case CONTINUE = 100;
 
-final class Status {
+    case SWITCHING_PROTOCOLS = 101;
 
-    public const CONTINUE = 100;
+    case PROCESSING = 102;
 
-    public const SWITCHING_PROTOCOLS = 101;
+    case EARLY_HINTS = 103;
 
-    public const PROCESSING = 102;
+    case OK = 200;
 
-    public const EARLY_HINTS = 103;
+    case CREATED = 201;
 
-    public const OK = 200;
+    case ACCEPTED = 202;
 
-    public const CREATED = 201;
+    case NON_AUTHORITATIVE_INFORMATION = 203;
 
-    public const ACCEPTED = 202;
+    case NO_CONTENT = 204;
 
-    public const NON_AUTHORITATIVE_INFORMATION = 203;
+    case RESET_CONTENT = 205;
 
-    public const NO_CONTENT = 204;
+    case PARTIAL_CONTENT = 206;
 
-    public const RESET_CONTENT = 205;
+    case MULTIPLE_CHOICES = 300;
 
-    public const PARTIAL_CONTENT = 206;
+    case MOVED_PERMANENTLY = 301;
 
-    public const MULTIPLE_CHOICES = 300;
+    case FOUND = 302;
 
-    public const MOVED_PERMANENTLY = 301;
+    case SEE_OTHER = 303;
 
-    public const FOUND = 302;
+    case NOT_MODIFIED = 304;
 
-    public const SEE_OTHER = 303;
+    case USE_PROXY = 305;
 
-    public const NOT_MODIFIED = 304;
+    case UNUSED = 306;
 
-    public const USE_PROXY = 305;
+    case TEMPORARY_REDIRECT = 307;
 
-    public const UNUSED = 306;
+    case PERMANENT_REDIRECT = 308;
 
-    public const TEMPORARY_REDIRECT = 307;
+    case BAD_REQUEST = 400;
 
-    public const PERMANENT_REDIRECT = 308;
+    case UNAUTHORIZED = 401;
 
-    public const BAD_REQUEST = 400;
+    case PAYMENT_REQUIRED = 402;
 
-    public const UNAUTHORIZED = 401;
+    case FORBIDDEN = 403;
 
-    public const PAYMENT_REQUIRED = 402;
+    case NOT_FOUND = 404;
 
-    public const FORBIDDEN = 403;
+    case METHOD_NOT_ALLOWED = 405;
 
-    public const NOT_FOUND = 404;
+    case NOT_ACCEPTABLE = 406;
 
-    public const METHOD_NOT_ALLOWED = 405;
+    case PROXY_AUTHENTICATION_REQUIRED = 407;
 
-    public const NOT_ACCEPTABLE = 406;
+    case REQUEST_TIMEOUT = 408;
 
-    public const PROXY_AUTHENTICATION_REQUIRED = 407;
+    case CONFLICT = 409;
 
-    public const REQUEST_TIMEOUT = 408;
+    case GONE = 410;
 
-    public const CONFLICT = 409;
+    case LENGTH_REQUIRED = 411;
 
-    public const GONE = 410;
+    case PRECONDITION_FAILED = 412;
 
-    public const LENGTH_REQUIRED = 411;
+    case REQUEST_ENTITY_TOO_LARGE = 413;
 
-    public const PRECONDITION_FAILED = 412;
+    case REQUEST_URI_TOO_LONG = 414;
 
-    public const REQUEST_ENTITY_TOO_LARGE = 413;
+    case UNSUPPORTED_MEDIA_TYPE = 415;
 
-    public const REQUEST_URI_TOO_LONG = 414;
+    case REQUESTED_RANGE_NOT_SATISFIABLE = 416;
 
-    public const UNSUPPORTED_MEDIA_TYPE = 415;
+    case EXPECTATION_FAILED = 417;
 
-    public const REQUESTED_RANGE_NOT_SATISFIABLE = 416;
+    case IM_A_TEAPOT = 418;
 
-    public const EXPECTATION_FAILED = 417;
+    case MISDIRECTED_REQUEST = 421;
 
-    public const IM_A_TEAPOT = 418;
+    case UNPROCESSABLE_ENTITY = 422;
 
-    public const MISDIRECTED_REQUEST = 421;
+    case LOCKED = 423;
 
-    public const UNPROCESSABLE_ENTITY = 422;
+    case FAILED_DEPENDENCY = 424;
 
-    public const LOCKED = 423;
+    case TOO_EARLY = 425;
 
-    public const FAILED_DEPENDENCY = 424;
+    case UPGRADE_REQUIRED = 426;
 
-    public const TOO_EARLY = 425;
+    case PRECONDITION_REQUIRED = 428;
 
-    public const UPGRADE_REQUIRED = 426;
+    case TOO_MANY_REQUESTS = 429;
 
-    public const PRECONDITION_REQUIRED = 428;
+    case REQUEST_HEADER_FIELDS_TOO_LARGE = 431;
 
-    public const TOO_MANY_REQUESTS = 429;
+    case UNAVAILABLE_FOR_LEGAL_REASONS = 451;
 
-    public const REQUEST_HEADER_FIELDS_TOO_LARGE = 431;
+    case INTERNAL_SERVER_ERROR = 500;
 
-    public const UNAVAILABLE_FOR_LEGAL_REASONS = 451;
+    case NOT_IMPLEMENTED = 501;
 
-    public const INTERNAL_SERVER_ERROR = 500;
+    case BAD_GATEWAY = 502;
 
-    public const NOT_IMPLEMENTED = 501;
+    case SERVICE_UNAVAILABLE = 503;
 
-    public const BAD_GATEWAY = 502;
+    case GATEWAY_TIMEOUT = 504;
 
-    public const SERVICE_UNAVAILABLE = 503;
+    case HTTP_VERSION_NOT_SUPPORTED = 505;
 
-    public const GATEWAY_TIMEOUT = 504;
+    case VARIANT_ALSO_NEGOTIATES = 506;
 
-    public const HTTP_VERSION_NOT_SUPPORTED = 505;
+    case INSUFFICIENT_STORAGE = 507;
 
-    public const VARIANT_ALSO_NEGOTIATES = 506;
+    case LOOP_DETECTED = 508;
 
-    public const INSUFFICIENT_STORAGE = 507;
+    case NOT_EXTENDED = 510;
 
-    public const LOOP_DETECTED = 508;
-
-    public const NOT_EXTENDED = 510;
-
-    public const NETWORK_AUTHENTICATION_REQUIRED = 511;
-
-    public static function getStatusName(mixed $value) : int|string|null {
-        $class = new ReflectionClass(self::class);
-        $constants = $class->getConstants();
-        $constantName = array_search($value, $constants, true);
-
-        return $constantName !== false ? $constantName : null;
-    }
-
+    case NETWORK_AUTHENTICATION_REQUIRED = 511;
 }

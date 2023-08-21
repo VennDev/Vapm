@@ -25,26 +25,28 @@ namespace vennv\vapm\utils;
 
 use Closure;
 use Generator;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
-use ReflectionException;
-use ReflectionFunction;
 use SplFileInfo;
+use ReflectionFunction;
+use ReflectionException;
+use RecursiveIteratorIterator;
+use RecursiveDirectoryIterator;
+use vennv\vapm\enums\ErrorMessage;
 use vennv\vapm\simultaneous\Error;
-use function array_slice;
+
 use function file;
+use function strlen;
+use function strpos;
+use function substr;
 use function implode;
 use function is_array;
 use function is_object;
 use function is_string;
-use function preg_match;
 use function serialize;
-use function strlen;
-use function strpos;
-use function substr;
+use function preg_match;
+use function array_slice;
 
-interface UtilsInterface {
-
+interface UtilsInterface
+{
     /**
      * Transform milliseconds to seconds
      */
@@ -110,31 +112,32 @@ interface UtilsInterface {
      * Replace advanced
      */
     public static function replaceAdvanced(string $text, string $search, string $replace) : array|string|null;
-
 }
 
-final class Utils implements UtilsInterface {
-
-    public static function milliSecsToSecs(float $milliSecs) : float {
+final class Utils implements UtilsInterface
+{
+    public static function milliSecsToSecs(float $milliSecs) : float
+    {
         return $milliSecs / 1000;
     }
 
     /**
      * @throws ReflectionException
      */
-    public static function closureToString(Closure $closure) : string {
+    public static function closureToString(Closure $closure) : string
+    {
         $reflection = new ReflectionFunction($closure);
         $startLine = $reflection->getStartLine();
         $endLine = $reflection->getEndLine();
         $filename = $reflection->getFileName();
 
         if ($filename === false || $startLine === false || $endLine === false) {
-            throw new ReflectionException(Error::CANNOT_FIND_FUNCTION_KEYWORD);
+            throw new ReflectionException(ErrorMessage::CANNOT_FIND_FUNCTION_KEYWORD->value);
         }
 
         $lines = file($filename);
         if ($lines === false) {
-            throw new ReflectionException(Error::CANNOT_READ_FILE);
+            throw new ReflectionException(ErrorMessage::CANNOT_READ_FILE->value);
         }
 
         $result = implode("", array_slice($lines, $startLine - 1, $endLine - $startLine + 1));
@@ -144,13 +147,13 @@ final class Utils implements UtilsInterface {
             $startPos = strpos($result, 'fn');
 
             if ($startPos === false) {
-                throw new ReflectionException(Error::CANNOT_FIND_FUNCTION_KEYWORD);
+                throw new ReflectionException(ErrorMessage::CANNOT_FIND_FUNCTION_KEYWORD->value);
             }
         }
 
         $endBracketPos = strrpos($result, '}');
         if ($endBracketPos === false) {
-            throw new ReflectionException(Error::CANNOT_FIND_FUNCTION_KEYWORD);
+            throw new ReflectionException(ErrorMessage::CANNOT_FIND_FUNCTION_KEYWORD->value);
         }
 
         return substr($result, $startPos, $endBracketPos - $startPos + 1);
@@ -161,12 +164,10 @@ final class Utils implements UtilsInterface {
         $iterator = new RecursiveIteratorIterator($dir);
 
         foreach ($iterator as $file) {
-            if ($file instanceof SplFileInfo) {
-                $fname = $file->getFilename();
+            if (!($file instanceof SplFileInfo)) continue;
 
-                if (preg_match('%' . $dotFile . '$%', $fname) === 1) {
-                    yield $file->getPathname();
-                }
+            if (preg_match('%' . $dotFile . '$%', $file->getFilename()) === 1) {
+                yield $file->getPathname();
             }
         }
     }
@@ -222,13 +223,10 @@ final class Utils implements UtilsInterface {
      * Split a string by slash
      */
     public static function splitStringBySlash(string $string) : Generator {
-        $parts = explode('/', $string);
+        foreach (explode('/', $string) as $path) {
+            if (empty($path)) continue;
 
-        foreach ($parts as $value) {
-            $path = '/' . $value;
-            if ($path !== '/') {
-                yield $path;
-            }
+            yield "/{$path}";
         }
     }
 

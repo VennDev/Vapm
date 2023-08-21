@@ -19,35 +19,27 @@
  * GNU General Public License for more details.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace vennv\vapm\simultaneous;
 
-interface PromiseResultInterface {
+use vennv\vapm\enums\StatusPromise;
+use vennv\api\simultaneous\PromiseResultInterface;
 
-    public function getStatus() : string;
+final readonly class PromiseResult implements PromiseResultInterface
+{
+    public function __construct(
+        private StatusPromise $status,
+        private mixed         $result
+    ) {}
 
-    public function getResult() : mixed;
-
-}
-
-final class PromiseResult implements PromiseResultInterface {
-
-    private string $status;
-
-    private mixed $result;
-
-    public function __construct(string $status, mixed $result) {
-        $this->status = $status;
-        $this->result = $result;
-    }
-
-    public function getStatus() : string {
+    public function getStatus(): StatusPromise
+    {
         return $this->status;
     }
 
-    public function getResult() : mixed {
+    public function getResult(): mixed
+    {
         return $this->result;
     }
-
 }

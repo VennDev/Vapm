@@ -24,6 +24,7 @@ declare(strict_types = 1);
 namespace vennv\vapm\express;
 
 use vennv\vapm\System;
+use vennv\vapm\enums\ErrorMessage;
 use vennv\vapm\express\data\JsonData;
 use vennv\vapm\express\data\StaticData;
 use vennv\vapm\express\handlers\Request;
@@ -327,7 +328,7 @@ class Express extends Router implements ExpressInterface {
         $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 
         if ($socket === false) {
-            throw new RuntimeException(Error::ERROR_TO_CREATE_SOCKET);
+            throw new RuntimeException(ErrorMessage::ERROR_TO_CREATE_SOCKET->value);
         }
 
         socket_set_option($socket, SOL_SOCKET, SO_REUSEADDR, 1);

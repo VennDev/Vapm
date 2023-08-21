@@ -19,44 +19,19 @@
  * GNU General Public License for more details.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace vennv\vapm\simultaneous;
 
 use Throwable;
+use vennv\vapm\enums\StatusPromise;
+use vennv\api\simultaneous\EventLoopInterface;
+
 use function count;
 use const PHP_INT_MAX;
 
-interface EventLoopInterface {
-
-    public static function generateId() : int;
-
-    public static function addQueue(Promise $promise) : void;
-
-    public static function removeQueue(int $id) : void;
-
-    public static function getQueue(int $id) : ?Promise;
-
-    /**
-     * @return array<int, Promise>
-     */
-    public static function getQueues() : array;
-
-    public static function addReturn(Promise $promise) : void;
-
-    public static function removeReturn(int $id) : void;
-
-    public static function getReturn(int $id) : ?Promise;
-
-    /**
-     * @return array<int, Promise>
-     */
-    public static function getReturns() : array;
-
-}
-
-class EventLoop implements EventLoopInterface {
-
+class EventLoop implements EventLoopInterface
+{
     protected static int $nextId = 0;
 
     /**
@@ -69,7 +44,8 @@ class EventLoop implements EventLoopInterface {
      */
     protected static array $returns = [];
 
-    public static function generateId() : int {
+    public static function generateId(): int
+    {
         if (self::$nextId >= PHP_INT_MAX) {
             self::$nextId = 0;
         }
@@ -77,64 +53,65 @@ class EventLoop implements EventLoopInterface {
         return self::$nextId++;
     }
 
-    public static function addQueue(Promise $promise) : void {
+    public static function addQueue(Promise $promise): void
+    {
         $id = $promise->getId();
 
-        if (!isset(self::$queues[$id])) {
-            self::$queues[$id] = $promise;
-        }
+        if (isset(self::$queues[$id])) return;
+
+        self::$queues[$id] = $promise;
     }
 
-    public static function removeQueue(int $id) : void {
-        unset(self::$queues[$id]);
-    }
-
-    public static function getQueue(int $id) : ?Promise {
+    public static function getQueue(int $id): ?Promise
+    {
         return self::$queues[$id] ?? null;
     }
 
     /**
      * @return array<int, Promise>
      */
-    public static function getQueues() : array {
+    public static function getQueues(): array
+    {
         return self::$queues;
     }
 
-    public static function addReturn(Promise $promise) : void {
+    public static function addReturn(Promise $promise): void
+    {
         $id = $promise->getId();
 
-        if (!isset(self::$returns[$id])) {
-            self::$returns[$id] = $promise;
-        }
+        if (isset(self::$returns[$id])) return;
+
+        self::$returns[$id] = $promise;
     }
 
-    public static function removeReturn(int $id) : void {
-        unset(self::$returns[$id]);
-    }
-
-    public static function getReturn(int $id) : ?Promise {
+    public static function getReturn(int $id): ?Promise
+    {
         return self::$returns[$id] ?? null;
     }
 
     /**
      * @return array<int, Promise>
      */
-    public static function getReturns() : array {
+    public static function getReturns(): array
+    {
         return self::$returns;
     }
 
-    private static function clearGarbage() : void {
-        foreach (self::$returns as $id => $promise) {
-            if ($promise->canDrop()) {
-                self::removeReturn($id);
-            }
+    /**
+     * @throws Throwable
+     */
+    protected static function runSingle(): void
+    {
+        while (count(self::$queues) > 0 || count(MicroTask::getTasks()) > 0 || count(MacroTask::getTasks()) > 0 || count(GreenThread::getFibers()) > 0) {
+            self::run();
         }
     }
 
     /**
      * @throws Throwable
      */
-    protected static function run() : void {
+    protected static function run(): void
+    {
         if (count(GreenThread::getFibers()) > 0) {
             GreenThread::run();
         }
@@ -165,13 +142,22 @@ class EventLoop implements EventLoopInterface {
         self::clearGarbage();
     }
 
-    /**
-     * @throws Throwable
-     */
-    protected static function runSingle() : void {
-        while (count(self::$queues) > 0 || count(MicroTask::getTasks()) > 0 || count(MacroTask::getTasks()) > 0 || count(GreenThread::getFibers()) > 0) {
-            self::run();
+    public static function removeQueue(int $id): void
+    {
+        unset(self::$queues[$id]);
+    }
+
+    private static function clearGarbage(): void
+    {
+        foreach (self::$returns as $id => $promise) {
+            if (!$promise->canDrop()) continue;
+
+            self::removeReturn($id);
         }
     }
 
+    public static function removeReturn(int $id): void
+    {
+        unset(self::$returns[$id]);
+    }
 }

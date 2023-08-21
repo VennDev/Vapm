@@ -25,11 +25,11 @@ namespace vennv\vapm\simultaneous;
 
 use TypeError;
 
-final class AssumptionFailedError extends TypeError {
-
+final class AssumptionFailedError extends TypeError
+{
     public function __construct(
-        protected string $errorMessage,
-        protected int    $errorCode = 0
+        protected readonly string $errorMessage,
+        protected readonly int    $errorCode = 0
     ) {
         parent::__construct(
             $this->errorMessage,
@@ -40,5 +40,4 @@ final class AssumptionFailedError extends TypeError {
     public function __toString() : string {
         return __CLASS__ . ": [$this->errorCode]: $this->errorMessage\n";
     }
-
 }

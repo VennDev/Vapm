@@ -19,49 +19,42 @@
  * GNU General Public License for more details.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace vennv\vapm\simultaneous;
 
 use Generator;
 use Exception;
+use vennv\api\simultaneous\ChildCoroutineInterface;
 
-interface ChildCoroutineInterface {
-
-    public function setException(Exception $exception) : void;
-
-    public function run() : void;
-
-    public function isFinished() : bool;
-
-    public function getReturn() : mixed;
-
-}
-
-final class ChildCoroutine implements ChildCoroutineInterface {
-
+final class ChildCoroutine implements ChildCoroutineInterface
+{
     protected Generator $coroutine;
 
     protected Exception $exception;
 
-    public function __construct(Generator $coroutine) {
+    public function __construct(Generator $coroutine)
+    {
         $this->coroutine = $coroutine;
     }
 
-    public function setException(Exception $exception) : void {
+    public function setException(Exception $exception): void
+    {
         $this->exception = $exception;
     }
 
-    public function run() : void {
+    public function run(): void
+    {
         $this->coroutine->send($this->coroutine->current());
     }
 
-    public function isFinished() : bool {
+    public function isFinished(): bool
+    {
         return !$this->coroutine->valid();
     }
 
-    public function getReturn() : mixed {
+    public function getReturn(): mixed
+    {
         return $this->coroutine->getReturn();
     }
-
 }

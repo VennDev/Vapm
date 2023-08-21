@@ -19,12 +19,12 @@
  * GNU General Public License for more details.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace vennv\vapm\http;
 
-final class Method {
-
+final class Method
+{
     public const GET = 'GET';
 
     public const POST = 'POST';
@@ -44,5 +44,4 @@ final class Method {
     public const CONNECT = 'CONNECT';
 
     public const ALL = 'ALL';
-
 }

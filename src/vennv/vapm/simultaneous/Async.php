@@ -24,21 +24,12 @@ declare(strict_types = 1);
 namespace vennv\vapm\simultaneous;
 
 use Throwable;
+use vennv\api\simultaneous\AsyncInterface;
+
 use function is_callable;
 
-interface AsyncInterface {
-
-    public function getId() : int;
-
-    /**
-     * @throws Throwable
-     */
-    public static function await(mixed $await) : mixed;
-
-}
-
-final class Async implements AsyncInterface {
-
+final class Async implements AsyncInterface
+{
     private int $id;
 
     /**
@@ -78,5 +69,4 @@ final class Async implements AsyncInterface {
 
         return $result;
     }
-
 }

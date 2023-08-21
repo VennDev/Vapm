@@ -19,12 +19,12 @@
  * GNU General Public License for more details.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace vennv\vapm\http;
 
-final class Protocol {
-
+final class Protocol
+{
     public const HTTP_0_9 = 'HTTP/0.9';
 
     public const HTTP_1_0 = 'HTTP/1.0';
@@ -34,5 +34,4 @@ final class Protocol {
     public const HTTP_2_0 = 'HTTP/2.0';
 
     public const HTTP_3_0 = 'HTTP/3.0';
-
 }
