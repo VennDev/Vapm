@@ -185,9 +185,10 @@ final class Request implements RequestInterface {
     }
 
     /**
-     * @return array<int|float|string, mixed>|object
+     * @param array<int|float|string, mixed> $array
+     * @return mixed
      */
-    private function encodeArray(array $array) : array|object {
+    private function encodeArray(array $array) : mixed {
         $encode = json_encode($array);
         if ($this->express->getOptionsJson()->enable && $encode !== false) {
             return json_decode($encode);

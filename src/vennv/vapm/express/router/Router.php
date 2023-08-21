@@ -193,6 +193,12 @@ class Router implements RouterInterface {
     }
 
     private function createRoute(string $method, string $path, mixed ...$args) : ?Route {
+        /**
+         * @var string $path
+         * @var array<int, string> $params
+         * @var callable $callback
+         * @var bool $canDo
+         */
         [$path, $params, $callback, $canDo] = $this->getResults($path, ...$args);
 
         if ($canDo) {
@@ -331,31 +337,25 @@ class Router implements RouterInterface {
     }
 
     /**
-     * @param Express $express
      * @param Request $request
      * @param Response $response
      * @param Route $route
-     * @param Socket $client
      * @param string $path
-     * @param string $dataClient
      * @param string $method
      * @param array<int|float|string, mixed> $queries
      * @return Async
      * @throws Throwable
      */
     private function processRoute(
-        Express  $express,
         Request  &$request,
         Response &$response,
         Route    $route,
-        Socket   $client,
         string   &$path,
-        string   $dataClient,
         string   $method,
         array    $queries = []
     ) : Async {
         return new Async(function () use (
-            $express, &$request, &$response, $route, $client, &$path, $dataClient, $method, $queries
+            &$request, &$response, $route, &$path, $method, $queries
         ) : void {
             $callback = $route->getCallback();
             $methodRequire = $route->getMethod();
@@ -404,6 +404,7 @@ class Router implements RouterInterface {
             $realPaths = iterator_to_array(Utils::splitStringBySlash($path));
             foreach ($realPaths as $index => $realPath) {
                 if (isset($this->middlewares[$realPath])) {
+                    /** @var MiddleWare $middleware */
                     foreach ($this->middlewares[$realPath] as $middleware) {
                         if (count($middleware->params) > 0) {
                             for ($i = 0; $i < count($middleware->params); $i++) {
@@ -458,13 +459,13 @@ class Router implements RouterInterface {
             $childPaths = iterator_to_array(Utils::splitStringBySlash($path));
             if (isset($this->routes[$path])) {
                 Async::await($this->processRoute(
-                    $express, $request, $response, $this->routes[$path], $client, $path, $data, $method, $queries
+                    $request, $response, $this->routes[$path], $path, $method, $queries
                 ));
             } else {
                 foreach ($childPaths as $pth) {
                     if (isset($this->routes[$pth])) {
                         Async::await($this->processRoute(
-                            $express, $request, $response, $this->routes[$pth], $client, $path, $data, $method, $queries
+                            $request, $response, $this->routes[$pth], $path, $method, $queries
                         ));
                         break;
                     }
