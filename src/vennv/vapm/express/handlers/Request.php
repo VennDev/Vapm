@@ -77,18 +77,18 @@ interface RequestInterface {
     public function getStatus() : int;
 
     /**
-     * @return array<int|float|string, mixed>|object
+     * @return mixed
      *
      * This method returns the request params
      */
-    public function getParams() : array|object;
+    public function getParams() : mixed;
 
     /**
-     * @return array<int|float|string, mixed>|object
+     * @return mixed
      *
      * This method returns the request queries
      */
-    public function getQueries() : array|object;
+    public function getQueries() : mixed;
 
     /**
      * @param string ...$types
@@ -198,20 +198,20 @@ final class Request implements RequestInterface {
     }
 
     /**
-     * @return array<int|float|string, mixed>|object
+     * @return mixed
      *
      * This method returns the request params
      */
-    public function getParams() : array|object {
+    public function getParams() : mixed {
         return $this->encodeArray($this->params);
     }
 
     /**
-     * @return array<int|float|string, mixed>|object
+     * @return mixed
      *
      * This method returns the request params
      */
-    public function getQueries() : array|object {
+    public function getQueries() : mixed {
         return $this->encodeArray($this->queries);
     }
 

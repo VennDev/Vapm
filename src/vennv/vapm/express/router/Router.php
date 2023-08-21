@@ -265,13 +265,13 @@ class Router implements RouterInterface {
 
     private function processRequest(MiddleWare|Route $middleWare, string $path, Request $request) : void {
         $childPaths = iterator_to_array(Utils::splitStringBySlash($path));
-        $indexPath = array_search($middleWare->path, $childPaths);
+        $indexPath = array_search($middleWare->path, $childPaths, true);
         if (count($middleWare->params) > 0 && $indexPath !== false && !is_string($indexPath)) {
             for ($i = 1; $i <= count($middleWare->params); $i++) {
                 $index = $middleWare->params[$i];
                 $value = $childPaths[$indexPath + $i] ?? null;
 
-                $request->params[$index] = $value === null ? null : str_replace('/', '', $value);
+                $request->params[$index] = !is_array($value) && !is_string($value) ? null : str_replace('/', '', $value);
             }
         }
     }
@@ -297,10 +297,12 @@ class Router implements RouterInterface {
 
         $this->processRequest($middleWare, $path, $request);
 
-        $dataCallBack = call_user_func($middleWare->callback, $request, $response, fn() => self::NEXT);
+        if (is_callable($middleWare->callback)) {
+            $dataCallBack = call_user_func($middleWare->callback, $request, $response, fn() => self::NEXT);
 
-        if ($dataCallBack !== self::NEXT) {
-            return $canNext = false;
+            if ($dataCallBack !== self::NEXT) {
+                return $canNext = false;
+            }
         }
 
         return true;
@@ -408,7 +410,10 @@ class Router implements RouterInterface {
                     foreach ($this->middlewares[$realPath] as $middleware) {
                         if (count($middleware->params) > 0) {
                             for ($i = 0; $i < count($middleware->params); $i++) {
-                                $request->params[$middleware->params[$i + 1]] = str_replace('/', '', $realPaths[$index + $i]);
+                                $indexParam = $middleware->params[$i + 1];
+                                $value = $realPaths[$index + $i];
+
+                                $request->params[$indexParam] = !is_array($value) && !is_string($value) ? null : str_replace('/', '', $value);
                             }
                         }
 
@@ -515,6 +520,10 @@ class Router implements RouterInterface {
             $path = $args[0];
             $param = $args[1];
 
+            if (!is_string($path)) {
+                return;
+            }
+
             /**
              * @var string $pathOther
              * @var array<int|float|string, mixed> $params
@@ -526,10 +535,6 @@ class Router implements RouterInterface {
             if (count($params) > 0 && $canDo) {
                 $this->middlewares[$pathOther][] = new MiddleWare($pathOther, $callback, $params);
             } else if (count($params) <= 0) {
-                if (!is_string($path)) {
-                    throw new RuntimeException('Invalid path');
-                }
-
                 if (!isset($this->middlewares[$path])) {
                     $this->middlewares[$path] = [];
                 }
