@@ -188,6 +188,7 @@ class Express extends Router implements ExpressInterface {
     }
 
     /**
+     * @param array<string, mixed> $options
      * @throws Exception
      */
     public function router(array $options = []) : Router {

@@ -270,20 +270,27 @@ class Router implements RouterInterface {
         $requireA = $requireB = false;
         $countParams = count($middleWare->params);
         $childPaths = iterator_to_array(Utils::splitStringBySlash($path));
-        $params = array_map(function ($index, $path) use ($middleWare, &$requireA, &$requireB, &$countParams) {
-            $requireC = $this->path != $path && $middleWare->path != $path;
+        $params = array_map(
+            /**
+             * @param int $index
+             * @param string $path
+             * @return string|null
+             */
+            function (int $index, string $path) use ($middleWare, &$requireA, &$requireB, &$countParams) : ?string {
+                $requireC = $this->path != $path && $middleWare->path != $path;
 
-            if ($this->path == $path) $requireA = true;
+                if ($this->path == $path) $requireA = true;
 
-            if ($middleWare->path == $path) $requireB = true;
+                if ($middleWare->path == $path) $requireB = true;
 
-            if ($requireA && $requireB && $requireC && $countParams > 0) {
-                $countParams--;
-                return str_replace('/', '', $path);
-            }
+                if ($requireA && $requireB && $requireC && $countParams > 0) {
+                    $countParams--;
+                    return str_replace('/', '', $path);
+                }
 
-            return null;
-        }, array_keys($childPaths), $childPaths);
+                return null;
+            }, array_keys($childPaths), $childPaths
+        );
 
         $params = array_filter($params, fn($value) => $value !== null);
 
@@ -477,6 +484,8 @@ class Router implements RouterInterface {
         ) : void {
             $queries = iterator_to_array($this->processQueries($path));
             $path = parse_url($path, PHP_URL_PATH);
+
+            if (!is_string($path)) return;
 
             $canNext = true;
             Async::await($this->processMiddlewares($path, $request, $response, $canNext));
