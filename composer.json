@@ -11,18 +11,18 @@
             "email": "1050080275@sv.hcmunre.edu.vn"
         }
     ],
-    "config": {
-        "allow-plugins": {
-            "pestphp/pest-plugin": true
-        }
-    },
     "require": {
         "php": "^8.2",
 	"php-64bit": "*",
 	"composer-runtime-api": "^2.0"
     },
     "require-dev": {
-        "pestphp/pest": "*"
+        "pestphp/pest": "^2.16"
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
     },
     "scripts": {
 	"pest": "./vendor/bin/pest"
