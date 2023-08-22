@@ -3,7 +3,7 @@
 return [
     'default' => 'pest',
     'paths' => [
-        'src\vennv'
+        'src/vennv'
     ],
     'testSuffix' => '.php',
     'parallel' => false,
