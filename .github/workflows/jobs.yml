@@ -36,8 +36,9 @@ jobs:
           restore-keys: "php-${{ matrix.php }}-composer-"
 
       - name: Install Dependencies
-        if: steps.vendor-cache.outputs.cache-hit != 'true'
-        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
-      - name: Run Pest
-        run: vendor/bin/pest
+      - name: PestPHP (Run Pest Tests)
+        # You may pin to the exact commit or the version.
+        # uses: NWBY/pest-action@a446e7d3d99823679ca5e72acd7e435e6ae50e37
+        uses: NWBY/pest-action@v1.2.0
