@@ -35,8 +35,9 @@ jobs:
           key: "php-${{ matrix.php }}-composer-${{ hashFiles('**/composer.json') }}"
           restore-keys: "php-${{ matrix.php }}-composer-"
 
-      - name: Install Pest Composer dependencies
-        run: composer install --prefer-dist --no-interaction --ignore-platform-reqs
+      - name: Install Dependencies
+        if: steps.vendor-cache.outputs.cache-hit != 'true'
+        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
       - name: Run Pest
-        run: ./vendor/bin/pest
+        run: vendor/bin/pest
