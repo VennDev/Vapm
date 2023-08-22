@@ -12,9 +12,9 @@
         }
     ],
     "config": {
-	"allow-plugins": {
-		"phpstan/extension-installer": true
-	}
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
     },
     "require": {
         "php": "^8.2",
@@ -22,13 +22,9 @@
 	"composer-runtime-api": "^2.0"
     },
     "require-dev": {
-        "phpstan/phpstan": "*"
+        "pestphp/pest": "*"
     },
     "scripts": {
-	"analyse-src": "./vendor/bin/phpstan analyse -c phpstan.neon.dist",
-	"make-server": [
-		 "@composer install --no-dev --classmap-authoritative --ignore-platform-reqs",
-		 "@php -dphar.readonly=0 build/server-phar.php"
-      	]
+	"pest": "./vendor/bin/pest"
     }
 }
