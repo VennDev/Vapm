@@ -5,7 +5,7 @@ return [
     'paths' => [
         'src\vennv'
     ],
-    'testSuffix' => '.pest.php',
+    'testSuffix' => '.php',
     'parallel' => false,
     'colors' => true,
 ];
