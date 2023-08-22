@@ -25,7 +25,7 @@ namespace vennv\vapm\simultaneous;
 
 use Throwable;
 use vennv\vapm\System;
-use vennv\vapm\enums\ErrorMessage;
+use vennv\vapm\simultaneous\enums\ErrorMessage;
 use vennv\api\simultaneous\StreamInterface;
 
 use function fgets;

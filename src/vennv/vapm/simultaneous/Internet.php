@@ -25,7 +25,7 @@ namespace vennv\vapm\simultaneous;
 
 use Closure;
 use CurlHandle;
-use vennv\vapm\enums\ErrorMessage;
+use vennv\vapm\simultaneous\enums\ErrorMessage;
 
 use function trim;
 use function substr;

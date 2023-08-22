@@ -29,7 +29,7 @@ use ReflectionClass;
 use RuntimeException;
 use ReflectionException;
 use vennv\vapm\utils\Utils;
-use vennv\vapm\enums\ErrorMessage;
+use vennv\vapm\simultaneous\enums\ErrorMessage;
 use vennv\api\simultaneous\ThreadInterface;
 use vennv\api\simultaneous\ThreadedInterface;
 

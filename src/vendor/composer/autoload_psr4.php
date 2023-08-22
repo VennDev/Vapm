@@ -7,4 +7,5 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'vennv\\vapm\\' => array($baseDir . '/vennv/vapm'),
+    'vennv\\api\\' => array($baseDir . '/vennv/api'),
 );

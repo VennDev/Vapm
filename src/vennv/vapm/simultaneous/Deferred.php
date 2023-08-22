@@ -24,7 +24,7 @@ declare(strict_types=1);
 namespace vennv\vapm\simultaneous;
 
 use Generator;
-use vennv\vapm\enums\ErrorMessage;
+use vennv\vapm\simultaneous\enums\ErrorMessage;
 use vennv\api\simultaneous\DeferredInterface;
 
 final class Deferred implements DeferredInterface

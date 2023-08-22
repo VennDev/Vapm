@@ -28,7 +28,7 @@ use vennv\vapm\http\Status;
 use vennv\vapm\utils\Utils;
 use vennv\vapm\http\Protocol;
 use vennv\vapm\express\Express;
-use vennv\vapm\enums\ErrorMessage;
+use vennv\vapm\simultaneous\enums\ErrorMessage;
 use vennv\api\express\handlers\RequestInterface;
 use function count;
 use function explode;

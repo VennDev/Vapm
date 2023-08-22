@@ -26,14 +26,13 @@ namespace vennv\vapm;
 use Closure;
 use Throwable;
 use vennv\api\SystemInterface;
-use vennv\vapm\simultaneous\Error;
-use vennv\vapm\enums\ErrorMessage;
 use vennv\vapm\simultaneous\Promise;
 use vennv\vapm\simultaneous\Internet;
 use vennv\vapm\simultaneous\EventLoop;
 use vennv\vapm\simultaneous\MacroTask;
 use vennv\vapm\simultaneous\SampleMacro;
 use vennv\vapm\simultaneous\FiberManager;
+use vennv\vapm\enums\simultaneous\ErrorMessage;
 
 use function curl_init;
 use function curl_multi_exec;

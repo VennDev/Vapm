@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace vennv\vapm\simultaneous;
 
-use vennv\vapm\enums\StatusPromise;
+use vennv\vapm\simultaneous\enums\StatusPromise;
 use vennv\api\simultaneous\PromiseResultInterface;
 
 final readonly class PromiseResult implements PromiseResultInterface

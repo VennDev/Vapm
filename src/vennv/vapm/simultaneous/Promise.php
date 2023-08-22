@@ -26,8 +26,8 @@ namespace vennv\vapm\simultaneous;
 use Fiber;
 use Throwable;
 use vennv\vapm\System;
-use vennv\vapm\enums\StatusPromise;
 use vennv\api\simultaneous\PromiseInterface;
+use vennv\vapm\simultaneous\enums\StatusPromise;
 
 use function count;
 use function microtime;

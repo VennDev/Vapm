@@ -30,7 +30,7 @@ use ReflectionFunction;
 use ReflectionException;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
-use vennv\vapm\enums\ErrorMessage;
+use vennv\vapm\simultaneous\enums\ErrorMessage;
 use vennv\vapm\simultaneous\Error;
 
 use function file;

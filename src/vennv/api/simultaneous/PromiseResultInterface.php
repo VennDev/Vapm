@@ -2,7 +2,7 @@
 
 namespace vennv\api\simultaneous;
 
-use vennv\vapm\enums\StatusPromise;
+use vennv\vapm\simultaneous\enums\StatusPromise;
 
 interface PromiseResultInterface
 {

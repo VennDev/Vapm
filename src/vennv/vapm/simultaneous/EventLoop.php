@@ -24,7 +24,7 @@ declare(strict_types=1);
 namespace vennv\vapm\simultaneous;
 
 use Throwable;
-use vennv\vapm\enums\StatusPromise;
+use vennv\vapm\simultaneous\enums\StatusPromise;
 use vennv\api\simultaneous\EventLoopInterface;
 
 use function count;

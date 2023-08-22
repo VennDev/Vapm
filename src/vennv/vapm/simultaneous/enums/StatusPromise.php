@@ -1,6 +1,6 @@
 <?php
 
-namespace vennv\vapm\enums;
+namespace vennv\vapm\simultaneous\enums;
 
 enum StatusPromise: string
 {

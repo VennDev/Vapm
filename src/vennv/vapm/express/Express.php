@@ -24,7 +24,7 @@ declare(strict_types = 1);
 namespace vennv\vapm\express;
 
 use vennv\vapm\System;
-use vennv\vapm\enums\ErrorMessage;
+use vennv\vapm\simultaneous\enums\ErrorMessage;
 use vennv\vapm\express\data\JsonData;
 use vennv\vapm\express\data\StaticData;
 use vennv\vapm\express\handlers\Request;

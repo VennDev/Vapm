@@ -5,8 +5,8 @@ namespace vennv\api\simultaneous;
 use Fiber;
 use Throwable;
 use vennv\vapm\simultaneous\Async;
-use vennv\vapm\enums\StatusPromise;
 use vennv\vapm\simultaneous\Promise;
+use vennv\vapm\simultaneous\enums\StatusPromise;
 
 interface PromiseInterface
 {
