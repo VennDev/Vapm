@@ -1,6 +1,0 @@
-parameters:
-   level: 9
-   paths:
-      - src\vennv
-   checkGenericClassInNonGenericObjectType: false
-   treatPhpDocTypesAsCertain: false
