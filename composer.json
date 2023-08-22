@@ -11,20 +11,24 @@
             "email": "1050080275@sv.hcmunre.edu.vn"
         }
     ],
+    "config": {
+	"allow-plugins": {
+		"phpstan/extension-installer": true
+	}
+    },
     "require": {
         "php": "^8.2",
 	"php-64bit": "*",
 	"composer-runtime-api": "^2.0"
     },
     "require-dev": {
-        "pestphp/pest": "^2.16"
-    },
-    "config": {
-        "allow-plugins": {
-            "pestphp/pest-plugin": true
-        }
+        "phpstan/phpstan": "*"
     },
     "scripts": {
-	"pest": "./vendor/bin/pest"
+	"analyse-src": "./vendor/bin/phpstan analyse -c phpstan.neon.dist",
+	"make-server": [
+		 "@composer install --no-dev --classmap-authoritative --ignore-platform-reqs",
+		 "@php -dphar.readonly=0 build/server-phar.php"
+      	]
     }
 }
