@@ -23,11 +23,14 @@ declare(strict_types = 1);
 
 namespace vennv\vapm\simultaneous;
 
+use ArrayObject;
 use Throwable;
 use function count;
 use const PHP_INT_MAX;
 
 interface EventLoopInterface {
+
+    public static function init() : void;
 
     public static function generateId() : int;
 
@@ -35,23 +38,27 @@ interface EventLoopInterface {
 
     public static function removeQueue(int $id) : void;
 
+    public static function isQueue(int $id) : bool;
+
     public static function getQueue(int $id) : ?Promise;
 
     /**
-     * @return array<int, Promise>
+     * @return ArrayObject
      */
-    public static function getQueues() : array;
+    public static function getQueues() : ArrayObject;
 
     public static function addReturn(Promise $promise) : void;
 
     public static function removeReturn(int $id) : void;
 
+    public static function isReturn(int $id) : bool;
+
     public static function getReturn(int $id) : ?Promise;
 
     /**
-     * @return array<int, Promise>
+     * @return ArrayObject
      */
-    public static function getReturns() : array;
+    public static function getReturns() : ArrayObject;
 
 }
 
@@ -60,14 +67,19 @@ class EventLoop implements EventLoopInterface {
     protected static int $nextId = 0;
 
     /**
-     * @var array<int, Promise>
+     * @var ArrayObject
      */
-    protected static array $queues = [];
+    protected static ArrayObject $queues;
 
     /**
-     * @var array<int, Promise>
+     * @var ArrayObject
      */
-    protected static array $returns = [];
+    protected static ArrayObject $returns;
+
+    public static function init() : void {
+        if (!isset(self::$queues)) self::$queues = new ArrayObject();
+        if (!isset(self::$returns)) self::$returns = new ArrayObject();
+    }
 
     public static function generateId() : int {
         if (self::$nextId >= PHP_INT_MAX) {
@@ -78,53 +90,53 @@ class EventLoop implements EventLoopInterface {
     }
 
     public static function addQueue(Promise $promise) : void {
-        $id = $promise->getId();
-
-        if (!isset(self::$queues[$id])) {
-            self::$queues[$id] = $promise;
-        }
+        if (!self::getQueue($id = $promise->getId())) self::$queues->offsetSet($id, $promise);
     }
 
     public static function removeQueue(int $id) : void {
-        unset(self::$queues[$id]);
+        self::$queues->offsetUnset($id);
+    }
+
+    public static function isQueue(int $id) : bool {
+        return self::$queues->offsetExists($id);
     }
 
     public static function getQueue(int $id) : ?Promise {
-        return self::$queues[$id] ?? null;
+        return self::isQueue($id) ? self::$queues->offsetGet($id) : null;
     }
 
     /**
-     * @return array<int, Promise>
+     * @return ArrayObject
      */
-    public static function getQueues() : array {
+    public static function getQueues() : ArrayObject {
         return self::$queues;
     }
 
     public static function addReturn(Promise $promise) : void {
-        $id = $promise->getId();
+        if (!self::getReturn($id = $promise->getId())) self::$returns->offsetSet($id, $promise);
+    }
 
-        if (!isset(self::$returns[$id])) {
-            self::$returns[$id] = $promise;
-        }
+    public static function isReturn(int $id) : bool {
+        return self::$returns->offsetExists($id);
     }
 
     public static function removeReturn(int $id) : void {
-        unset(self::$returns[$id]);
+        self::$returns->offsetUnset($id);
     }
 
     public static function getReturn(int $id) : ?Promise {
-        return self::$returns[$id] ?? null;
+        return self::$returns->offsetExists($id) ? self::$returns->offsetGet($id) : null;
     }
 
     /**
-     * @return array<int, Promise>
+     * @return ArrayObject
      */
-    public static function getReturns() : array {
+    public static function getReturns() : ArrayObject {
         return self::$returns;
     }
 
     private static function clearGarbage() : void {
-        foreach (self::$returns as $id => $promise) {
+        foreach (self::$returns->getIterator() as $id => $promise) {
             if ($promise->canDrop()) {
                 self::removeReturn($id);
             }
@@ -139,7 +151,7 @@ class EventLoop implements EventLoopInterface {
             GreenThread::run();
         }
 
-        foreach (self::$queues as $id => $promise) {
+        foreach (self::$queues->getIterator() as $id => $promise) {
             $fiber = $promise->getFiber();
 
             if ($fiber->isSuspended()) {

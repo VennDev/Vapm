@@ -141,6 +141,7 @@ final class System extends EventLoop implements SystemInterface {
      * @throws Throwable
      */
     public static function runEventLoop() : void {
+        self::init();
         parent::run();
     }
 
@@ -148,6 +149,7 @@ final class System extends EventLoop implements SystemInterface {
      * @throws Throwable
      */
     public static function runSingleEventLoop() : void {
+        self::init();
         parent::runSingle();
     }
 
@@ -159,6 +161,8 @@ final class System extends EventLoop implements SystemInterface {
                 self::runSingleEventLoop();
             });
         }
+
+        parent::init();
     }
 
     /**

@@ -26,6 +26,7 @@ namespace vennv\vapm\simultaneous;
 use vennv\vapm\System;
 use Fiber;
 use Throwable;
+use ArrayObject;
 use function call_user_func;
 use function count;
 use function is_callable;
@@ -201,8 +202,8 @@ final class Promise implements PromiseInterface {
 
     private string $status = StatusPromise::PENDING;
 
-    /** @var array<int|string, callable> $callbacksResolve */
-    private array $callbacksResolve = [];
+    /** @var ArrayObject $callbacksResolve */
+    private ArrayObject $callbacksResolve;
 
     /** @var callable $callbacksReject */
     private mixed $callbackReject;
@@ -226,6 +227,8 @@ final class Promise implements PromiseInterface {
      */
     public function __construct(callable $callback, bool $justGetResult = false) {
         System::init();
+
+        $this->callbacksResolve = new ArrayObject();
 
         $this->id = EventLoop::generateId();
 
@@ -254,9 +257,9 @@ final class Promise implements PromiseInterface {
 
         $this->timeStart = microtime(true);
 
-        $this->callbacksResolve["master"] = function ($result) : mixed {
+        $this->callbacksResolve->offsetSet("master", function ($result) : mixed {
             return $result;
-        };
+        });
 
         $this->callbackReject = function ($result) : mixed {
             return $result;
@@ -355,7 +358,6 @@ final class Promise implements PromiseInterface {
 
     public function then(callable $callback) : Promise {
         $this->callbacksResolve[] = $callback;
-
         return $this;
     }
 
@@ -401,17 +403,16 @@ final class Promise implements PromiseInterface {
     }
 
     /**
-     * @param array<callable> $callbacks
-     * @phpstan-param array<callable> $callbacks
-     * @throws Throwable
+     * @param ArrayObject $callbacks
+     * @param mixed $return
      */
-    private function checkStatus(array $callbacks, mixed $return) : void {
+    private function checkStatus(ArrayObject $callbacks, mixed $return) : void {
         $lastPromise = null;
 
         while (count($callbacks) > 0) {
             $cancel = false;
 
-            foreach ($callbacks as $case => $callable) {
+            foreach ($callbacks->getArrayCopy() as $case => $callable) {
                 if ($return === null) {
                     $cancel = true;
                     break;
@@ -441,7 +442,7 @@ final class Promise implements PromiseInterface {
                         $lastPromise = $queue2;
                     }
 
-                    unset($callbacks[$case]);
+                    $callbacks->offsetUnset($case);
                     continue;
                 }
 
@@ -471,11 +472,12 @@ final class Promise implements PromiseInterface {
      */
     public static function all(array $promises) : Promise {
         $promise = new Promise(function ($resolve, $reject) use ($promises) : void {
+            $count = count($promises);
             $results = [];
             $isSolved = false;
 
             while ($isSolved === false) {
-                foreach ($promises as $promise) {
+                foreach ($promises as $index => $promise) {
                     if (is_callable($promise)) {
                         $promise = new Async($promise);
                     }
@@ -491,11 +493,12 @@ final class Promise implements PromiseInterface {
 
                             if ($return->isResolved()) {
                                 $results[] = $return->getResult();
+                                unset($promises[$index]);
                             }
                         }
                     }
 
-                    if (count($results) === count($promises)) {
+                    if (count($results) === $count) {
                         $resolve($results);
                         $isSolved = true;
                     }
@@ -519,11 +522,12 @@ final class Promise implements PromiseInterface {
      */
     public static function allSettled(array $promises) : Promise {
         $promise = new Promise(function ($resolve) use ($promises) : void {
+            $count = count($promises);
             $results = [];
             $isSolved = false;
 
             while ($isSolved === false) {
-                foreach ($promises as $promise) {
+                foreach ($promises as $index => $promise) {
                     if (is_callable($promise)) {
                         $promise = new Async($promise);
                     }
@@ -533,10 +537,11 @@ final class Promise implements PromiseInterface {
 
                         if ($return !== null) {
                             $results[] = new PromiseResult($return->getStatus(), $return->getResult());
+                            unset($promises[$index]);
                         }
                     }
 
-                    if (count($results) === count($promises)) {
+                    if (count($results) === $count) {
                         $resolve($results);
                         $isSolved = true;
                     }
@@ -560,11 +565,12 @@ final class Promise implements PromiseInterface {
      */
     public static function any(array $promises) : Promise {
         $promise = new Promise(function ($resolve, $reject) use ($promises) : void {
+            $count = count($promises);
             $results = [];
             $isSolved = false;
 
             while ($isSolved === false) {
-                foreach ($promises as $promise) {
+                foreach ($promises as $index => $promise) {
                     if (is_callable($promise)) {
                         $promise = new Async($promise);
                     }
@@ -575,6 +581,7 @@ final class Promise implements PromiseInterface {
                         if ($return !== null) {
                             if ($return->isRejected()) {
                                 $results[] = $return->getResult();
+                                unset($promises[$index]);
                             }
 
                             if ($return->isResolved()) {
@@ -584,7 +591,7 @@ final class Promise implements PromiseInterface {
                         }
                     }
 
-                    if (count($results) === count($promises)) {
+                    if (count($results) === $count) {
                         $reject($results);
                         $isSolved = true;
                     }
