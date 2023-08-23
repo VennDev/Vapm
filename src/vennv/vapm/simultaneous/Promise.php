@@ -421,7 +421,7 @@ final class Promise implements PromiseInterface {
              * @var int|string $case
              * @var callable $callback
              */
-            foreach ($callbacks->getArrayCopy() as $case => $callable) {
+            foreach ($callbacks->getArrayCopy() as $case => $callback) {
                 if ($return === null) {
                     $cancel = true;
                     break;
@@ -434,7 +434,7 @@ final class Promise implements PromiseInterface {
                     $queue2 = MicroTask::getTask($return->getId());
 
                     if (!is_null($queue1)) {
-                        $queue1->then($callable);
+                        $queue1->then($callback);
 
                         if (is_callable($this->callbackReject)) {
                             $queue1->catch($this->callbackReject);
@@ -442,7 +442,7 @@ final class Promise implements PromiseInterface {
 
                         $lastPromise = $queue1;
                     } else if (!is_null($queue2)) {
-                        $queue2->then($callable);
+                        $queue2->then($callback);
 
                         if (is_callable($this->callbackReject)) {
                             $queue2->catch($this->callbackReject);
