@@ -102,7 +102,7 @@ class EventLoop implements EventLoopInterface {
     }
 
     public static function getQueue(int $id) : ?Promise {
-        return self::isQueue($id) ? self::$queues->offsetGet($id) : null;
+        return self::isQueue($id) ? self::$queues->offsetGet($id) : null; /* @phpstan-ignore-line */
     }
 
     /**
@@ -125,7 +125,7 @@ class EventLoop implements EventLoopInterface {
     }
 
     public static function getReturn(int $id) : ?Promise {
-        return self::$returns->offsetExists($id) ? self::$returns->offsetGet($id) : null;
+        return self::$returns->offsetExists($id) ? self::$returns->offsetGet($id) : null; /* @phpstan-ignore-line */
     }
 
     /**
@@ -136,6 +136,10 @@ class EventLoop implements EventLoopInterface {
     }
 
     private static function clearGarbage() : void {
+        /**
+         * @var int $id
+         * @var Promise $promise
+         */
         foreach (self::$returns->getIterator() as $id => $promise) {
             if ($promise->canDrop()) {
                 self::removeReturn($id);
@@ -151,6 +155,10 @@ class EventLoop implements EventLoopInterface {
             GreenThread::run();
         }
 
+        /**
+         * @var int $id
+         * @var Promise $promise
+         */
         foreach (self::$queues->getIterator() as $id => $promise) {
             $fiber = $promise->getFiber();
 

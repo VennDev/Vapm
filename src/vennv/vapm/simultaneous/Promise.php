@@ -381,6 +381,8 @@ final class Promise implements PromiseInterface {
 
         if ($this->isResolved()) {
             $callbacks = $this->callbacksResolve;
+
+            /** @var callable $master */
             $master = $callbacks["master"];
 
             $this->result = call_user_func($master, $result);
@@ -388,7 +390,10 @@ final class Promise implements PromiseInterface {
             unset($callbacks["master"]);
 
             if (count($callbacks) > 0) {
-                $resultFirstCallback = call_user_func($callbacks[0], $this->result);
+                /** @var callable $callback */
+                $callback = $callbacks[0];
+
+                $resultFirstCallback = call_user_func($callback, $this->result);
 
                 $this->result = $resultFirstCallback;
                 $this->return = $resultFirstCallback;
@@ -412,6 +417,10 @@ final class Promise implements PromiseInterface {
         while (count($callbacks) > 0) {
             $cancel = false;
 
+            /**
+             * @var int|string $case
+             * @var callable $callback
+             */
             foreach ($callbacks->getArrayCopy() as $case => $callable) {
                 if ($return === null) {
                     $cancel = true;
