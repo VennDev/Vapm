@@ -5,6 +5,9 @@
 # Institutes supported by this library
 - [VapmExpress](https://github.com/VennDev/VapmExpress)
 
+# Composer
+```composer require vennv/vapm```
+
 # Next update?
 - Simply add some other asynchronous features so that this library is as similar to Javascript & Kotlin as possible.
 - If you have any features you'd like to contribute or have any ideas, please give me feedback. I will always update this project in the near future.
