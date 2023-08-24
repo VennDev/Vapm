@@ -1,5 +1,6 @@
 {
     "name": "vennv/vapm",
+    "keywords": ["vapm", "asynchronous", "Vapm"],
     "autoload": {
         "psr-4": {
             "vennv\\vapm\\": "src/vennv/vapm/"
@@ -17,10 +18,9 @@
 	}
     },
     "require": {
-        "php": "^8.2",
+        "php": ">=8.2",
 	"php-64bit": "*",
-	"composer-runtime-api": "^2.0",
-	"another-vendor/package": "1.*"
+	"composer-runtime-api": "^2.0"
     },
     "require-dev": {
         "phpstan/phpstan": "*"
