@@ -1,5 +1,5 @@
 {
-    "name": "nam/vapm",
+    "name": "vennv/vapm",
     "autoload": {
         "psr-4": {
             "vennv\\vapm\\": "src/vennv/vapm/"
@@ -19,7 +19,8 @@
     "require": {
         "php": "^8.2",
 	"php-64bit": "*",
-	"composer-runtime-api": "^2.0"
+	"composer-runtime-api": "^2.0",
+	"another-vendor/package": "1.*"
     },
     "require-dev": {
         "phpstan/phpstan": "*"
