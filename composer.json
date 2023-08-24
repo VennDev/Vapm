@@ -2,6 +2,7 @@
     "name": "vennv/vapm",
     "keywords": ["vapm", "asynchronous", "Vapm"],
     "license": "LGPL-2.0-only",
+    "version": "8.6.0",
     "autoload": {
         "psr-4": {
             "vennv\\vapm\\": "src/vennv/vapm/"
