@@ -1,6 +1,7 @@
 {
     "name": "vennv/vapm",
     "keywords": ["vapm", "asynchronous", "Vapm"],
+    "license": "GPL",
     "autoload": {
         "psr-4": {
             "vennv\\vapm\\": "src/vennv/vapm/"
