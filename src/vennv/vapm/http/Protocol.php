@@ -21,30 +21,18 @@
 
 declare(strict_types = 1);
 
-namespace vennv\vapm\simultaneous;
+namespace vennv\vapm\http;
 
-interface CoroutineThreadInterface {
+final class Protocol {
 
-    /**
-     * @return void
-     *
-     * This function runs the callback function for the thread.
-     */
-    public function onRun() : void;
+    public const HTTP_0_9 = 'HTTP/0.9';
 
-}
+    public const HTTP_1_0 = 'HTTP/1.0';
 
-final class CoroutineThread extends Thread implements CoroutineThreadInterface {
+    public const HTTP_1_1 = 'HTTP/1.1';
 
-    private mixed $callback;
+    public const HTTP_2_0 = 'HTTP/2.0';
 
-    public function __construct(callable $callback) {
-        $this->callback = $callback;
-        parent::__construct($callback);
-    }
-
-    public function onRun() : void {
-        if (is_callable($this->callback)) call_user_func($this->callback);
-    }
+    public const HTTP_3_0 = 'HTTP/3.0';
 
 }

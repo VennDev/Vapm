@@ -21,30 +21,28 @@
 
 declare(strict_types = 1);
 
-namespace vennv\vapm\simultaneous;
+namespace vennv\vapm\express\middleware;
 
-interface CoroutineThreadInterface {
+final class MiddleWare {
+
+    public string $path;
+
+    public mixed $callback;
 
     /**
-     * @return void
-     *
-     * This function runs the callback function for the thread.
+     * @var array<int|float|string, mixed> $params
      */
-    public function onRun() : void;
+    public array $params;
 
-}
-
-final class CoroutineThread extends Thread implements CoroutineThreadInterface {
-
-    private mixed $callback;
-
-    public function __construct(callable $callback) {
+    /**
+     * @param string $path
+     * @param callable $callback
+     * @param array<int|float|string, mixed> $params
+     */
+    public function __construct(string $path, callable $callback, array $params = []) {
+        $this->path = $path;
         $this->callback = $callback;
-        parent::__construct($callback);
-    }
-
-    public function onRun() : void {
-        if (is_callable($this->callback)) call_user_func($this->callback);
+        $this->params = $params;
     }
 
 }

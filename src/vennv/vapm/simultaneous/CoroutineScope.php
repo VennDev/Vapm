@@ -125,7 +125,7 @@ final class CoroutineScope implements CoroutineScopeInterface {
      * @throws Throwable
      */
     public function run() : void {
-        if (self::$taskQueue !== null && !self::$taskQueue->isEmpty() && self::$cancelled === false) {
+        if (self::$taskQueue !== null && !self::$taskQueue->isEmpty() && !self::$cancelled) {
             $coroutine = self::$taskQueue->dequeue();
 
             if ($coroutine instanceof ChildCoroutine) {
@@ -149,9 +149,7 @@ final class CoroutineScope implements CoroutineScopeInterface {
     }
 
     private static function schedule(ChildCoroutine|CoroutineScope $childCoroutine) : void {
-        if (self::$taskQueue === null) {
-            self::$taskQueue = new SplQueue();
-        }
+        if (self::$taskQueue === null) self::$taskQueue = new SplQueue();
 
         self::$taskQueue->enqueue($childCoroutine);
     }

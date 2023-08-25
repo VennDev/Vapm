@@ -21,30 +21,35 @@
 
 declare(strict_types = 1);
 
-namespace vennv\vapm\simultaneous;
+namespace vennv\vapm\express\data;
 
-interface CoroutineThreadInterface {
+use vennv\vapm\utils\Property;
+
+final class StaticData {
+
+    use Property;
+
+    public string $dotfiles = 'ignore';
+
+    public bool $etag = true;
 
     /**
-     * @return void
-     *
-     * This function runs the callback function for the thread.
+     * @var array<string> $extensions
      */
-    public function onRun() : void;
+    public array $extensions = [];
 
-}
+    public bool $fallthrough = true;
 
-final class CoroutineThread extends Thread implements CoroutineThreadInterface {
+    public bool $immutable = false;
 
-    private mixed $callback;
+    public bool $lastModified = true;
 
-    public function __construct(callable $callback) {
-        $this->callback = $callback;
-        parent::__construct($callback);
-    }
+    public int|float $maxAge = 0;
 
-    public function onRun() : void {
-        if (is_callable($this->callback)) call_user_func($this->callback);
-    }
+    public bool $redirect = true;
+
+    public mixed $setHeaders = null;
+
+    public bool $enable = false;
 
 }

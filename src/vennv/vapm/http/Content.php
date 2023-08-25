@@ -21,30 +21,32 @@
 
 declare(strict_types = 1);
 
-namespace vennv\vapm\simultaneous;
+namespace vennv\vapm\http;
 
-interface CoroutineThreadInterface {
+final class Content {
 
-    /**
-     * @return void
-     *
-     * This function runs the callback function for the thread.
-     */
-    public function onRun() : void;
+    public const CONTENT_TYPE = 'Content-Type';
 
-}
+    public const CONTENT_LENGTH = 'Content-Length';
 
-final class CoroutineThread extends Thread implements CoroutineThreadInterface {
+    public const CONTENT_ENCODING = 'Content-Encoding';
 
-    private mixed $callback;
+    public const CONTENT_DISPOSITION = 'Content-Disposition';
 
-    public function __construct(callable $callback) {
-        $this->callback = $callback;
-        parent::__construct($callback);
-    }
+    public const CONTENT_TRANSFER_ENCODING = 'Content-Transfer-Encoding';
 
-    public function onRun() : void {
-        if (is_callable($this->callback)) call_user_func($this->callback);
-    }
+    public const CONTENT_RANGE = 'Content-Range';
+
+    public const CONTENT_LOCATION = 'Content-Location';
+
+    public const CONTENT_LANGUAGE = 'Content-Language';
+
+    public const CONTENT_EXPIRES = 'Content-Expires';
+
+    public const CONTENT_MD5 = 'Content-MD5';
+
+    public const CONTENT_RANGE_BYTES = 'bytes';
+
+    public const CONTENT_RANGE_NONE = '*';
 
 }

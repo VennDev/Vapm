@@ -39,18 +39,18 @@ interface AsyncInterface {
 
 final class Async implements AsyncInterface {
 
-    private int $id;
+    private Promise $promise;
 
     /**
      * @throws Throwable
      */
     public function __construct(callable $callback) {
         $promise = new Promise($callback, true);
-        $this->id = $promise->getId();
+        $this->promise = $promise;
     }
 
     public function getId() : int {
-        return $this->id;
+        return $this->promise->getId();
     }
 
     /**

@@ -21,30 +21,27 @@
 
 declare(strict_types = 1);
 
-namespace vennv\vapm\simultaneous;
+namespace vennv\vapm\express\data;
 
-interface CoroutineThreadInterface {
+use vennv\vapm\http\TypeData;
+use vennv\vapm\utils\Property;
 
-    /**
-     * @return void
-     *
-     * This function runs the callback function for the thread.
-     */
-    public function onRun() : void;
+final class JsonData {
 
-}
+    use Property;
 
-final class CoroutineThread extends Thread implements CoroutineThreadInterface {
+    public bool $enable = false;
 
-    private mixed $callback;
+    public bool $inflate = false;
 
-    public function __construct(callable $callback) {
-        $this->callback = $callback;
-        parent::__construct($callback);
-    }
+    public bool $strict = false;
 
-    public function onRun() : void {
-        if (is_callable($this->callback)) call_user_func($this->callback);
-    }
+    public int $limit = 100000;
+
+    public mixed $type = TypeData::JSON;
+
+    public mixed $verify = null;
+
+    public mixed $reviver = null;
 
 }

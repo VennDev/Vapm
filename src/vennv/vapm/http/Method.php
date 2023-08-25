@@ -21,30 +21,28 @@
 
 declare(strict_types = 1);
 
-namespace vennv\vapm\simultaneous;
+namespace vennv\vapm\http;
 
-interface CoroutineThreadInterface {
+final class Method {
 
-    /**
-     * @return void
-     *
-     * This function runs the callback function for the thread.
-     */
-    public function onRun() : void;
+    public const GET = 'GET';
 
-}
+    public const POST = 'POST';
 
-final class CoroutineThread extends Thread implements CoroutineThreadInterface {
+    public const PUT = 'PUT';
 
-    private mixed $callback;
+    public const DELETE = 'DELETE';
 
-    public function __construct(callable $callback) {
-        $this->callback = $callback;
-        parent::__construct($callback);
-    }
+    public const HEAD = 'HEAD';
 
-    public function onRun() : void {
-        if (is_callable($this->callback)) call_user_func($this->callback);
-    }
+    public const OPTIONS = 'OPTIONS';
+
+    public const PATCH = 'PATCH';
+
+    public const TRACE = 'TRACE';
+
+    public const CONNECT = 'CONNECT';
+
+    public const ALL = 'ALL';
 
 }

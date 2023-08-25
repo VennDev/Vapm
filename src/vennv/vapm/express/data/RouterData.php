@@ -21,30 +21,16 @@
 
 declare(strict_types = 1);
 
-namespace vennv\vapm\simultaneous;
+namespace vennv\vapm\express\data;
 
-interface CoroutineThreadInterface {
+use vennv\vapm\utils\Property;
 
-    /**
-     * @return void
-     *
-     * This function runs the callback function for the thread.
-     */
-    public function onRun() : void;
+final class RouterData {
 
-}
+    use Property;
 
-final class CoroutineThread extends Thread implements CoroutineThreadInterface {
+    public bool $caseSensitive = false;
 
-    private mixed $callback;
-
-    public function __construct(callable $callback) {
-        $this->callback = $callback;
-        parent::__construct($callback);
-    }
-
-    public function onRun() : void {
-        if (is_callable($this->callback)) call_user_func($this->callback);
-    }
+    public bool $mergeParams = false;
 
 }

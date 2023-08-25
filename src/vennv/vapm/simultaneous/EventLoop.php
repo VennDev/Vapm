@@ -23,7 +23,7 @@ declare(strict_types = 1);
 
 namespace vennv\vapm\simultaneous;
 
-use ArrayObject;
+use SplObjectStorage;
 use Throwable;
 use function count;
 use const PHP_INT_MAX;
@@ -43,9 +43,9 @@ interface EventLoopInterface {
     public static function getQueue(int $id) : ?Promise;
 
     /**
-     * @return ArrayObject
+     * @return SplObjectStorage
      */
-    public static function getQueues() : ArrayObject;
+    public static function getQueues() : SplObjectStorage;
 
     public static function addReturn(Promise $promise) : void;
 
@@ -56,9 +56,9 @@ interface EventLoopInterface {
     public static function getReturn(int $id) : ?Promise;
 
     /**
-     * @return ArrayObject
+     * @return SplObjectStorage
      */
-    public static function getReturns() : ArrayObject;
+    public static function getReturns() : SplObjectStorage;
 
 }
 
@@ -67,18 +67,18 @@ class EventLoop implements EventLoopInterface {
     protected static int $nextId = 0;
 
     /**
-     * @var ArrayObject
+     * @var SplObjectStorage
      */
-    protected static ArrayObject $queues;
+    protected static SplObjectStorage $queues;
 
     /**
-     * @var ArrayObject
+     * @var SplObjectStorage
      */
-    protected static ArrayObject $returns;
+    protected static SplObjectStorage $returns;
 
     public static function init() : void {
-        if (!isset(self::$queues)) self::$queues = new ArrayObject();
-        if (!isset(self::$returns)) self::$returns = new ArrayObject();
+        if (!isset(self::$queues)) self::$queues = new SplObjectStorage();
+        if (!isset(self::$returns)) self::$returns = new SplObjectStorage();
     }
 
     public static function generateId() : int {
@@ -90,59 +90,84 @@ class EventLoop implements EventLoopInterface {
     }
 
     public static function addQueue(Promise $promise) : void {
-        if (!self::getQueue($id = $promise->getId())) self::$queues->offsetSet($id, $promise);
+        if (!self::getQueue($promise->getId())) self::$queues->offsetSet($promise, $promise->getId());
     }
 
     public static function removeQueue(int $id) : void {
-        self::$queues->offsetUnset($id);
+        foreach (self::$queues as $promise) {
+            if ($promise->getId() === $id) {
+                self::$queues->offsetUnset($promise);
+                break;
+            }
+        }
     }
 
     public static function isQueue(int $id) : bool {
-        return self::$queues->offsetExists($id);
+        foreach (self::$queues as $promise) {
+            if ($promise->getId() === $id) return true;
+        }
+
+        return false;
     }
 
     public static function getQueue(int $id) : ?Promise {
-        return self::isQueue($id) ? self::$queues->offsetGet($id) : null; /* @phpstan-ignore-line */
+        foreach (self::$queues as $promise) {
+            if ($promise->getId() === $id) return $promise;
+        }
+
+        return null;
     }
 
     /**
-     * @return ArrayObject
+     * @return SplObjectStorage
      */
-    public static function getQueues() : ArrayObject {
+    public static function getQueues() : SplObjectStorage {
         return self::$queues;
     }
 
     public static function addReturn(Promise $promise) : void {
-        if (!self::getReturn($id = $promise->getId())) self::$returns->offsetSet($id, $promise);
+        if (!self::getReturn($promise->getId())) self::$returns->offsetSet($promise);
     }
 
     public static function isReturn(int $id) : bool {
-        return self::$returns->offsetExists($id);
+        foreach (self::$returns as $promise) {
+            if ($promise->getId() === $id) return true;
+        }
+
+        return false;
     }
 
     public static function removeReturn(int $id) : void {
-        self::$returns->offsetUnset($id);
+        foreach (self::$returns as $promise) {
+            if ($promise->getId() === $id) {
+                self::$returns->offsetUnset($promise);
+                break;
+            }
+        }
     }
 
     public static function getReturn(int $id) : ?Promise {
-        return self::$returns->offsetExists($id) ? self::$returns->offsetGet($id) : null; /* @phpstan-ignore-line */
+        foreach (self::$returns as $promise) {
+            if ($promise->getId() === $id) return $promise;
+        }
+
+        return null;
     }
 
     /**
-     * @return ArrayObject
+     * @return SplObjectStorage
      */
-    public static function getReturns() : ArrayObject {
+    public static function getReturns() : SplObjectStorage {
         return self::$returns;
     }
 
     private static function clearGarbage() : void {
         /**
-         * @var int $id
          * @var Promise $promise
          */
-        foreach (self::$returns->getIterator() as $id => $promise) {
+        foreach (self::$returns as $promise) {
             if ($promise->canDrop()) {
-                self::removeReturn($id);
+                self::removeReturn($promise->getId());
             }
         }
     }
@@ -156,10 +181,10 @@ class EventLoop implements EventLoopInterface {
         }
 
         /**
-         * @var int $id
          * @var Promise $promise
          */
-        foreach (self::$queues->getIterator() as $id => $promise) {
+        foreach (self::$queues as $promise) {
+            $id = $promise->getId();
             $fiber = $promise->getFiber();
 
             if ($fiber->isSuspended()) {
