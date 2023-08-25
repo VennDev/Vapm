@@ -94,6 +94,9 @@ class EventLoop implements EventLoopInterface {
     }
 
     public static function removeQueue(int $id) : void {
+        /**
+         * @var Promise $promise
+         */
         foreach (self::$queues as $promise) {
             if ($promise->getId() === $id) {
                 self::$queues->offsetUnset($promise);
@@ -103,6 +106,9 @@ class EventLoop implements EventLoopInterface {
     }
 
     public static function isQueue(int $id) : bool {
+        /**
+         * @var Promise $promise
+         */
         foreach (self::$queues as $promise) {
             if ($promise->getId() === $id) return true;
         }
@@ -111,6 +117,9 @@ class EventLoop implements EventLoopInterface {
     }
 
     public static function getQueue(int $id) : ?Promise {
+        /**
+         * @var Promise $promise
+         */
         foreach (self::$queues as $promise) {
             if ($promise->getId() === $id) return $promise;
         }
@@ -130,6 +139,9 @@ class EventLoop implements EventLoopInterface {
     }
 
     public static function isReturn(int $id) : bool {
+        /**
+         * @var Promise $promise
+         */
         foreach (self::$returns as $promise) {
             if ($promise->getId() === $id) return true;
         }
@@ -138,6 +150,9 @@ class EventLoop implements EventLoopInterface {
     }
 
     public static function removeReturn(int $id) : void {
+        /**
+         * @var Promise $promise
+         */
         foreach (self::$returns as $promise) {
             if ($promise->getId() === $id) {
                 self::$returns->offsetUnset($promise);
@@ -147,6 +162,9 @@ class EventLoop implements EventLoopInterface {
     }
 
     public static function getReturn(int $id) : ?Promise {
+        /**
+         * @var Promise $promise
+         */
         foreach (self::$returns as $promise) {
             if ($promise->getId() === $id) return $promise;
         }
