@@ -19,11 +19,12 @@
  * GNU General Public License for more details.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace vennv\vapm\simultaneous;
 
-final class StatusPromise {
+final class StatusPromise
+{
 
     public const PENDING = "pending";
     public const FULFILLED = "fulfilled";

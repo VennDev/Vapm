@@ -19,7 +19,7 @@
  * GNU General Public License for more details.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace vennv\vapm\simultaneous;
 
@@ -34,59 +34,69 @@ use function stream_set_blocking;
 use function touch;
 use function unlink;
 
-interface StreamInterface {
+interface StreamInterface
+{
 
     /**
      * @throws Throwable
      *
      * Use this to read a file or url.
      */
-    public static function read(string $path) : Promise;
+    public static function read(string $path): Promise;
 
     /**
      * @throws Throwable
      *
      * Use this to write to a file.
      */
-    public static function write(string $path, string $data) : Promise;
+    public static function write(string $path, string $data): Promise;
 
     /**
      * @throws Throwable
      *
      * Use this to append to a file.
      */
-    public static function append(string $path, string $data) : Promise;
+    public static function append(string $path, string $data): Promise;
 
     /**
      * @throws Throwable
      *
      * Use this to delete a file.
      */
-    public static function delete(string $path) : Promise;
+    public static function delete(string $path): Promise;
 
     /**
      * @throws Throwable
      *
      * Use this to create a file.
      */
-    public static function create(string $path) : Promise;
+    public static function create(string $path): Promise;
 
     /**
      * @throws Throwable
      *
      * Use this to create a file or overwrite a file.
      */
-    public static function overWrite(string $path, string $data) : Promise;
+    public static function overWrite(string $path, string $data): Promise;
+
+    /**
+     * @throws Throwable
+     *
+     * Use this to flatten an array.
+     */
+    public static function flattenArray(array $array): Promise;
 
 }
 
-final class Stream implements StreamInterface {
+final class Stream implements StreamInterface
+{
 
     /**
      * @throws Throwable
      */
-    public static function read(string $path) : Promise {
-        return new Promise(function ($resolve, $reject) use ($path) : void {
+    public static function read(string $path): Promise
+    {
+        return new Promise(function ($resolve, $reject) use ($path): void {
             $lines = '';
             $handle = fopen($path, 'r');
 
@@ -110,10 +120,11 @@ final class Stream implements StreamInterface {
     /**
      * @throws Throwable
      */
-    public static function write(string $path, string $data) : Promise {
-        return new Promise(function ($resolve, $reject) use ($path, $data) : void {
-            System::setTimeout(function () use ($resolve, $reject, $path, $data) : void {
-                $callback = function ($path, $data) use ($reject) : void {
+    public static function write(string $path, string $data): Promise
+    {
+        return new Promise(function ($resolve, $reject) use ($path, $data): void {
+            System::setTimeout(function () use ($resolve, $reject, $path, $data): void {
+                $callback = function ($path, $data) use ($reject): void {
                     $handle = fopen($path, 'w');
 
                     if ($handle === false) {
@@ -135,10 +146,11 @@ final class Stream implements StreamInterface {
     /**
      * @throws Throwable
      */
-    public static function append(string $path, string $data) : Promise {
-        return new Promise(function ($resolve, $reject) use ($path, $data) : void {
-            System::setTimeout(function () use ($resolve, $reject, $path, $data) : void {
-                $callback = function ($path, $data) use ($reject) : void {
+    public static function append(string $path, string $data): Promise
+    {
+        return new Promise(function ($resolve, $reject) use ($path, $data): void {
+            System::setTimeout(function () use ($resolve, $reject, $path, $data): void {
+                $callback = function ($path, $data) use ($reject): void {
                     $handle = fopen($path, 'a');
 
                     if ($handle === false) {
@@ -160,10 +172,11 @@ final class Stream implements StreamInterface {
     /**
      * @throws Throwable
      */
-    public static function delete(string $path) : Promise {
-        return new Promise(function ($resolve, $reject) use ($path) : void {
-            System::setTimeout(function () use ($resolve, $reject, $path) : void {
-                $callback = function ($path) use ($reject) : void {
+    public static function delete(string $path): Promise
+    {
+        return new Promise(function ($resolve, $reject) use ($path): void {
+            System::setTimeout(function () use ($resolve, $reject, $path): void {
+                $callback = function ($path) use ($reject): void {
                     if (file_exists($path)) {
                         unlink($path);
                     } else {
@@ -181,10 +194,11 @@ final class Stream implements StreamInterface {
     /**
      * @throws Throwable
      */
-    public static function create(string $path) : Promise {
-        return new Promise(function ($resolve, $reject) use ($path) : void {
-            System::setTimeout(function () use ($resolve, $reject, $path) : void {
-                $callback = function ($path) use ($reject) : void {
+    public static function create(string $path): Promise
+    {
+        return new Promise(function ($resolve, $reject) use ($path): void {
+            System::setTimeout(function () use ($resolve, $reject, $path): void {
+                $callback = function ($path) use ($reject): void {
                     if (!file_exists($path)) {
                         touch($path);
                     } else {
@@ -202,10 +216,11 @@ final class Stream implements StreamInterface {
     /**
      * @throws Throwable
      */
-    public static function overWrite(string $path, string $data) : Promise {
-        return new Promise(function ($resolve, $reject) use ($path, $data) : void {
-            System::setTimeout(function () use ($resolve, $reject, $path, $data) : void {
-                $callback = function ($path, $data) use ($reject) : void {
+    public static function overWrite(string $path, string $data): Promise
+    {
+        return new Promise(function ($resolve, $reject) use ($path, $data): void {
+            System::setTimeout(function () use ($resolve, $reject, $path, $data): void {
+                $callback = function ($path, $data) use ($reject): void {
                     $handle = fopen($path, 'w+');
 
                     if ($handle === false) {
@@ -221,6 +236,34 @@ final class Stream implements StreamInterface {
 
                 $resolve();
             }, 0);
+        });
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public static function flattenArray(array $array): Promise
+    {
+        return new Promise(function ($resolve, $reject) use ($array) {
+            $result = [];
+            $stack = [$array];
+
+            while (!empty($stack)) {
+                $element = array_shift($stack);
+
+                if ($element === null) {
+                    $reject(Error::INVALID_ARRAY);
+                    break;
+                }
+
+                foreach ($element as $value) {
+                    is_array($value) ? array_unshift($stack, $value) : $result[] = $value;
+                }
+
+                FiberManager::wait();
+            }
+
+            $resolve($result);
         });
     }
 

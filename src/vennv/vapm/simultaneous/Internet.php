@@ -19,7 +19,7 @@
  * GNU General Public License for more details.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace vennv\vapm\simultaneous;
 
@@ -53,7 +53,8 @@ use const CURLOPT_SSL_VERIFYHOST;
 use const CURLOPT_SSL_VERIFYPEER;
 use const CURLOPT_TIMEOUT_MS;
 
-final class Internet {
+final class Internet
+{
 
     /**
      * GETs a URL using cURL
@@ -68,7 +69,8 @@ final class Internet {
         int    $timeout = 10,
         array  $extraHeaders = [],
         string &$error = null
-    ) : ?InternetRequestResult {
+    ): ?InternetRequestResult
+    {
         try {
             return self::simpleCurl(
                 $page,
@@ -95,7 +97,8 @@ final class Internet {
         int          $timeout = 10,
         array        $extraHeaders = [],
         string       &$error = null
-    ) : ?InternetRequestResult {
+    ): ?InternetRequestResult
+    {
         try {
             return self::simpleCurl($page, $timeout, $extraHeaders, [
                 CURLOPT_POST => 1,
@@ -127,7 +130,8 @@ final class Internet {
         array    $extraHeaders = [],
         array    $extraOpts = [],
         ?Closure $onSuccess = null
-    ) : InternetRequestResult {
+    ): InternetRequestResult
+    {
 
         $time = (int)($timeout * 1000);
 

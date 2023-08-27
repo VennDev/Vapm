@@ -1,0 +1,131 @@
+<?php
+
+/**
+ * Vapm - A library support for PHP about Async, Promise, Coroutine, Thread, GreenThread
+ *          and other non-blocking methods. The library also includes some Javascript packages
+ *          such as Express. The method is based on Fibers & Generator & Processes, requires
+ *          you to have php version from >= 8.1
+ *
+ * Copyright (C) 2023  VennDev
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+declare(strict_types=1);
+
+namespace vennv\vapm\simultaneous;
+
+use SplQueue;
+
+interface WorkInterface {
+
+    /**
+     * @param callable $work
+     * @return void
+     *
+     * The work is a function that will be executed when the work is run.
+     */
+    public function add(callable $work): void;
+
+    /**
+     * @param callable $work
+     * @return void
+     *
+     * Remove the work from the work list.
+     */
+    public function remove(callable $work): void;
+
+    /**
+     * @return void
+     *
+     * Remove all works from the work list.
+     */
+    public function clear(): void;
+
+    /**
+     * @return int
+     *
+     * Get the number of works in the work list.
+     */
+    public function count(): int;
+
+    /**
+     * @return bool
+     *
+     * Check if the work list is empty.
+     */
+    public function isEmpty(): bool;
+
+    /**
+     * @return mixed
+     *
+     * Get the first work in the work list.
+     */
+    public function dequeue(): mixed;
+
+    /**
+     * @return void
+     *
+     * Run all works in the work list.
+     */
+    public function run(): void;
+
+}
+
+final class Work implements WorkInterface
+{
+
+    private SplQueue $queue;
+
+    public function __construct()
+    {
+        $this->queue = new SplQueue();
+    }
+
+    public function add(callable $work): void
+    {
+        $this->queue->enqueue($work);
+    }
+
+    public function remove(callable $work): void
+    {
+        $this->queue->offsetUnset($work);
+    }
+
+    public function clear(): void
+    {
+        $this->queue = new SplQueue();
+    }
+
+    public function count(): int
+    {
+        return $this->queue->count();
+    }
+
+    public function isEmpty(): bool
+    {
+        return $this->queue->isEmpty();
+    }
+
+    public function dequeue(): mixed
+    {
+        return $this->queue->dequeue();
+    }
+
+    public function run(): void
+    {
+        while (!$this->queue->isEmpty()) {
+            $work = $this->queue->dequeue();
+            if (is_callable($work)) $work();
+        }
+    }
+
+}
