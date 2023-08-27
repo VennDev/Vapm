@@ -53,7 +53,7 @@ interface WorkerInterface
     public function collect(mixed $result): void;
 
     /**
-     * @return array
+     * @return array<int, mixed>
      *
      * Get the result of the work.
      */
@@ -81,6 +81,9 @@ final class Worker implements WorkerInterface
      */
     private array $options;
 
+    /**
+     * @var array<int, array<int, mixed>>
+     */
     private static array $workers = [];
 
     private Work $work;
@@ -122,6 +125,9 @@ final class Worker implements WorkerInterface
         self::$workers[$this->id][] = $result;
     }
 
+    /**
+     * @return array<int, mixed>
+     */
     public function get(): array
     {
         return self::$workers[$this->id];

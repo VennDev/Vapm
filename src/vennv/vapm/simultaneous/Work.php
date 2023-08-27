@@ -25,7 +25,8 @@ namespace vennv\vapm\simultaneous;
 
 use SplQueue;
 
-interface WorkInterface {
+interface WorkInterface
+{
 
     /**
      * @param callable $work
@@ -36,12 +37,12 @@ interface WorkInterface {
     public function add(callable $work): void;
 
     /**
-     * @param callable $work
+     * @param int $index
      * @return void
      *
      * Remove the work from the work list.
      */
-    public function remove(callable $work): void;
+    public function remove(int $index): void;
 
     /**
      * @return void
@@ -95,9 +96,9 @@ final class Work implements WorkInterface
         $this->queue->enqueue($work);
     }
 
-    public function remove(callable $work): void
+    public function remove(int $index): void
     {
-        $this->queue->offsetUnset($work);
+        $this->queue->offsetUnset($index);
     }
 
     public function clear(): void
