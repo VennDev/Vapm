@@ -80,7 +80,7 @@ interface StreamInterface
     public static function overWrite(string $path, string $data): Promise;
 
     /**
-     * @param array<int, mixed> $array
+     * @param array<int|string, mixed> $array
      * @throws Throwable
      *
      * Use this to flatten an array.
@@ -241,7 +241,7 @@ final class Stream implements StreamInterface
     }
 
     /**
-     * @param array<int, mixed> $array
+     * @param array<int|string, mixed> $array
      * @throws Throwable
      */
     public static function flattenArray(array $array): Promise
