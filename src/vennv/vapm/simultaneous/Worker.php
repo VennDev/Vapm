@@ -87,13 +87,13 @@ interface WorkerInterface
     public function unlock(): void;
 
     /**
-     * @param WorkerInterface $worker
+     * @param Worker $worker
      * @param callable $callback
      * @return void
      *
      * Add a child worker to the parent worker.
      */
-    public function addWorker(WorkerInterface $worker, callable $callback): void;
+    public function addWorker(Worker $worker, callable $callback): void;
 
     /**
      * @return Async
@@ -122,12 +122,12 @@ final class Worker implements WorkerInterface
     private array $options;
 
     /**
-     * @var array<int, WorkerInterface>
+     * @var array<int, array<Worker|callable>>
      */
     private array $childWorkers = [];
 
     /**
-     * @var array<int, array<int, mixed>>
+     * @var array<int|string, array<int, mixed>>
      */
     private static array $workers = [];
 
@@ -191,7 +191,7 @@ final class Worker implements WorkerInterface
         unset(self::$workers[$this->id][self::LOCKED]);
     }
 
-    public function addWorker(WorkerInterface $worker, callable $callback): void
+    public function addWorker(Worker $worker, callable $callback): void
     {
         $worker->isChild = true;
         $this->childWorkers[] = [$worker, $callback];
