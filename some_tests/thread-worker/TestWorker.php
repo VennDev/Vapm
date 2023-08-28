@@ -8,12 +8,12 @@ use vennv\vapm\simultaneous\Worker;
 $work = new Work();
 
 $work->add(function () : string {
-    // In this will work with threads.
+    // In this will work with thread.
     return 'Hello World! 1';
 });
 
 $work->add(function () : string {
-    // In this will work with threads.
+    // In this will work with thread.
     return 'Hello World! 2';
 });
 
