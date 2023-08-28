@@ -127,7 +127,7 @@ final class Worker implements WorkerInterface
     private array $childWorkers = [];
 
     /**
-     * @var array<int|string, array<int, mixed>>
+     * @var array<int|string, array<int|string, mixed>>
      */
     private static array $workers = [];
 
