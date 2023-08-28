@@ -59,7 +59,7 @@ interface WorkerInterface
     public function collect(mixed $result): void;
 
     /**
-     * @return array<int, mixed>
+     * @return array<int|string, mixed>
      *
      * Get the result of the work.
      */
@@ -169,7 +169,7 @@ final class Worker implements WorkerInterface
     }
 
     /**
-     * @return array<int, mixed>
+     * @return array<int|string, mixed>
      */
     public function get(): array
     {
