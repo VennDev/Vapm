@@ -9,22 +9,22 @@ $work1 = new Work();
 $work2 = new Work();
 
 $work1->add(function () : string {
-    // In this will work with threads.
+    // In this will work with thread.
     return 'Hello World! 1';
 });
 
 $work1->add(function () : string {
-    // In this will work with threads.
+    // In this will work with thread.
     return 'Hello World! 2';
 });
 
 $work2->add(function () : string {
-    // In this will work with threads.
+    // In this will work with thread.
     return 'Hello World! 3';
 });
 
 $work2->add(function () : string {
-    // In this will work with threads.
+    // In this will work with thread.
     return 'Hello World! 4';
 });
 
@@ -35,6 +35,7 @@ $childWorker = new Worker($work2, $options);
 
 // This will add a child worker to the main worker.
 $worker->addWorker($childWorker, function (array $result, Worker $childWorker) : void {
+    // Do something with the results of this child worker
     $childWorker->done(); // This will void memory leaks
 });
 
