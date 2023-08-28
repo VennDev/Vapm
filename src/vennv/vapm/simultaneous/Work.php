@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace vennv\vapm\simultaneous;
 
+use Generator;
 use SplQueue;
 
 interface WorkInterface
@@ -73,6 +74,21 @@ interface WorkInterface
     public function dequeue(): mixed;
 
     /**
+     * @param int $number
+     * @return Generator
+     *
+     * Get the work list by number.
+     */
+    public function getArrayByNumber(int $number): Generator;
+
+    /**
+     * @return Generator
+     *
+     * Get all works in the work list.
+     */
+    public function getAll(): Generator;
+
+    /**
      * @return void
      *
      * Run all works in the work list.
@@ -119,6 +135,20 @@ final class Work implements WorkInterface
     public function dequeue(): mixed
     {
         return $this->queue->dequeue();
+    }
+
+    public function getArrayByNumber(int $number): Generator
+    {
+        for ($i = 0; $i < $number; $i++) {
+            yield $this->queue->dequeue();
+        }
+    }
+
+    public function getAll(): Generator
+    {
+        while (!$this->queue->isEmpty()) {
+            yield $this->queue->dequeue();
+        }
     }
 
     public function run(): void

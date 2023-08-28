@@ -120,6 +120,13 @@ interface UtilsInterface
      */
     public static function evenlyDivide(int $number, int $parts): Generator;
 
+    /**
+     * @param array<int, mixed> $array
+     * @param int $size
+     * @return Generator
+     */
+    public static function splitArray(array $array, int $size): Generator;
+
 }
 
 final class Utils implements UtilsInterface
@@ -282,6 +289,28 @@ final class Utils implements UtilsInterface
 
         for ($i = 0; $i < $parts; $i++) {
             yield $quotient + ($remainder > 0 ? 1 : 0);
+            $remainder--;
+        }
+    }
+
+    /**
+     * @param array<int, mixed> $array
+     * @param int $size
+     * @return Generator
+     */
+    public static function splitArray(array $array, int $size): Generator
+    {
+        $totalItems = count($array);
+        $quotient = intdiv($totalItems, $size);
+        $remainder = $totalItems % $size;
+
+        $offset = 0;
+        for ($i = 0; $i < $size; $i++) {
+            $length = $quotient + ($remainder > 0 ? 1 : 0);
+
+            yield array_slice($array, $offset, $length);
+
+            $offset += $length;
             $remainder--;
         }
     }

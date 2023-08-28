@@ -23,9 +23,15 @@ declare(strict_types=1);
 
 namespace vennv\vapm\simultaneous;
 
-use Exception;
 use Throwable;
 
+/**
+ * Class Worker
+ * @package vennv\vapm\simultaneous
+ *
+ * This class is used to create a worker to run the work.
+ * All asynchronous methods are based on this class.
+ */
 interface WorkerInterface
 {
 
@@ -60,10 +66,40 @@ interface WorkerInterface
     public function get(): array;
 
     /**
-     * @throws Throwable
+     * @return bool
+     *
+     * Check the worker is locked.
+     */
+    public function isLocked(): bool;
+
+    /**
+     * @return void
+     *
+     * Lock the worker.
+     */
+    public function lock(): void;
+
+    /**
+     * @return void
+     *
+     * Unlock the worker.
+     */
+    public function unlock(): void;
+
+    /**
+     * @param WorkerInterface $worker
+     * @param callable $callback
+     * @return void
+     *
+     * Add a child worker to the parent worker.
+     */
+    public function addWorker(WorkerInterface $worker, callable $callback): void;
+
+    /**
      * @return Async
      *
      * Run the work.
+     * @throws Throwable
      */
     public function run(callable $callback): Async;
 
@@ -71,6 +107,10 @@ interface WorkerInterface
 
 final class Worker implements WorkerInterface
 {
+
+    private const LOCKED = "locked";
+
+    public bool $isChild = false;
 
     protected static int $nextId = 0;
 
@@ -80,6 +120,11 @@ final class Worker implements WorkerInterface
      * @var array<string, mixed>
      */
     private array $options;
+
+    /**
+     * @var array<int, WorkerInterface>
+     */
+    private array $childWorkers = [];
 
     /**
      * @var array<int, array<int, mixed>>
@@ -92,10 +137,7 @@ final class Worker implements WorkerInterface
      * @param Work $work
      * @param array<string, mixed> $options
      */
-    public function __construct(Work $work, array $options = [
-        "threads" => 4,
-        "max_queue" => 16
-    ])
+    public function __construct(Work $work, array $options = ["threads" => 4])
     {
         $this->work = $work;
         $this->options = $options;
@@ -117,6 +159,7 @@ final class Worker implements WorkerInterface
 
     public function done(): void
     {
+        if ($this->isChild) return;
         unset(self::$workers[$this->id]);
     }
 
@@ -133,6 +176,27 @@ final class Worker implements WorkerInterface
         return self::$workers[$this->id];
     }
 
+    public function isLocked(): bool
+    {
+        return isset(self::$workers[$this->id][self::LOCKED]);
+    }
+
+    public function lock(): void
+    {
+        self::$workers[$this->id][self::LOCKED] = true;
+    }
+
+    public function unlock(): void
+    {
+        unset(self::$workers[$this->id][self::LOCKED]);
+    }
+
+    public function addWorker(WorkerInterface $worker, callable $callback): void
+    {
+        $worker->isChild = true;
+        $this->childWorkers[] = [$worker, $callback];
+    }
+
     /**
      * @throws Throwable
      */
@@ -142,26 +206,52 @@ final class Worker implements WorkerInterface
 
         return new Async(function () use ($work, $callback): void {
             $threads = $this->options["threads"];
-            $max_queue = $this->options["max_queue"];
 
             if ($threads >= 1) {
-                if ($work->count() > $max_queue) throw new Exception(Error::QUEUE_IS_FULL);
-
-                $i = 0;
                 $promises = [];
-                while ($work->count() > 0) {
-                    $callbackQueue = $work->dequeue();
+                $totalCountWorks = $work->count();
+                while ($this->isLocked() || $totalCountWorks > 0) {
+                    if (!$this->isLocked()) {
+                        if (count($promises) < $threads && $work->count() > 0) {
+                            $callbackQueue = $work->dequeue();
 
-                    if (!is_callable($callbackQueue)) return;
+                            if (!is_callable($callbackQueue)) continue;
 
-                    $thread = new CoroutineThread($callbackQueue);
-                    $promises[] = $thread->start();
+                            $thread = new CoroutineThread($callbackQueue);
+                            $promises[] = $thread->start();
+                        } else {
+                            /** @var Promise $promise */
+                            foreach ($promises as $index => $promise) {
+                                $result = EventLoop::getReturn($promise->getId());
 
-                    if (++$i <= $threads) {
-                        $data = Async::await(Promise::all($promises));
-                        $this->collect($data);
-                        $i = 0;
-                        $promises = [];
+                                if ($result !== null) {
+                                    $result = $promise->getResult();
+                                    $this->collect($result);
+                                    unset($promises[$index]);
+
+                                    $totalCountWorks--;
+                                }
+                            }
+                        }
+                    }
+
+                    FiberManager::wait();
+                }
+
+                while (count($this->childWorkers) > 0) {
+                    $childWorker = array_shift($this->childWorkers);
+
+                    if ($childWorker !== null) {
+                        /** @var WorkerInterface $worker */
+                        $worker = $childWorker[0];
+
+                        /** @var callable $workerCallback */
+                        $workerCallback = $childWorker[1];
+
+                        Async::await($worker->run($workerCallback));
+
+                        $this->collect($worker->get());
+                        $worker->done();
                     }
                 }
 
