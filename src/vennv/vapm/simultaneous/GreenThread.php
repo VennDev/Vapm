@@ -233,9 +233,7 @@ final class GreenThread implements GreenThreadInterface
 
         $fiberCurrent = Fiber::getCurrent();
 
-        if ($fiberCurrent !== null) {
-            $fiberCurrent::suspend();
-        }
+        if ($fiberCurrent !== null) $fiberCurrent::suspend();
     }
 
     public static function getStatus(string|int $name): StatusThread|null

@@ -459,17 +459,13 @@ final class Promise implements PromiseInterface
                     if (!is_null($queue1)) {
                         $queue1->then($callback);
 
-                        if (is_callable($this->callbackReject)) {
-                            $queue1->catch($this->callbackReject);
-                        }
+                        if (is_callable($this->callbackReject)) $queue1->catch($this->callbackReject);
 
                         $lastPromise = $queue1;
                     } else if (!is_null($queue2)) {
                         $queue2->then($callback);
 
-                        if (is_callable($this->callbackReject)) {
-                            $queue2->catch($this->callbackReject);
-                        }
+                        if (is_callable($this->callbackReject)) $queue2->catch($this->callbackReject);
 
                         $lastPromise = $queue2;
                     }
@@ -487,9 +483,7 @@ final class Promise implements PromiseInterface
         if ($lastPromise !== null) {
             $lastPromise->finally($this->callbackFinally);
         } else {
-            if (is_callable($this->callbackFinally)) {
-                call_user_func($this->callbackFinally);
-            }
+            if (is_callable($this->callbackFinally)) call_user_func($this->callbackFinally);
         }
     }
 

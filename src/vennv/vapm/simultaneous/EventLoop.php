@@ -196,9 +196,7 @@ class EventLoop implements EventLoopInterface
          * @var Promise $promise
          */
         foreach (self::$returns as $promise) {
-            if ($promise->canDrop()) {
-                self::removeReturn($promise->getId());
-            }
+            if ($promise->canDrop()) self::removeReturn($promise->getId());
         }
     }
 
@@ -207,9 +205,7 @@ class EventLoop implements EventLoopInterface
      */
     protected static function run(): void
     {
-        if (count(GreenThread::getFibers()) > 0) {
-            GreenThread::run();
-        }
+        if (count(GreenThread::getFibers()) > 0) GreenThread::run();
 
         /**
          * @var Promise $promise
@@ -230,13 +226,9 @@ class EventLoop implements EventLoopInterface
             }
         }
 
-        if (count(MicroTask::getTasks()) > 0) {
-            MicroTask::run();
-        }
+        if (count(MicroTask::getTasks()) > 0) MicroTask::run();
 
-        if (count(MacroTask::getTasks()) > 0) {
-            MacroTask::run();
-        }
+        if (count(MacroTask::getTasks()) > 0) MacroTask::run();
 
         self::clearGarbage();
     }

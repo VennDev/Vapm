@@ -37,9 +37,7 @@ final class MacroTask
 
     public static function generateId(): int
     {
-        if (self::$nextId >= PHP_INT_MAX) {
-            self::$nextId = 0;
-        }
+        if (self::$nextId >= PHP_INT_MAX) self::$nextId = 0;
 
         return self::$nextId++;
     }
@@ -53,9 +51,7 @@ final class MacroTask
     {
         $id = $sampleMacro->getId();
 
-        if (isset(self::$tasks[$id])) {
-            unset(self::$tasks[$id]);
-        }
+        if (isset(self::$tasks[$id])) unset(self::$tasks[$id]);
     }
 
     public static function getTask(int $id): ?SampleMacro

@@ -184,18 +184,13 @@ final class Internet
                 foreach (explode("\r\n", $rawHeaderGroup) as $line) {
                     $nameValue = explode(":", $line, 2);
 
-                    if (isset($nameValue[1])) {
-                        $headerGroup[trim(strtolower($nameValue[0]))] = trim($nameValue[1]);
-                    }
-
+                    if (isset($nameValue[1])) $headerGroup[trim(strtolower($nameValue[0]))] = trim($nameValue[1]);
                 }
 
                 $headers[] = $headerGroup;
             }
 
-            if (!is_null($onSuccess)) {
-                $onSuccess($curlHandle);
-            }
+            if (!is_null($onSuccess)) $onSuccess($curlHandle);
 
             return new InternetRequestResult($headers, $body, $httpCode);
         } finally {
