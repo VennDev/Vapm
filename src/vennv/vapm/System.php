@@ -185,9 +185,7 @@ final class System extends EventLoop implements SystemInterface
 
     public static function clearTimeout(SampleMacro $sampleMacro): void
     {
-        if ($sampleMacro->isRunning() && !$sampleMacro->isRepeat()) {
-            $sampleMacro->stop();
-        }
+        if ($sampleMacro->isRunning() && !$sampleMacro->isRepeat()) $sampleMacro->stop();
     }
 
     /**
@@ -205,9 +203,7 @@ final class System extends EventLoop implements SystemInterface
 
     public static function clearInterval(SampleMacro $sampleMacro): void
     {
-        if ($sampleMacro->isRunning() && $sampleMacro->isRepeat()) {
-            $sampleMacro->stop();
-        }
+        if ($sampleMacro->isRunning() && $sampleMacro->isRepeat()) $sampleMacro->stop();
     }
 
     /**
@@ -278,9 +274,7 @@ final class System extends EventLoop implements SystemInterface
             do {
                 $status = curl_multi_exec($multiHandle, $running);
 
-                if ($status !== CURLM_OK) {
-                    $reject(Error::FAILED_IN_FETCHING_DATA);
-                }
+                if ($status !== CURLM_OK) $reject(Error::FAILED_IN_FETCHING_DATA);
 
                 FiberManager::wait();
             } while ($running > 0);
@@ -323,9 +317,7 @@ final class System extends EventLoop implements SystemInterface
 
     public static function timeEnd(string $name = 'Console'): void
     {
-        if (!isset(self::$timings[$name])) {
-            return;
-        }
+        if (!isset(self::$timings[$name])) return;
 
         $time = microtime(true) - self::$timings[$name];
         echo "Time for $name: $time\n";
