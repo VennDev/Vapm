@@ -160,19 +160,17 @@ final class CoroutineGen implements CoroutineGenInterface
      */
     private static function run(): void
     {
-        if (self::$taskQueue !== null) {
-            while (!self::$taskQueue->isEmpty()) {
-                $coroutine = self::$taskQueue->dequeue();
+        while (self::$taskQueue?->isEmpty() === false) {
+            $coroutine = self::$taskQueue->dequeue();
 
-                if ($coroutine instanceof ChildCoroutine) {
-                    $coroutine->run();
-                    if (!$coroutine->isFinished()) self::schedule($coroutine);
-                }
+            if ($coroutine instanceof ChildCoroutine) {
+                $coroutine->run();
+                if (!$coroutine->isFinished()) self::schedule($coroutine);
+            }
 
-                if ($coroutine instanceof CoroutineScope) {
-                    $coroutine->run();
-                    if (!$coroutine->isFinished()) self::schedule($coroutine);
-                }
+            if ($coroutine instanceof CoroutineScope) {
+                $coroutine->run();
+                if (!$coroutine->isFinished()) self::schedule($coroutine);
             }
         }
     }

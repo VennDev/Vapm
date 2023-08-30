@@ -137,11 +137,7 @@ final class Internet
 
         $curlHandle = curl_init($page);
 
-        if ($curlHandle === false) {
-            throw new InternetException(
-                "Unable to create new cURL session"
-            );
-        }
+        if ($curlHandle === false) throw new InternetException("Unable to create new cURL session");
 
         curl_setopt_array($curlHandle, $extraOpts +
             [
@@ -164,13 +160,9 @@ final class Internet
         try {
             $raw = curl_exec($curlHandle);
 
-            if ($raw === false) {
-                throw new InternetException(curl_error($curlHandle));
-            }
+            if ($raw === false) throw new InternetException(curl_error($curlHandle));
 
-            if (!is_string($raw)) {
-                throw new AssumptionFailedError(Error::WRONG_TYPE_WHEN_USE_CURL_EXEC);
-            }
+            if (!is_string($raw)) throw new AssumptionFailedError(Error::WRONG_TYPE_WHEN_USE_CURL_EXEC);
 
             $httpCode = curl_getinfo($curlHandle, CURLINFO_HTTP_CODE);
             $headerSize = curl_getinfo($curlHandle, CURLINFO_HEADER_SIZE);

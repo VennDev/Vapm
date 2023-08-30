@@ -129,7 +129,7 @@ final class CoroutineScope implements CoroutineScopeInterface
      */
     public function run(): void
     {
-        if (self::$taskQueue !== null && !self::$taskQueue->isEmpty() && !self::$cancelled) {
+        if (self::$taskQueue?->isEmpty() === false && !self::$cancelled) {
             $coroutine = self::$taskQueue->dequeue();
 
             if ($coroutine instanceof ChildCoroutine) {

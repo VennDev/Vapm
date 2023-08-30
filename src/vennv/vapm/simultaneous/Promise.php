@@ -506,16 +506,14 @@ final class Promise implements PromiseInterface
                     if ($promise instanceof Async || $promise instanceof Promise) {
                         $return = EventLoop::getReturn($promise->getId());
 
-                        if ($return !== null) {
-                            if ($return->isRejected()) {
-                                $reject($return->getResult());
-                                $isSolved = true;
-                            }
+                        if ($return?->isRejected() === true) {
+                            $reject($return->getResult());
+                            $isSolved = true;
+                        }
 
-                            if ($return->isResolved()) {
-                                $results[] = $return->getResult();
-                                unset($promises[$index]);
-                            }
+                        if ($return?->isResolved() === true) {
+                            $results[] = $return->getResult();
+                            unset($promises[$index]);
                         }
                     }
 
@@ -593,16 +591,14 @@ final class Promise implements PromiseInterface
                     if ($promise instanceof Async || $promise instanceof Promise) {
                         $return = EventLoop::getReturn($promise->getId());
 
-                        if ($return !== null) {
-                            if ($return->isRejected()) {
-                                $results[] = $return->getResult();
-                                unset($promises[$index]);
-                            }
+                        if ($return?->isRejected() === true) {
+                            $results[] = $return->getResult();
+                            unset($promises[$index]);
+                        }
 
-                            if ($return->isResolved()) {
-                                $resolve($return->getResult());
-                                $isSolved = true;
-                            }
+                        if ($return?->isResolved() === true) {
+                            $resolve($return->getResult());
+                            $isSolved = true;
                         }
                     }
 
@@ -640,16 +636,14 @@ final class Promise implements PromiseInterface
                     if ($promise instanceof Async || $promise instanceof Promise) {
                         $return = EventLoop::getReturn($promise->getId());
 
-                        if ($return !== null) {
-                            if ($return->isRejected()) {
-                                $reject($return->getResult());
-                                $isSolved = true;
-                            }
+                        if ($return?->isRejected() === true) {
+                            $reject($return->getResult());
+                            $isSolved = true;
+                        }
 
-                            if ($return->isResolved()) {
-                                $resolve($return->getResult());
-                                $isSolved = true;
-                            }
+                        if ($return?->isResolved() === true) {
+                            $resolve($return->getResult());
+                            $isSolved = true;
                         }
                     }
                 }
