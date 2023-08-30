@@ -36,6 +36,13 @@ interface WorkerInterface
 {
 
     /**
+     * @return bool
+     *
+     * Check the worker is started.
+     */
+    public function isStarted(): bool;
+
+    /**
      * @return Work
      *
      * Get the work.
@@ -110,6 +117,8 @@ final class Worker implements WorkerInterface
 
     private const LOCKED = "locked";
 
+    public bool $isStarted = false;
+
     public bool $isChild = false;
 
     protected static int $nextId = 0;
@@ -150,6 +159,11 @@ final class Worker implements WorkerInterface
     {
         if (self::$nextId >= PHP_INT_MAX) self::$nextId = 0;
         return self::$nextId++;
+    }
+
+    public function isStarted(): bool
+    {
+        return $this->isStarted;
     }
 
     public function getWork(): Work
@@ -202,6 +216,7 @@ final class Worker implements WorkerInterface
      */
     public function run(callable $callback): Async
     {
+        $this->isStarted = true;
         $work = $this->getWork();
 
         return new Async(function () use ($work, $callback): void {

@@ -63,12 +63,7 @@ final class Deferred implements DeferredInterface
     public function __construct(callable $callback)
     {
         $generator = call_user_func($callback);
-
-        if ($generator instanceof Generator) {
-            $this->childCoroutine = new ChildCoroutine($generator);
-        } else {
-            throw new DeferredException(Error::DEFERRED_CALLBACK_MUST_RETURN_GENERATOR);
-        }
+        $generator instanceof Generator ? $this->childCoroutine = new ChildCoroutine($generator) : throw new DeferredException(Error::DEFERRED_CALLBACK_MUST_RETURN_GENERATOR);
     }
 
     public function await(): Generator

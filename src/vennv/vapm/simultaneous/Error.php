@@ -50,8 +50,6 @@ final class Error
 
     public const PAYLOAD_TOO_LARGE = "Payload too large";
 
-    public const QUEUE_IS_FULL = "The queue is full";
-
     public const INVALID_ARRAY = "Invalid array";
 
 }

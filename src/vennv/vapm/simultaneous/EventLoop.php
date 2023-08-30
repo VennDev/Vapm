@@ -111,14 +111,14 @@ class EventLoop implements EventLoopInterface
     public static function isQueue(int $id): bool
     {
         /* @var Promise $promise */
-        foreach (self::$queues as $promise) if ($promise->getId() === $id) return true;
+        foreach (self::$queues as $promise) if ($promise instanceof Promise && $promise->getId() === $id) return true;
         return false;
     }
 
     public static function getQueue(int $id): ?Promise
     {
         /* @var Promise $promise */
-        foreach (self::$queues as $promise) if ($promise->getId() === $id) return $promise;
+        foreach (self::$queues as $promise) if ($promise instanceof Promise && $promise->getId() === $id) return $promise;
         return null;
     }
 
@@ -138,7 +138,7 @@ class EventLoop implements EventLoopInterface
     public static function isReturn(int $id): bool
     {
         /* @var Promise $promise */
-        foreach (self::$returns as $promise) if ($promise->getId() === $id) return true;
+        foreach (self::$returns as $promise) if ($promise instanceof Promise && $promise->getId() === $id) return true;
         return false;
     }
 
@@ -158,7 +158,7 @@ class EventLoop implements EventLoopInterface
     public static function getReturn(int $id): ?Promise
     {
         /* @var Promise $promise */
-        foreach (self::$returns as $promise) if ($promise->getId() === $id) return $promise;
+        foreach (self::$returns as $promise) if ($promise instanceof Promise && $promise->getId() === $id) return $promise;
         return null;
     }
 
@@ -173,7 +173,7 @@ class EventLoop implements EventLoopInterface
     private static function clearGarbage(): void
     {
         /* @var Promise $promise */
-        foreach (self::$returns as $promise) if ($promise->canDrop()) self::removeReturn($promise->getId());
+        foreach (self::$returns as $promise) if ($promise instanceof Promise && $promise->canDrop()) self::removeReturn($promise->getId());
     }
 
     /**
