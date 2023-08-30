@@ -122,18 +122,13 @@ final class CoroutineGen implements CoroutineGenInterface
 
     public static function repeat(callable $callback, int $times): Closure
     {
-        for ($i = 0; $i <= $times; $i++) {
-            if (call_user_func($callback) instanceof Generator) $callback = self::processCoroutine($callback);
-        }
-
+        for ($i = 0; $i <= $times; $i++) if (call_user_func($callback) instanceof Generator) $callback = self::processCoroutine($callback);
         return fn() => null;
     }
 
     public static function delay(int $milliseconds): Generator
     {
-        for ($i = 0; $i < GeneratorManager::calculateSeconds($milliseconds); $i++) {
-            yield;
-        }
+        for ($i = 0; $i < GeneratorManager::calculateSeconds($milliseconds); $i++) yield;
     }
 
     /**

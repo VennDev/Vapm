@@ -147,14 +147,10 @@ final class Utils implements UtilsInterface
         $endLine = $reflection->getEndLine();
         $filename = $reflection->getFileName();
 
-        if ($filename === false || $startLine === false || $endLine === false) {
-            throw new ReflectionException(Error::CANNOT_FIND_FUNCTION_KEYWORD);
-        }
+        if ($filename === false || $startLine === false || $endLine === false) throw new ReflectionException(Error::CANNOT_FIND_FUNCTION_KEYWORD);
 
         $lines = file($filename);
-        if ($lines === false) {
-            throw new ReflectionException(Error::CANNOT_READ_FILE);
-        }
+        if ($lines === false) throw new ReflectionException(Error::CANNOT_READ_FILE);
 
         $result = implode("", array_slice($lines, $startLine - 1, $endLine - $startLine + 1));
 
@@ -162,15 +158,11 @@ final class Utils implements UtilsInterface
         if ($startPos === false) {
             $startPos = strpos($result, 'fn');
 
-            if ($startPos === false) {
-                throw new ReflectionException(Error::CANNOT_FIND_FUNCTION_KEYWORD);
-            }
+            if ($startPos === false) throw new ReflectionException(Error::CANNOT_FIND_FUNCTION_KEYWORD);
         }
 
         $endBracketPos = strrpos($result, '}');
-        if ($endBracketPos === false) {
-            throw new ReflectionException(Error::CANNOT_FIND_FUNCTION_KEYWORD);
-        }
+        if ($endBracketPos === false) throw new ReflectionException(Error::CANNOT_FIND_FUNCTION_KEYWORD);
 
         return substr($result, $startPos, $endBracketPos - $startPos + 1);
     }
@@ -182,9 +174,9 @@ final class Utils implements UtilsInterface
 
         foreach ($iterator as $file) {
             if ($file instanceof SplFileInfo) {
-                $fname = $file->getFilename();
+                $fName = $file->getFilename();
 
-                if (preg_match('%' . $dotFile . '$%', $fname) === 1) {
+                if (preg_match('%' . $dotFile . '$%', $fName) === 1) {
                     yield $file->getPathname();
                 }
             }
@@ -215,9 +207,7 @@ final class Utils implements UtilsInterface
     public static function removeComments(string $text): null|string|array
     {
         $text = preg_replace('/\/\/.*?(\r\n|\n|$)/', '', $text);
-        if ($text === null || is_array($text)) {
-            return null;
-        }
+        if ($text === null || is_array($text)) return null;
 
         return preg_replace('/\/\*.*?\*\//ms', '', $text);
     }
@@ -229,13 +219,8 @@ final class Utils implements UtilsInterface
      */
     public static function getBytes(mixed $data): int
     {
-        if (is_string($data)) {
-            return strlen($data);
-        }
-
-        if (is_object($data) || is_array($data)) {
-            return strlen(serialize($data));
-        }
+        if (is_string($data)) return strlen($data);
+        if (is_object($data) || is_array($data)) return strlen(serialize($data));
 
         return 0;
     }
@@ -251,9 +236,7 @@ final class Utils implements UtilsInterface
 
         foreach ($parts as $value) {
             $path = '/' . $value;
-            if ($path !== '/') {
-                yield $path;
-            }
+            if ($path !== '/') yield $path;
         }
     }
 
@@ -265,9 +248,7 @@ final class Utils implements UtilsInterface
     public static function replacePath(string $path, string $segment): false|string
     {
         $pos = strpos($path, $segment);
-        if ($pos === false) {
-            return false;
-        }
+        if ($pos === false) return false;
 
         return substr($path, $pos + strlen($segment));
     }

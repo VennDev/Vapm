@@ -258,9 +258,7 @@ final class Stream implements StreamInterface
                     break;
                 }
 
-                foreach ($element as $value) {
-                    is_array($value) ? array_unshift($stack, $value) : $result[] = $value;
-                }
+                foreach ($element as $value) is_array($value) ? array_unshift($stack, $value) : $result[] = $value;
 
                 FiberManager::wait();
             }

@@ -33,10 +33,7 @@ final class DeferredException extends TypeError
         protected int    $errorCode = 0
     )
     {
-        parent::__construct(
-            $this->errorMessage,
-            $this->errorCode
-        );
+        parent::__construct($this->errorMessage, $this->errorCode);
     }
 
     public function __toString(): string

@@ -448,11 +448,7 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
 
             unset(self::$inputs[get_called_class()]);
 
-            $process = proc_open(
-                $command,
-                $mode,
-                $pipes
-            );
+            $process = proc_open($command, $mode, $pipes);
 
             if (is_resource($process)) {
                 stream_set_blocking($pipes[1], false);

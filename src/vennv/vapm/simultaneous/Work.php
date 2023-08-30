@@ -139,16 +139,12 @@ final class Work implements WorkInterface
 
     public function getArrayByNumber(int $number): Generator
     {
-        for ($i = 0; $i < $number; $i++) {
-            yield $this->queue->dequeue();
-        }
+        for ($i = 0; $i < $number; $i++) yield $this->queue->dequeue();
     }
 
     public function getAll(): Generator
     {
-        while (!$this->queue->isEmpty()) {
-            yield $this->queue->dequeue();
-        }
+        while (!$this->queue->isEmpty()) yield $this->queue->dequeue();
     }
 
     public function run(): void
