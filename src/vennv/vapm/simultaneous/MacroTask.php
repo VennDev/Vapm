@@ -73,11 +73,7 @@ final class MacroTask
             if ($task->checkTimeOut()) {
                 $task->run();
 
-                if (!$task->isRepeat()) {
-                    self::removeTask($task);
-                } else {
-                    $task->resetTimeOut();
-                }
+                !$task->isRepeat() ? self::removeTask($task) : $task->resetTimeOut();
             }
         }
     }

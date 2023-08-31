@@ -109,11 +109,7 @@ final class CoroutineGen implements CoroutineGenInterface
                     $coroutine = call_user_func($coroutine);
                 }
 
-                if (!$coroutine instanceof Generator) {
-                    call_user_func(fn() => $coroutine);
-                } else {
-                    self::schedule(new ChildCoroutine($coroutine));
-                }
+                !$coroutine instanceof Generator ? call_user_func(fn() => $coroutine) : self::schedule(new ChildCoroutine($coroutine));
             }
 
             self::run();

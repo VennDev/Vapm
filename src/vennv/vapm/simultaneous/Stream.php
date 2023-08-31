@@ -27,12 +27,14 @@ use vennv\vapm\System;
 use Throwable;
 use function fclose;
 use function fgets;
-use function file_exists;
 use function fopen;
 use function fwrite;
-use function stream_set_blocking;
+use function is_array;
 use function touch;
 use function unlink;
+use function file_exists;
+use function call_user_func;
+use function stream_set_blocking;
 
 interface StreamInterface
 {
@@ -137,8 +139,7 @@ final class Stream implements StreamInterface
                     }
                 };
 
-                $callback($path, $data);
-
+                call_user_func($callback, $path, $data);
                 $resolve();
             }, 0);
         });
@@ -163,8 +164,7 @@ final class Stream implements StreamInterface
                     }
                 };
 
-                $callback($path, $data);
-
+                call_user_func($callback, $path, $data);
                 $resolve();
             }, 0);
         });
@@ -178,15 +178,9 @@ final class Stream implements StreamInterface
         return new Promise(function ($resolve, $reject) use ($path): void {
             System::setTimeout(function () use ($resolve, $reject, $path): void {
                 $callback = function ($path) use ($reject): void {
-                    if (file_exists($path)) {
-                        unlink($path);
-                    } else {
-                        $reject(Error::FILE_DOES_NOT_EXIST);
-                    }
+                    file_exists($path) ? unlink($path) : $reject(Error::FILE_DOES_NOT_EXIST);
                 };
-
-                $callback($path);
-
+                call_user_func($callback, $path);
                 $resolve();
             }, 0);
         });
@@ -200,15 +194,9 @@ final class Stream implements StreamInterface
         return new Promise(function ($resolve, $reject) use ($path): void {
             System::setTimeout(function () use ($resolve, $reject, $path): void {
                 $callback = function ($path) use ($reject): void {
-                    if (!file_exists($path)) {
-                        touch($path);
-                    } else {
-                        $reject(Error::FILE_ALREADY_EXISTS);
-                    }
+                    !file_exists($path) ? touch($path) : $reject(Error::FILE_ALREADY_EXISTS);
                 };
-
-                $callback($path);
-
+                call_user_func($callback, $path);
                 $resolve();
             }, 0);
         });
@@ -223,7 +211,6 @@ final class Stream implements StreamInterface
             System::setTimeout(function () use ($resolve, $reject, $path, $data): void {
                 $callback = function ($path, $data) use ($reject): void {
                     $handle = fopen($path, 'w+');
-
                     if ($handle === false) {
                         $reject(Error::UNABLE_TO_OPEN_FILE);
                     } else {
@@ -233,8 +220,7 @@ final class Stream implements StreamInterface
                     }
                 };
 
-                $callback($path, $data);
-
+                call_user_func($callback, $path, $data);
                 $resolve();
             }, 0);
         });
@@ -252,14 +238,12 @@ final class Stream implements StreamInterface
 
             while (!empty($stack)) {
                 $element = array_shift($stack);
-
                 if ($element === null) {
                     $reject(Error::INVALID_ARRAY);
                     break;
                 }
 
                 foreach ($element as $value) is_array($value) ? array_unshift($stack, $value) : $result[] = $value;
-
                 FiberManager::wait();
             }
 

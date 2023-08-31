@@ -161,7 +161,6 @@ final class System extends EventLoop implements SystemInterface
     {
         if (!self::$hasInit) {
             self::$hasInit = true;
-
             register_shutdown_function(function () {
                 self::runSingleEventLoop();
             });
@@ -176,10 +175,8 @@ final class System extends EventLoop implements SystemInterface
     public static function setTimeout(callable $callback, int $timeout): SampleMacro
     {
         self::init();
-
         $sampleMacro = new SampleMacro($callback, $timeout);
         MacroTask::addTask($sampleMacro);
-
         return $sampleMacro;
     }
 
@@ -194,10 +191,8 @@ final class System extends EventLoop implements SystemInterface
     public static function setInterval(callable $callback, int $interval): SampleMacro
     {
         self::init();
-
         $sampleMacro = new SampleMacro($callback, $interval, true);
         MacroTask::addTask($sampleMacro);
-
         return $sampleMacro;
     }
 
@@ -228,17 +223,8 @@ final class System extends EventLoop implements SystemInterface
                 /** @var array<string, string> $body */
                 $body = $options["body"] ?? [];
 
-                if ($method === "GET") {
-                    $result = Internet::getURL($url, $timeout, $headers);
-                } else {
-                    $result = Internet::postURL($url, $body, $timeout, $headers);
-                }
-
-                if ($result === null) {
-                    $reject(Error::FAILED_IN_FETCHING_DATA);
-                } else {
-                    $resolve($result);
-                }
+                $method === "GET" ? $result = Internet::getURL($url, $timeout, $headers) : $result = Internet::postURL($url, $body, $timeout, $headers);
+                $result === null ? $reject(Error::FAILED_IN_FETCHING_DATA) : $resolve($result);
             }, 0);
         });
     }
@@ -255,16 +241,13 @@ final class System extends EventLoop implements SystemInterface
         return new Promise(function ($resolve, $reject) use ($curls): void {
             $multiHandle = curl_multi_init();
             $handles = [];
-
             foreach ($curls as $url) {
                 $handle = curl_init($url);
-
                 if ($handle === false) {
                     $reject(Error::FAILED_IN_FETCHING_DATA);
                 } else {
                     curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
                     curl_multi_add_handle($multiHandle, $handle);
-
                     $handles[] = $handle;
                 }
             }
@@ -273,21 +256,17 @@ final class System extends EventLoop implements SystemInterface
 
             do {
                 $status = curl_multi_exec($multiHandle, $running);
-
                 if ($status !== CURLM_OK) $reject(Error::FAILED_IN_FETCHING_DATA);
-
                 FiberManager::wait();
             } while ($running > 0);
 
             $results = [];
-
             foreach ($handles as $handle) {
                 $results[] = curl_multi_getcontent($handle);
                 curl_multi_remove_handle($multiHandle, $handle);
             }
 
             curl_multi_close($multiHandle);
-
             $resolve($results);
         });
     }
@@ -300,12 +279,7 @@ final class System extends EventLoop implements SystemInterface
         return new Promise(function ($resolve, $reject) use ($path) {
             self::setTimeout(function () use ($resolve, $reject, $path) {
                 $ch = file_get_contents($path);
-
-                if ($ch === false) {
-                    $reject(Error::FAILED_IN_FETCHING_DATA);
-                } else {
-                    $resolve($ch);
-                }
+                $ch === false ? $reject(Error::FAILED_IN_FETCHING_DATA) : $resolve($ch);
             }, 0);
         });
     }
@@ -318,10 +292,8 @@ final class System extends EventLoop implements SystemInterface
     public static function timeEnd(string $name = 'Console'): void
     {
         if (!isset(self::$timings[$name])) return;
-
         $time = microtime(true) - self::$timings[$name];
         echo "Time for $name: $time\n";
-
         unset(self::$timings[$name]);
     }
 

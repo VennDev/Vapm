@@ -498,13 +498,8 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
 
                         foreach ($explode as $item) {
                             if ($item !== '') {
-                                if (self::isPostMainThread($item)) {
-                                    self::loadSharedData($item);
-                                }
-
-                                if (self::isPost($item)) {
-                                    self::loadPost($item);
-                                }
+                                if (self::isPostMainThread($item)) self::loadSharedData($item);
+                                if (self::isPost($item)) self::loadPost($item);
                             }
                         }
                     }
@@ -515,7 +510,6 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
 
             proc_close($process);
             unset(self::$threads[$this->getPid()]);
-
             return $resolve(self::getPost($output));
         });
     }

@@ -153,11 +153,9 @@ final class Utils implements UtilsInterface
         if ($lines === false) throw new ReflectionException(Error::CANNOT_READ_FILE);
 
         $result = implode("", array_slice($lines, $startLine - 1, $endLine - $startLine + 1));
-
         $startPos = strpos($result, 'function');
         if ($startPos === false) {
             $startPos = strpos($result, 'fn');
-
             if ($startPos === false) throw new ReflectionException(Error::CANNOT_FIND_FUNCTION_KEYWORD);
         }
 
@@ -171,11 +169,9 @@ final class Utils implements UtilsInterface
     {
         $dir = new RecursiveDirectoryIterator($path);
         $iterator = new RecursiveIteratorIterator($dir);
-
         foreach ($iterator as $file) {
             if ($file instanceof SplFileInfo) {
                 $fName = $file->getFilename();
-
                 if (preg_match('%' . $dotFile . '$%', $fName) === 1) {
                     yield $file->getPathname();
                 }
@@ -208,7 +204,6 @@ final class Utils implements UtilsInterface
     {
         $text = preg_replace('/\/\/.*?(\r\n|\n|$)/', '', $text);
         if ($text === null || is_array($text)) return null;
-
         return preg_replace('/\/\*.*?\*\//ms', '', $text);
     }
 
@@ -221,7 +216,6 @@ final class Utils implements UtilsInterface
     {
         if (is_string($data)) return strlen($data);
         if (is_object($data) || is_array($data)) return strlen(serialize($data));
-
         return 0;
     }
 
@@ -233,7 +227,6 @@ final class Utils implements UtilsInterface
     public static function splitStringBySlash(string $string): Generator
     {
         $parts = explode('/', $string);
-
         foreach ($parts as $value) {
             $path = '/' . $value;
             if ($path !== '/') yield $path;
@@ -249,7 +242,6 @@ final class Utils implements UtilsInterface
     {
         $pos = strpos($path, $segment);
         if ($pos === false) return false;
-
         return substr($path, $pos + strlen($segment));
     }
 
