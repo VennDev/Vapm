@@ -203,7 +203,6 @@ class EventLoop implements EventLoopInterface
         }
 
         if (count(MicroTask::getTasks()) > 0) MicroTask::run();
-
         if (count(MacroTask::getTasks()) > 0) MacroTask::run();
 
         self::clearGarbage();

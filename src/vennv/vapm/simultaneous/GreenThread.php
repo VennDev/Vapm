@@ -138,10 +138,7 @@ final class GreenThread implements GreenThreadInterface
     public static function register(string|int $name, callable $callback, array $params): void
     {
         System::init();
-
-        if (isset(self::$outputs[$name])) {
-            unset(self::$outputs[$name]);
-        }
+        if (isset(self::$outputs[$name])) unset(self::$outputs[$name]);
 
         self::$names[] = $name;
         self::$params[] = $params;
@@ -155,9 +152,7 @@ final class GreenThread implements GreenThreadInterface
     public static function run(): void
     {
         foreach (self::$fibers as $i => $fiber) {
-            if (!self::$status[self::$names[$i]]->canWakeUp()) {
-                continue;
-            }
+            if (!self::$status[self::$names[$i]]->canWakeUp()) continue;
 
             $name = self::$names[$i];
 
@@ -230,9 +225,7 @@ final class GreenThread implements GreenThreadInterface
     public static function sleep(string $name, int $seconds): void
     {
         self::$status[$name]->sleep($seconds);
-
         $fiberCurrent = Fiber::getCurrent();
-
         if ($fiberCurrent !== null) $fiberCurrent::suspend();
     }
 

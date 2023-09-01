@@ -161,7 +161,6 @@ final class Internet
             $raw = curl_exec($curlHandle);
 
             if ($raw === false) throw new InternetException(curl_error($curlHandle));
-
             if (!is_string($raw)) throw new AssumptionFailedError(Error::WRONG_TYPE_WHEN_USE_CURL_EXEC);
 
             $httpCode = curl_getinfo($curlHandle, CURLINFO_HTTP_CODE);

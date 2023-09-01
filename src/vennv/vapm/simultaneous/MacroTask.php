@@ -50,7 +50,6 @@ final class MacroTask
     public static function removeTask(SampleMacro $sampleMacro): void
     {
         $id = $sampleMacro->getId();
-
         if (isset(self::$tasks[$id])) unset(self::$tasks[$id]);
     }
 
@@ -72,7 +71,6 @@ final class MacroTask
         foreach (self::$tasks as $task) {
             if ($task->checkTimeOut()) {
                 $task->run();
-
                 !$task->isRepeat() ? self::removeTask($task) : $task->resetTimeOut();
             }
         }

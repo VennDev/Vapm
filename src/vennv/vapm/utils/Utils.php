@@ -169,13 +169,9 @@ final class Utils implements UtilsInterface
     {
         $dir = new RecursiveDirectoryIterator($path);
         $iterator = new RecursiveIteratorIterator($dir);
+
         foreach ($iterator as $file) {
-            if ($file instanceof SplFileInfo) {
-                $fName = $file->getFilename();
-                if (preg_match('%' . $dotFile . '$%', $fName) === 1) {
-                    yield $file->getPathname();
-                }
-            }
+            if ($file instanceof SplFileInfo && preg_match('%' . $dotFile . '$%', $file->getFilename()) === 1) yield $file->getPathname();
         }
     }
 
