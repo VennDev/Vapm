@@ -629,10 +629,7 @@ final class Promise implements PromiseInterface
 
             while ($isSolved === false) {
                 foreach ($promises as $promise) {
-                    if (is_callable($promise)) {
-                        $promise = new Async($promise);
-                    }
-
+                    if (is_callable($promise)) $promise = new Async($promise);
                     if ($promise instanceof Async || $promise instanceof Promise) {
                         $return = EventLoop::getReturn($promise->getId());
 
