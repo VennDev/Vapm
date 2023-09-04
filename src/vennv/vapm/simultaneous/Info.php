@@ -26,7 +26,7 @@ namespace vennv\vapm\simultaneous;
 class Info
 {
 
-    public const VERSION = "1.8.4";
+    public const VERSION = "1.8.5";
 
     public const AUTHOR = "VennV";
 
