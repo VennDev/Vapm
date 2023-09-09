@@ -23,11 +23,11 @@ declare(strict_types=1);
 
 namespace vennv\vapm\simultaneous;
 
+use vennv\vapm\System;
+use vennv\vapm\utils\Utils;
 use Fiber;
 use RuntimeException;
 use Throwable;
-use vennv\vapm\System;
-use vennv\vapm\utils\Utils;
 
 interface GreenThreadInterface
 {

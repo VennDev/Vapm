@@ -23,9 +23,9 @@ declare(strict_types=1);
 
 namespace vennv\vapm\simultaneous;
 
+use vennv\vapm\utils\Utils;
 use Throwable;
 use RuntimeException;
-use vennv\vapm\utils\Utils;
 use function is_callable;
 
 interface AsyncInterface
