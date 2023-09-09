@@ -127,6 +127,14 @@ interface UtilsInterface
      */
     public static function splitArray(array $array, int $size): Generator;
 
+    /**
+     * @param string $class
+     * @return bool
+     *
+     * This method is used to check if the current class is the same as the class passed in
+     */
+    public static function isClass(string $class): bool;
+
 }
 
 final class Utils implements UtilsInterface
@@ -282,6 +290,29 @@ final class Utils implements UtilsInterface
             $offset += $length;
             $remainder--;
         }
+    }
+
+    /**
+     * @param string $class
+     * @return bool
+     * @throws ReflectionException
+     */
+    public static function isClass(string $class): bool
+    {
+        $trace = debug_backtrace();
+        if (isset($trace[2])) {
+            $args = $trace[2]['args'];
+            if (!empty($args)) {
+                /** @var Closure $closure */
+                $closure = $args[0];
+                $reflectionFunction = new ReflectionFunction($closure);
+                return $reflectionFunction->getClosureScopeClass()->getName() === $class;
+            } else {
+                return true; // This is a class
+            }
+        }
+
+        return false;
     }
 
 }

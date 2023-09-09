@@ -24,8 +24,10 @@ declare(strict_types=1);
 namespace vennv\vapm\simultaneous;
 
 use Fiber;
+use RuntimeException;
 use Throwable;
 use vennv\vapm\System;
+use vennv\vapm\utils\Utils;
 
 interface GreenThreadInterface
 {
@@ -224,6 +226,8 @@ final class GreenThread implements GreenThreadInterface
      */
     public static function sleep(string $name, int $seconds): void
     {
+        if (!Utils::isClass(Fiber::class)) throw new RuntimeException(Error::GREEN_THREAD_MUST_CALL_IN_GREEN_THREAD_FUNCTION);
+
         self::$status[$name]->sleep($seconds);
         $fiberCurrent = Fiber::getCurrent();
         if ($fiberCurrent !== null) $fiberCurrent::suspend();
