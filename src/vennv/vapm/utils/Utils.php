@@ -301,8 +301,8 @@ final class Utils implements UtilsInterface
     {
         $trace = debug_backtrace();
         if (isset($trace[2])) {
-            $args = $trace[2]['args'];
-            if (!empty($args)) {
+            if (!empty($trace[2]['args'])) {
+                $args = $trace[2]['args'];
                 /** @var Closure $closure */
                 $closure = $args[0];
                 $reflectionFunction = new ReflectionFunction($closure);
