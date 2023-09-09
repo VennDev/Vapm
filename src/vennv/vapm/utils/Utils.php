@@ -306,7 +306,9 @@ final class Utils implements UtilsInterface
                 /** @var Closure $closure */
                 $closure = $args[0];
                 $reflectionFunction = new ReflectionFunction($closure);
-                return $reflectionFunction->getClosureScopeClass()->getName() === $class;
+                $scopeClass = $reflectionFunction->getClosureScopeClass();
+                if ($scopeClass === null) return false;
+                return $scopeClass->getName() === $class;
             } else {
                 return true; // This is a class
             }
