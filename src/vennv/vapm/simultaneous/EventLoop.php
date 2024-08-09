@@ -58,9 +58,9 @@ interface EventLoopInterface
     public static function getReturn(int $id): ?Promise;
 
     /**
-     * @return array<int, Promise>
+     * @return Generator
      */
-    public static function getReturns(): array;
+    public static function getReturns(): Generator;
 
 }
 
@@ -98,6 +98,7 @@ class EventLoop implements EventLoopInterface
 
     public static function removeQueue(int $id): void
     {
+        /* @var Promise $promise */
         foreach (self::$queues as $promise) {
             if ($promise->getId() === $id) {
                 self::$queues->offsetUnset($promise);
@@ -151,11 +152,13 @@ class EventLoop implements EventLoopInterface
     }
 
     /**
-     * @return array<int, Promise>
+     * @return Generator
      */
-    public static function getReturns(): array
+    public static function getReturns(): Generator
     {
-        return self::$returns;
+        foreach (self::$returns as $id => $promise) {
+            yield $id => $promise;
+        }
     }
 
     /**
@@ -163,15 +166,7 @@ class EventLoop implements EventLoopInterface
      */
     private static function clearGarbage(): void
     {
-        if (self::$isCleaningGarbage) return;
-        self::$isCleaningGarbage = true;
-        CoroutineGen::runBlocking(function (): Generator {
-            foreach (self::$returns as $id => $promise) {
-                if ($promise instanceof Promise && $promise->canDrop()) unset(self::$returns[$id]);
-                yield;
-            }
-            self::$isCleaningGarbage = false;
-        });
+        foreach (self::getReturns() as $id => $promise) if ($promise instanceof Promise && $promise->canDrop()) unset(self::$returns[$id]);
     }
 
     /**
