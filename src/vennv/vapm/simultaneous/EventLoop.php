@@ -70,7 +70,7 @@ class EventLoop implements EventLoopInterface
     protected static int $nextId = 0;
 
     /**
-     * @var SplObjectStorage<Promise, int>
+     * @var SplObjectStorage
      */
     protected static SplObjectStorage $queues;
 
@@ -98,8 +98,8 @@ class EventLoop implements EventLoopInterface
 
     public static function removeQueue(int $id): void
     {
-        /* @var Promise $promise */
         foreach (self::$queues as $promise) {
+            /* @var Promise $promise */
             if ($promise->getId() === $id) {
                 self::$queues->offsetUnset($promise);
                 break;
