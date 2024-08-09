@@ -70,7 +70,7 @@ class EventLoop implements EventLoopInterface
     protected static int $nextId = 0;
 
     /**
-     * @var SplObjectStorage
+     * @var SplObjectStorage<Promise>
      */
     protected static SplObjectStorage $queues;
 
