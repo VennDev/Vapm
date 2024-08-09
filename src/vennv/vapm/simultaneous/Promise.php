@@ -403,11 +403,12 @@ final class Promise implements PromiseInterface
             $callbacks = $this->callbacksResolve;
 
             /** @var callable $master */
-            $master = $callbacks["master"];
+            $master = $callbacks["master"] ?? null;
 
-            $this->result = call_user_func($master, $result);
-
-            unset($callbacks["master"]);
+            if (is_callable($master)) {
+                $this->result = call_user_func($master, $result);
+                unset($callbacks["master"]);
+            }
 
             if (count($callbacks) > 0) {
                 /** @var callable $callback */
@@ -498,6 +499,7 @@ final class Promise implements PromiseInterface
                         if ($return?->isRejected() === true) {
                             $reject($return->getResult());
                             $isSolved = true;
+                            break;
                         }
 
                         if ($return?->isResolved() === true) {
@@ -510,6 +512,7 @@ final class Promise implements PromiseInterface
                         $resolve($results);
                         $isSolved = true;
                     }
+                    FiberManager::wait();
                 }
 
                 if (!$isSolved) FiberManager::wait();
@@ -550,6 +553,7 @@ final class Promise implements PromiseInterface
                         $resolve($results);
                         $isSolved = true;
                     }
+                    FiberManager::wait();
                 }
 
                 if (!$isSolved === false) FiberManager::wait();
@@ -588,6 +592,7 @@ final class Promise implements PromiseInterface
                         if ($return?->isResolved() === true) {
                             $resolve($return->getResult());
                             $isSolved = true;
+                            break;
                         }
                     }
 
@@ -595,6 +600,7 @@ final class Promise implements PromiseInterface
                         $reject($results);
                         $isSolved = true;
                     }
+                    FiberManager::wait();
                 }
 
                 if ($isSolved === false) FiberManager::wait();
@@ -625,13 +631,16 @@ final class Promise implements PromiseInterface
                         if ($return?->isRejected() === true) {
                             $reject($return->getResult());
                             $isSolved = true;
+                            break;
                         }
 
                         if ($return?->isResolved() === true) {
                             $resolve($return->getResult());
                             $isSolved = true;
+                            break;
                         }
                     }
+                    FiberManager::wait();
                 }
 
                 if ($isSolved === false) FiberManager::wait();

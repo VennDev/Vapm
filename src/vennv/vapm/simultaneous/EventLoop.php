@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace vennv\vapm\simultaneous;
 
+use Generator;
 use SplObjectStorage;
 use Throwable;
 use function count;
@@ -44,9 +45,9 @@ interface EventLoopInterface
     public static function getQueue(int $id): ?Promise;
 
     /**
-     * @return SplObjectStorage
+     * @return Generator
      */
-    public static function getQueues(): SplObjectStorage;
+    public static function getQueues(): Generator;
 
     public static function addReturn(Promise $promise): void;
 
@@ -57,9 +58,9 @@ interface EventLoopInterface
     public static function getReturn(int $id): ?Promise;
 
     /**
-     * @return SplObjectStorage
+     * @return array<int, Promise>
      */
-    public static function getReturns(): SplObjectStorage;
+    public static function getReturns(): array;
 
 }
 
@@ -74,14 +75,14 @@ class EventLoop implements EventLoopInterface
     protected static SplObjectStorage $queues;
 
     /**
-     * @var SplObjectStorage
+     * @var array<int, Promise>
      */
-    protected static SplObjectStorage $returns;
+    protected static array $returns = [];
+    protected static bool $isCleaningGarbage = false;
 
     public static function init(): void
     {
         if (!isset(self::$queues)) self::$queues = new SplObjectStorage();
-        if (!isset(self::$returns)) self::$returns = new SplObjectStorage();
     }
 
     public static function generateId(): int
@@ -97,9 +98,6 @@ class EventLoop implements EventLoopInterface
 
     public static function removeQueue(int $id): void
     {
-        /**
-         * @var Promise $promise
-         */
         foreach (self::$queues as $promise) {
             if ($promise->getId() === $id) {
                 self::$queues->offsetUnset($promise);
@@ -123,57 +121,57 @@ class EventLoop implements EventLoopInterface
     }
 
     /**
-     * @return SplObjectStorage
+     * @return Generator
      */
-    public static function getQueues(): SplObjectStorage
+    public static function getQueues(): Generator
     {
-        return self::$queues;
+        foreach (self::$queues as $promise) {
+            yield $promise;
+        }
     }
 
     public static function addReturn(Promise $promise): void
     {
-        if (!self::getReturn($promise->getId())) self::$returns->offsetSet($promise);
+        if (!isset(self::$returns[$promise->getId()])) self::$returns[$promise->getId()] = $promise;
     }
 
     public static function isReturn(int $id): bool
     {
-        /* @var Promise $promise */
-        foreach (self::$returns as $promise) if ($promise instanceof Promise && $promise->getId() === $id) return true;
-        return false;
+        return isset(self::$returns[$id]);
     }
 
     public static function removeReturn(int $id): void
     {
-        /**
-         * @var Promise $promise
-         */
-        foreach (self::$returns as $promise) {
-            if ($promise->getId() === $id) {
-                self::$returns->offsetUnset($promise);
-                break;
-            }
-        }
+        if (self::isReturn($id)) unset(self::$returns[$id]);
     }
 
     public static function getReturn(int $id): ?Promise
     {
-        /* @var Promise $promise */
-        foreach (self::$returns as $promise) if ($promise instanceof Promise && $promise->getId() === $id) return $promise;
-        return null;
+        return self::$returns[$id] ?? null;
     }
 
     /**
-     * @return SplObjectStorage
+     * @return array<int, Promise>
      */
-    public static function getReturns(): SplObjectStorage
+    public static function getReturns(): array
     {
         return self::$returns;
     }
 
+    /**
+     * @throws Throwable
+     */
     private static function clearGarbage(): void
     {
-        /* @var Promise $promise */
-        foreach (self::$returns as $promise) if ($promise instanceof Promise && $promise->canDrop()) self::removeReturn($promise->getId());
+        if (self::$isCleaningGarbage) return;
+        self::$isCleaningGarbage = true;
+        CoroutineGen::runBlocking(function (): Generator {
+            foreach (self::$returns as $id => $promise) {
+                if ($promise instanceof Promise && $promise->canDrop()) unset(self::$returns[$id]);
+                yield;
+            }
+            self::$isCleaningGarbage = false;
+        });
     }
 
     /**
@@ -186,7 +184,7 @@ class EventLoop implements EventLoopInterface
         /**
          * @var Promise $promise
          */
-        foreach (self::$queues as $promise) {
+        foreach (self::getQueues() as $promise) {
             $id = $promise->getId();
             $fiber = $promise->getFiber();
 
@@ -203,7 +201,7 @@ class EventLoop implements EventLoopInterface
                     echo $e->getMessage();
                 }
                 MicroTask::addTask($id, $promise);
-                self::removeQueue($id);
+                self::$queues->offsetUnset($promise); // Remove from queue
             }
         }
 
