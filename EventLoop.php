@@ -98,6 +98,7 @@ class EventLoop implements EventLoopInterface
 
     public static function removeQueue(int $id): void
     {
+        /* @var Promise $promise */
         foreach (self::$queues as $promise) {
             if ($promise->getId() === $id) {
                 self::$queues->offsetUnset($promise);
