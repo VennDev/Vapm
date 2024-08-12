@@ -124,7 +124,7 @@ final class CoroutineGen implements CoroutineGenInterface
 
     public static function delay(int $milliseconds): Generator
     {
-        for ($i = 0; $i < GeneratorManager::calculateSeconds($milliseconds); $i++) yield;
+        for ($i = 0; $i < GeneratorManager::calculateSeconds((int)($milliseconds/5)); $i++) yield;
     }
 
     /**
@@ -153,19 +153,25 @@ final class CoroutineGen implements CoroutineGenInterface
     {
         new Async(function (): void {
             try {
+                $fnWait = function (&$i) {
+                    FiberManager::wait();
+                    $i = 0;
+                };
+                $i = 0;
                 while (self::$taskQueue?->isEmpty() === false) {
                     $coroutine = self::$taskQueue->dequeue();
 
                     if ($coroutine instanceof ChildCoroutine) {
                         $coroutine->run();
                         if (!$coroutine->isFinished()) self::schedule($coroutine);
+                        if ($i >= 5) $fnWait($i);
                     }
 
                     if ($coroutine instanceof CoroutineScope) {
                         Async::await($coroutine->run());
                         if (!$coroutine->isFinished()) self::schedule($coroutine);
                     }
-                    FiberManager::wait();
+                    $i++;
                 }
             } catch (Throwable $e) {
                 echo $e->getMessage();
