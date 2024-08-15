@@ -28,6 +28,7 @@ use vennv\vapm\simultaneous\EventLoop;
 use vennv\vapm\simultaneous\FiberManager;
 use vennv\vapm\simultaneous\Internet;
 use vennv\vapm\simultaneous\MacroTask;
+use vennv\vapm\simultaneous\MicroTask;
 use vennv\vapm\simultaneous\Promise;
 use vennv\vapm\simultaneous\SampleMacro;
 use Throwable;
@@ -161,6 +162,8 @@ final class System extends EventLoop implements SystemInterface
     {
         if (!self::$hasInit) {
             self::$hasInit = true;
+            MacroTask::init();
+            MicroTask::init();
             register_shutdown_function(function () {
                 self::runSingleEventLoop();
             });
