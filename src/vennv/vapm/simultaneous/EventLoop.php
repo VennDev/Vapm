@@ -25,7 +25,6 @@ namespace vennv\vapm\simultaneous;
 
 use Generator;
 use SplQueue;
-use SplObjectStorage;
 use Throwable;
 use function count;
 use const PHP_INT_MAX;
@@ -115,7 +114,7 @@ class EventLoop implements EventLoopInterface
         while (self::$queues->isEmpty() === false) {
             $promise = self::$queues->dequeue();
             if ($promise instanceof Promise && $promise->getId() === $id) return $promise;
-            $promise->enqueue($promise);
+            self::$queues->enqueue($promise); // Add to queue again
         }
         return null;
     }
