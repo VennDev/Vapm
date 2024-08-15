@@ -55,6 +55,7 @@ final class MacroTask
     public static function getTask(int $id): ?SampleMacro
     {
         while (self::$tasks !== null && !self::$tasks->isEmpty()) {
+            /** @var SampleMacro $task */
             $task = self::$tasks->dequeue();
             if ($task->getId() === $id) return $task;
             self::$tasks->enqueue($task);
@@ -73,6 +74,7 @@ final class MacroTask
     public static function run(): void
     {
         while (self::$tasks !== null && !self::$tasks->isEmpty()) {
+            /** @var SampleMacro $task */
             $task = self::$tasks->dequeue();
             if ($task->checkTimeOut()) {
                 $task->run();
