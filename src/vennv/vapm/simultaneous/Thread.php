@@ -418,7 +418,7 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
 
             $pathAutoLoad = __FILE__;
             $pathAutoLoad = str_replace(
-                'src\vennv\vapm\Thread.php',
+                'src\vennv\vapm\simultaneous\Thread.php',
                 'src\vendor\autoload.php',
                 $pathAutoLoad
             );
