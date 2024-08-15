@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace vennv\vapm\simultaneous;
 
 use Generator;
+use SplQueue;
 use SplObjectStorage;
 use Throwable;
 use function count;
