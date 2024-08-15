@@ -122,7 +122,7 @@ final class SampleMacro implements SampleMacroInterface
 
     public function stop(): void
     {
-        MacroTask::removeTask($this->id);
+        MacroTask::removeTask($this);
     }
 
 }
