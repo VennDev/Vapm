@@ -47,6 +47,18 @@ final class MacroTask
         return self::$nextId++;
     }
 
+    public static function removeTask(int $id): void
+    {
+        if (self::$tasks === null) return;
+        $queue = new SplQueue();
+        while (!self::$tasks->isEmpty()) {
+            /** @var SampleMacro $task */
+            $task = self::$tasks->dequeue();
+            if ($task->getId() !== $id) $queue->enqueue($task);
+        }
+        self::$tasks = $queue;
+    }
+
     public static function addTask(SampleMacro $sampleMacro): void
     {
         self::$tasks?->enqueue($sampleMacro);
