@@ -23,13 +23,12 @@ declare(strict_types=1);
 
 namespace vennv\vapm\simultaneous;
 
+use Throwable;
 use SplQueue;
-use const PHP_INT_MAX;
+use function microtime;
 
-final class MacroTask
+final class MicroTask
 {
-
-    private static int $nextId = 0;
 
     /**
      * @var ?SplQueue
@@ -41,24 +40,19 @@ final class MacroTask
         if (self::$tasks === null) self::$tasks = new SplQueue();
     }
 
-    public static function generateId(): int
+    public static function addTask(Promise $promise): void
     {
-        if (self::$nextId >= PHP_INT_MAX) self::$nextId = 0;
-        return self::$nextId++;
+        self::$tasks->enqueue($promise);
     }
 
-    public static function addTask(SampleMacro $sampleMacro): void
-    {
-        self::$tasks->enqueue($sampleMacro);
-    }
-
-    public static function getTask(int $id): ?SampleMacro
+    public static function getTask(int $id): ?Promise
     {
         while (count(self::$tasks) > 0) {
             $task = self::$tasks->dequeue();
             if ($task->getId() === $id) return $task;
             self::$tasks->enqueue($task);
         }
+        return null;
     }
 
     /**
@@ -69,17 +63,16 @@ final class MacroTask
         return self::$tasks;
     }
 
+    /**
+     * @throws Throwable
+     */
     public static function run(): void
     {
         while (self::$tasks->count() > 0) {
-            $task = self::$tasks->dequeue();
-            if ($task->checkTimeOut()) {
-                $task->run();
-                if ($task->isRepeat()) {
-                    $task->resetTimeOut();
-                    self::$tasks->enqueue($task);
-                }
-            }
+            $promise = self::$tasks->dequeue();
+            $promise->useCallbacks();
+            $promise->setTimeEnd(microtime(true));
+            EventLoop::addReturn($promise);
         }
     }
 
