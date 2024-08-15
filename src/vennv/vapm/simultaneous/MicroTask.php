@@ -42,12 +42,13 @@ final class MicroTask
 
     public static function addTask(Promise $promise): void
     {
-        self::$tasks->enqueue($promise);
+        if (self::$tasks === null) self::$tasks->enqueue($promise);
     }
 
     public static function getTask(int $id): ?Promise
     {
-        while (count(self::$tasks) > 0) {
+        if (self::$tasks === null) return null;
+        while (!self::$tasks->isEmpty()) {
             $task = self::$tasks->dequeue();
             if ($task->getId() === $id) return $task;
             self::$tasks->enqueue($task);
@@ -56,9 +57,9 @@ final class MicroTask
     }
 
     /**
-     * @return SplQueue
+     * @return ?SplQueue
      */
-    public static function getTasks(): SplQueue
+    public static function getTasks(): ?SplQueue
     {
         return self::$tasks;
     }
@@ -68,7 +69,7 @@ final class MicroTask
      */
     public static function run(): void
     {
-        while (self::$tasks->count() > 0) {
+        while (!self::$tasks->isEmpty()) {
             $promise = self::$tasks->dequeue();
             $promise->useCallbacks();
             $promise->setTimeEnd(microtime(true));

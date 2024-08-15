@@ -185,8 +185,8 @@ class EventLoop implements EventLoopInterface
             }
         }
 
-        if (!MicroTask::getTasks()->isEmpty()) MicroTask::run();
-        if (!MacroTask::getTasks()->isEmpty()) MacroTask::run();
+        if (!MicroTask::getTasks()?->isEmpty()) MicroTask::run();
+        if (!MacroTask::getTasks()?->isEmpty()) MacroTask::run();
 
         self::clearGarbage();
     }
@@ -197,7 +197,7 @@ class EventLoop implements EventLoopInterface
     protected static function runSingle(): void
     {
         self::$limit = min((int)((self::$queues->count() / 2) + 1), 100); // Limit 100 promises per loop
-        while (!self::$queues->isEmpty() || !MicroTask::getTasks()->isEmpty() || !MacroTask::getTasks()->isEmpty()) self::run();
+        while (!self::$queues->isEmpty() || !MicroTask::getTasks()?->isEmpty() || !MacroTask::getTasks()?->isEmpty()) self::run();
     }
 
 }
