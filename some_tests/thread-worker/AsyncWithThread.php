@@ -3,7 +3,7 @@
 require 'vendor/autoload.php';
 include "SimpleThread.php";
 
-use vennv\vapm\simultaneous\Async;
+use vennv\vapm\Async;
 
 function start() : Async {
     return new Async(function () : void {
