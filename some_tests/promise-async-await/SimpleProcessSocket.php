@@ -1,6 +1,6 @@
 <?php
 
-use vennv\vapm\simultaneous\Async;
+use vennv\vapm\Async;
 use vennv\vapm\System;
 
 require 'vendor/autoload.php';
