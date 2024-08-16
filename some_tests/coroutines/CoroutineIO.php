@@ -2,9 +2,9 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-use vennv\vapm\simultaneous\CoroutineGen;
-use vennv\vapm\simultaneous\CoroutineScope;
-use vennv\vapm\simultaneous\Dispatchers;
+use vennv\vapm\CoroutineGen;
+use vennv\vapm\CoroutineScope;
+use vennv\vapm\Dispatchers;
 
 $scope = new CoroutineScope(Dispatchers::IO);
 
