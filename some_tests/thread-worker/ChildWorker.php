@@ -2,8 +2,8 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-use vennv\vapm\simultaneous\Work;
-use vennv\vapm\simultaneous\Worker;
+use vennv\vapm\Work;
+use vennv\vapm\Worker;
 
 $work1 = new Work();
 $work2 = new Work();
