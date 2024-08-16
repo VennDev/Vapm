@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-use vennv\vapm\simultaneous\Promise;
+use vennv\vapm\Promise;
 use vennv\vapm\System;
 
 /**
