@@ -2,8 +2,8 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-use vennv\vapm\simultaneous\CoroutineGen;
-use vennv\vapm\simultaneous\Deferred;
+use vennv\vapm\CoroutineGen;
+use vennv\vapm\Deferred;
 
 CoroutineGen::runBlocking(
     function() : Generator {
