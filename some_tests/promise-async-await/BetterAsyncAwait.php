@@ -1,7 +1,7 @@
 <?php
 
-use vennv\vapm\simultaneous\Async;
-use vennv\vapm\simultaneous\Promise;
+use vennv\vapm\Async;
+use vennv\vapm\Promise;
 use vennv\vapm\System;
 
 require 'vendor/autoload.php';
