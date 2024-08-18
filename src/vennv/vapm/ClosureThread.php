@@ -69,11 +69,8 @@ final class ClosureThread extends Thread implements ClosureThreadInterface
             } else {
                 $callback = (string) $callback;
             }
-            if (is_string($callback)) {
-                self::post($callback);
-            } elseif (is_bool($callback)) {
-                self::post($callback ? 'true' : 'false');
-            }
+            if (is_bool($callback)) $callback = (string) $callback;
+            self::post($callback);
         }
     }
 
