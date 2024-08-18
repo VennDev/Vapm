@@ -69,6 +69,7 @@ final class MicroTask
     public static function run(): void
     {
         foreach (self::getTasks() as $id => $promise) {
+            /** @var Promise $promise */
             $promise->useCallbacks();
             $promise->setTimeEnd(microtime(true));
             EventLoop::addReturn($promise);
