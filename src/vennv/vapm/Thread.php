@@ -355,11 +355,6 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
         return false;
     }
 
-    private static function isPost(string $data): bool
-    {
-        return explode('=>', $data)[0] === self::POST_THREAD;
-    }
-
     /**
      * @param false|string $data
      * @return array<int, mixed>

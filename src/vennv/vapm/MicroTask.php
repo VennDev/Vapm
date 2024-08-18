@@ -73,6 +73,7 @@ final class MicroTask
             $promise->useCallbacks();
             $promise->setTimeEnd(microtime(true));
             EventLoop::addReturn($promise);
+            /** @var int $id */
             self::removeTask($id);
         }
     }
