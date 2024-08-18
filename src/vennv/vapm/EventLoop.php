@@ -93,6 +93,9 @@ class EventLoop implements EventLoopInterface
     public static function getQueue(int $id): ?Promise
     {
         while (!self::$queues->isEmpty()) {
+            /**
+             * @var Promise $promise
+             */
             $promise = self::$queues->dequeue();
             if ($promise->getId() === $id) return $promise;
             self::$queues->enqueue($promise);
@@ -147,12 +150,11 @@ class EventLoop implements EventLoopInterface
         }
 
         $i = 0;
-
-        /**
-         * @var Promise $promise
-         */
         while (!self::$queues->isEmpty()) {
             if ($i++ >= self::$limit) break;
+            /**
+             * @var Promise $promise
+             */
             $promise = self::$queues->dequeue();
 
             $id = $promise->getId();
