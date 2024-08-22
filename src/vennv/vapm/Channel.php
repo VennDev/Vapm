@@ -92,7 +92,10 @@ final class Channel implements ChannelInterface
     public function receive(): Generator
     {
         $this->exceptionIfClosed();
-        while ($this->locked) yield CoroutineGen::run();
+        while ($this->locked) {
+            CoroutineGen::run();
+            yield;
+        }
         $this->locked = true;
         $message = array_shift($this->queue);
         $this->locked = false;

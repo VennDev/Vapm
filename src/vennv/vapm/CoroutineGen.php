@@ -139,7 +139,7 @@ final class CoroutineGen implements CoroutineGenInterface
 
     private static function schedule(ChildCoroutine $childCoroutine): void
     {
-        self::$taskQueue->enqueue($childCoroutine);
+        self::$taskQueue?->enqueue($childCoroutine);
     }
 
     /**
