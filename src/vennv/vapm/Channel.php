@@ -71,6 +71,9 @@ interface ChannelInterface
 final class Channel implements ChannelInterface
 {
 
+    /**
+     * @var mixed[]
+     */
     private array $queue = [];
 
     private bool $locked = false;
