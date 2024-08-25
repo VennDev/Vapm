@@ -5,7 +5,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 use vennv\vapm\CoroutineGen;
 use vennv\vapm\Deferred;
 
-CoroutineGen::runBlocking(
+CoroutineGen::runNonBlocking(
     function() : Generator {
         $deferredA = new Deferred(function (): Generator {
             return yield "Hello World! 1";
