@@ -31,7 +31,7 @@ interface ChildCoroutineInterface
 
     public function setException(Exception $exception): void;
 
-    public function run(): void;
+    public function run(): ChildCoroutineInterface;
 
     public function isFinished(): bool;
 
@@ -56,9 +56,10 @@ final class ChildCoroutine implements ChildCoroutineInterface
         $this->exception = $exception;
     }
 
-    public function run(): void
+    public function run(): ChildCoroutineInterface
     {
         $this->coroutine->send($this->coroutine->current());
+        return $this;
     }
 
     public function isFinished(): bool
