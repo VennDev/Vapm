@@ -29,12 +29,34 @@ use Exception;
 interface ChildCoroutineInterface
 {
 
+    /**
+     * @param Exception $exception
+     * @return void
+     *
+     * This function sets the exception.
+     */
     public function setException(Exception $exception): void;
 
-    public function run(): ChildCoroutineInterface;
+    /**
+     * @return ChildCoroutine
+     *
+     * This function runs the coroutine.
+     */
 
+    public function run(): ChildCoroutine;
+
+    /**
+     * @return bool
+     *
+     * This function checks if the coroutine is finished.
+     */
     public function isFinished(): bool;
 
+    /**
+     * @return mixed
+     *
+     * This function returns the return value of the coroutine.
+     */
     public function getReturn(): mixed;
 
 }
@@ -56,7 +78,7 @@ final class ChildCoroutine implements ChildCoroutineInterface
         $this->exception = $exception;
     }
 
-    public function run(): ChildCoroutineInterface
+    public function run(): ChildCoroutine
     {
         $this->coroutine->send($this->coroutine->current());
         return $this;

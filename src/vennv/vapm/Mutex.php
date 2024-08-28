@@ -67,7 +67,7 @@ final class Mutex implements MutexInterface
     }
 
     /**
-     * @return void
+     * @return Generator
      *
      * This function locks the mutex.
      */
@@ -80,7 +80,7 @@ final class Mutex implements MutexInterface
     }
 
     /**
-     * @return void
+     * @return Generator
      *
      * This function unlocks the mutex.
      */
