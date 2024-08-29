@@ -62,7 +62,7 @@ class EventLoop implements EventLoopInterface
     protected static int $nextId = 0;
 
     /**
-     * @var SplQueue
+     * @var SplQueue<Promise>
      */
     protected static SplQueue $queues;
 
@@ -145,6 +145,7 @@ class EventLoop implements EventLoopInterface
 
         $i = 0;
         while (!self::$queues->isEmpty() && $i++ < self::LIMIT) {
+            /** @var Promise $promise */
             $promise = self::$queues->dequeue();
             $fiber = $promise->getFiber();
             if ($fiber->isSuspended()) $fiber->resume();

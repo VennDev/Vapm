@@ -167,6 +167,7 @@ final class CoroutineGen implements CoroutineGenInterface
     public static function run(): void
     {
         if (!self::$taskQueue?->isEmpty()) {
+            /** @phpstan-ignore-next-line */
             $coroutine = self::$taskQueue->dequeue();
             if ($coroutine instanceof ChildCoroutine && !$coroutine->isFinished()) {
                 self::schedule($coroutine->run());
