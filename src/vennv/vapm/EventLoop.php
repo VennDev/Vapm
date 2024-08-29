@@ -73,7 +73,7 @@ class EventLoop implements EventLoopInterface
 
     public static function init(): void
     {
-        if (!isset(self::$queues)) self::$queues = new SplQueue();
+        self::$queues ??= new SplQueue();
     }
 
     public static function generateId(): int
