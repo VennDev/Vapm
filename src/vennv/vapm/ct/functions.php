@@ -43,7 +43,7 @@ use vennv\vapm\Mutex;
  */
 function c(callable ...$callbacks): void
 {
-    return CoroutineGen::runNonBlocking(...$callbacks);
+    CoroutineGen::runNonBlocking(...$callbacks);
 }
 
 /**
@@ -54,7 +54,7 @@ function c(callable ...$callbacks): void
  */
 function cBlock(callable ...$callbacks): void
 {
-    return CoroutineGen::runBlocking(...$callbacks);
+    CoroutineGen::runBlocking(...$callbacks);
 }
 
 /**
