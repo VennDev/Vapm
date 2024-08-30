@@ -65,12 +65,12 @@ final class Async implements AsyncInterface
     public static function await(mixed $await): mixed
     {
         if (!$await instanceof Promise && !$await instanceof Async) {
-            if (!Utils::isClass(Async::class)) {
-                throw new RuntimeException(Error::ASYNC_AWAIT_MUST_CALL_IN_ASYNC_FUNCTION);
-            }
             if (is_callable($await)) {
                 $await = new Async($await);
             } else {
+                if (!Utils::isClass(Async::class)) {
+                    throw new RuntimeException(Error::ASYNC_AWAIT_MUST_CALL_IN_ASYNC_FUNCTION);
+                }
                 return $await;
             }
         }
@@ -82,7 +82,7 @@ final class Async implements AsyncInterface
             }
         } while ($return === null);
 
-        return $return instanceof Promise ? $return->getResult() : $return;
+        return $return->getResult();
     }
 
 }
