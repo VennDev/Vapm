@@ -64,26 +64,25 @@ final class Async implements AsyncInterface
      */
     public static function await(mixed $await): mixed
     {
-        $isPromiseOrAsync = $await instanceof Promise || $await instanceof Async;
-        if (!$isPromiseOrAsync && !Utils::isClass(Async::class)) {
-            throw new RuntimeException(Error::ASYNC_AWAIT_MUST_CALL_IN_ASYNC_FUNCTION);
+        if (!$await instanceof Promise && !$await instanceof Async) {
+            if (!Utils::isClass(Async::class)) {
+                throw new RuntimeException(Error::ASYNC_AWAIT_MUST_CALL_IN_ASYNC_FUNCTION);
+            }
+            if (is_callable($await)) {
+                $await = new Async($await);
+            } else {
+                return $await;
+            }
         }
 
-        $result = $await;
-
-        if (is_callable($await)) $await = new Async($await);
-        if ($isPromiseOrAsync) {
+        do {
             $return = EventLoop::getReturn($await->getId());
-            while ($return === null) {
-                $return = EventLoop::getReturn($await->getId());
+            if ($return === null) {
                 FiberManager::wait();
             }
-            if ($return instanceof Promise) {
-                $result = $return->getResult();
-            }
-        }
+        } while ($return === null);
 
-        return $result;
+        return $return instanceof Promise ? $return->getResult() : $return;
     }
 
 }
