@@ -28,6 +28,7 @@ use Closure;
 use ReflectionClass;
 use ReflectionException;
 use RuntimeException;
+use InvalidArgumentException;
 use Throwable;
 use function strlen;
 use function rtrim;
@@ -424,10 +425,14 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
 
             $args = self::$args[$idCall];
 
-            foreach ($args as $key => $arg) {
-                $tryToString = Utils::toStringAny($arg);
-                $args[$key] = array_values($tryToString)[0];
-                FiberManager::wait();
+            if (is_array($args) || $args instanceof Traversable) {
+                foreach ($args as $key => $arg) {
+                    $tryToString = Utils::toStringAny($arg);
+                    $args[$key] = array_values($tryToString)[0];
+                    FiberManager::wait();
+                }
+            } else {
+                throw new InvalidArgumentException('Expected $args to be an array or Traversable.');
             }
 
             $args = '[' . implode(', ', array_map(function($item) { return '' . $item . ''; }, $args)) . ']';
