@@ -30,7 +30,6 @@ use ReflectionException;
 use RuntimeException;
 use InvalidArgumentException;
 use Throwable;
-use Traversable;
 use function strlen;
 use function rtrim;
 use function fclose;
@@ -426,7 +425,7 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
 
             $args = self::$args[$idCall];
 
-            if (is_array($args) || $args instanceof Traversable) {
+            if (is_array($args)) {
                 foreach ($args as $key => $arg) {
                     $tryToString = Utils::toStringAny($arg);
                     $args[$key] = array_values($tryToString)[0];
