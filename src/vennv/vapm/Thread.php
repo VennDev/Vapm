@@ -29,7 +29,8 @@ use ReflectionClass;
 use ReflectionException;
 use RuntimeException;
 use Throwable;
-use function explode;
+use function strlen;
+use function rtrim;
 use function fclose;
 use function fwrite;
 use function get_called_class;
@@ -212,14 +213,26 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
      */
     private static array $inputs = [];
 
-    public function __construct(mixed $input = '')
+    /**
+     * @var array<int, mixed>
+     * @phpstan-var array<int, mixed>
+     */
+    private static array $args = [];
+
+    public function __construct(mixed $input = '', array $args = [])
     {
-        self::$inputs[get_called_class()] = $input;
+        self::$inputs[$this->getCalledClassId()] = $input;
+        self::$args[$this->getCalledClassId()] = $args;
+    }
+
+    private function getCalledClassId(): int
+    {
+        return spl_object_id($this);
     }
 
     public function getInput(): mixed
     {
-        return self::$inputs[get_called_class()];
+        return self::$inputs[$this->getCalledClassId()];
     }
 
     public function getPid(): int
@@ -371,6 +384,8 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
     public function start(array $mode = DescriptorSpec::BASIC): Promise
     {
         return new Promise(function ($resolve, $reject) use ($mode): mixed {
+            $idCall = $this->getCalledClassId();
+
             $className = get_called_class();
 
             $reflection = new ReflectionClass($className);
@@ -384,43 +399,59 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
                 $pathAutoLoad
             );
 
-            $input = self::$inputs[get_called_class()];
+            $input = self::$inputs[$idCall];
 
-            if (is_string($input)) $input = '\'' . self::$inputs[get_called_class()] . '\'';
+            if (is_string($input)) $input = '\'' . self::$inputs[$idCall] . '\'';
 
             if (is_callable($input) && $input instanceof Closure) {
-                $input = Utils::closureToString($input);
-                $input = Utils::removeComments($input);
-
-                if (!is_string($input)) return $reject(new RuntimeException(Error::INPUT_MUST_BE_STRING_OR_CALLABLE));
-
-                $input = Utils::outlineToInline($input);
-
-                if (!is_string($input)) return $reject(new RuntimeException(Error::INPUT_MUST_BE_STRING_OR_CALLABLE));
-
-                $input = Utils::fixInputCommand($input);
-
-                if (!is_string($input)) return $reject(new RuntimeException(Error::INPUT_MUST_BE_STRING_OR_CALLABLE));
+                try {
+                    $input = Utils::closureToStringSafe($input);
+                } catch (Throwable $e) {
+                    return $reject(new ThreadException($e->getMessage()));
+                }
             }
 
             if (!is_string($input)) return $reject(new RuntimeException(Error::INPUT_MUST_BE_STRING_OR_CALLABLE));
 
-            $command = PHP_BINARY . ' -r "require_once \'' . $pathAutoLoad . '\'; include \'' . $class . '\'; $input = ' . $input . '; $class = new ' . static::class . '($input); $class->onRun();"';
+            $args = self::$args[$idCall];
 
-            unset(self::$inputs[get_called_class()]);
+            foreach ($args as $key => $arg) {
+                $tryToString = Utils::toStringAny($arg);
+                $args[$key] = array_values($tryToString)[0];
+                FiberManager::wait();
+            }
+
+            $args = '[' . implode(', ', array_map(function($item) { return '' . $item . ''; }, $args)) . ']';
+            $args = str_replace('"', '\'', $args);
+
+            $command = PHP_BINARY . ' -r "require_once \'' . $pathAutoLoad . '\'; include \'' . $class . '\'; $input = ' . $input . '; $args = ' . $args . '; $class = new ' . static::class . '($input, $args); $class->onRun();"';
+            
+            unset(self::$inputs[$idCall]);
+            unset(self::$args[$idCall]);
 
             $process = proc_open($command, $mode, $pipes);
 
+            $timeStart = microtime(true);
+            while (microtime(true) - $timeStart <= 1) {
+                FiberManager::wait(); // wait for 1 second
+            }
+
             $output = '';
             $error = '';
+
             if (is_resource($process)) {
-                $data = json_encode(self::getDataMainThread());
-
-                if (is_string($data)) fwrite($pipes[0], $data);
-                fclose($pipes[0]);
-
+                stream_set_blocking($pipes[0], false);
                 stream_set_blocking($pipes[1], false);
                 stream_set_blocking($pipes[2], false);
+
+                stream_set_write_buffer($pipes[0], 0);
+                stream_set_write_buffer($pipes[1], 0);
+                stream_set_write_buffer($pipes[2], 0);
+
+                $data = json_encode(self::getDataMainThread());
+
+                if (is_string($data)) @fwrite($pipes[0], $data);
+                @fclose($pipes[0]);
 
                 $status = proc_get_status($process);
                 $pid = $status['pid'];
@@ -446,16 +477,15 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
                         $write = null;
                         $except = null;
                         $timeout = 0;
-
                         $n = stream_select($read, $write, $except, $timeout);
                         if ($n === false) break;
                         if ($n > 0) {
                             foreach ($read as $stream) {
                                 if (!feof($stream)) {
-                                    stream_set_blocking($stream, false);
-                                    $data = stream_get_contents($stream, 1024);
-                                    if ($data === false || $data === '') continue;
-                                    $stream === $pipes[1] ? $output .= $data : $error .= $data;
+                                    $data = stream_get_contents($stream);
+                                    if ($data !== '') {
+                                        $stream === $pipes[1] ? $output .= $data : $error .= $data;
+                                    }
                                 }
                                 FiberManager::wait();
                             }
@@ -483,7 +513,7 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
                 } else {
                     if ($output !== '' && self::isPostMainThread($output)) self::loadSharedData($output);
                     elseif ($output !== '' && self::isPostThread($output)) {
-                        $output = Utils::getStringAfterSign($output, self::POST_THREAD . '=>');
+                        $output = rtrim(Utils::getStringAfterSign($output, self::POST_THREAD . '=>'));
                     }
                 }
             } else {

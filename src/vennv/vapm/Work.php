@@ -107,9 +107,9 @@ final class Work implements WorkInterface
         $this->queue = new SplQueue();
     }
 
-    public function add(callable $work): void
+    public function add(callable $work, array $args = []): void
     {
-        $this->queue->enqueue($work);
+        $this->queue->enqueue(new ClosureThread($work, $args));
     }
 
     public function remove(int $index): void
@@ -151,8 +151,9 @@ final class Work implements WorkInterface
     {
         $gc = new GarbageCollection();
         while (!$this->queue->isEmpty()) {
+            /** @var ClosureThread $work */
             $work = $this->queue->dequeue();
-            if (is_callable($work)) $work();
+            $work->start();
             $gc->collectWL();
         }
     }
