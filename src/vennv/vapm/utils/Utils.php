@@ -153,7 +153,7 @@ interface UtilsInterface
 
     /**
      * @param mixed $data
-     * @return array<string, string>
+     * @return array<int|string, bool|string>
      *
      * Convert data to string
      */
@@ -384,15 +384,12 @@ final class Utils implements UtilsInterface
 
     /**
      * @param mixed $data
-     * @return array<string, string>
+     * @return array<int|string, bool|string>
      *
      * Convert data to string
      */
     public static function toStringAny(mixed $data): array
     {
-        /**
-         * @phpstan-ignore-next-line
-         */
         $type = gettype($data);
         if (!is_callable($data) && (is_array($data) || is_object($data))) {
             return [$type => json_encode($data)];

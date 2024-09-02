@@ -69,14 +69,13 @@ final class ClosureThread extends Thread implements ClosureThreadInterface
 
     public function onRun(): void
     {
-        /** @phpstan-ignore-next-line */
         if (is_callable($this->callback)) {
             $callback = call_user_func($this->callback, ...$this->argsCallback);
             if ($callback instanceof Generator) {
                 $callback = function () use ($callback): Generator {
-                    yield from $callback(...$this->argsCallback);
+                    yield from $callback;
                 };
-                $callback = call_user_func($callback);
+                $callback = call_user_func($callback, ...$this->argsCallback);
             }
             if (is_array($callback)) {
                 $callback = json_encode($callback);

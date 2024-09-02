@@ -208,8 +208,8 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
     private static array $threads = [];
 
     /**
-     * @var array<string, mixed>
-     * @phpstan-var array<string, mixed>
+     * @var array<int|string, mixed>
+     * @phpstan-var array<int|string, mixed>
      */
     private static array $inputs = [];
 
@@ -219,6 +219,11 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
      */
     private static array $args = [];
 
+    /**
+     * @param mixed $input
+     * @param array<int, mixed> $args
+     * @phpstan-param array<int, mixed> $args
+     */
     public function __construct(mixed $input = '', array $args = [])
     {
         self::$inputs[$this->getCalledClassId()] = $input;
@@ -308,6 +313,10 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
         self::$shared[$key] = $value;
     }
 
+    /**
+     * @return array<int|string, mixed>
+     * @phpstan-return array<int|string, mixed>
+     */
     public static function getSharedData(): array
     {
         $data = fgets(STDIN);
