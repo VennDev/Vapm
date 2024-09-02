@@ -51,11 +51,15 @@ final class ClosureThread extends Thread implements ClosureThreadInterface
     private mixed $callback;
 
     /**
-     * @var array<int, mixed>
-     * @phpstan-var array<int, mixed>
+     * @var array<int|float|array|object|null, mixed>
+     * @phpstan-var array<int|float|array|object|null, mixed>
      */
     private array $argsCallback = [];
 
+    /**
+     * @param callable $callback
+     * @param array<int|float|array|object|null, mixed> $args
+     */
     public function __construct(callable $callback, array $args = [])
     {
         $this->callback = $callback;
@@ -65,6 +69,7 @@ final class ClosureThread extends Thread implements ClosureThreadInterface
 
     public function onRun(): void
     {
+        /** @phpstan-ignore-next-line */
         if (is_callable($this->callback)) {
             $callback = call_user_func($this->callback, ...$this->argsCallback);
             if ($callback instanceof Generator) {

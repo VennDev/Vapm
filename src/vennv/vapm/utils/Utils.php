@@ -31,7 +31,7 @@ use RecursiveIteratorIterator;
 use ReflectionException;
 use ReflectionFunction;
 use SplFileInfo;
-use Throwable;
+use RuntimeException;
 use function array_slice;
 use function file;
 use function implode;
@@ -404,10 +404,12 @@ final class Utils implements UtilsInterface
         } elseif (is_null($data)) {
             return [$type => 'null'];
         } elseif (is_callable($data)) {
+            /** @phpstan-ignore-next-line */
             return ['callable' => self::closureToStringSafe($data)];
         } elseif (is_string($data)) {
             return [$type => '\'' . $data . '\''];
         }
+        /** @phpstan-ignore-next-line */
         return [$type => (string) $data];
     }
 
