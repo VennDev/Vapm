@@ -30,6 +30,7 @@ use ReflectionException;
 use RuntimeException;
 use InvalidArgumentException;
 use Throwable;
+use Traversable;
 use function strlen;
 use function rtrim;
 use function fclose;
